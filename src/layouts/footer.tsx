@@ -1,8 +1,12 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import { FiMail } from "react-icons/fi";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
 
 export const Footer: React.FC = () => {
+  const location = useLocation();
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <footer style={styles.footer}>
       <div style={styles.topSection}>
@@ -47,35 +51,35 @@ export const Footer: React.FC = () => {
         {/* Links Column 1 */}
         <div style={styles.linksCol}>
           <h4 style={styles.colTitle}>SERVICES</h4>
-          <a href="#web" style={styles.link}>
-            Web Development
-          </a>
-          <a href="#cms" style={styles.link}>
+          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
+            Services
+          </Link>
+          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
             CMS Integration
-          </a>
-          <a href="#maintenance" style={styles.link}>
+          </Link>
+          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
             Website Maintenance
-          </a>
-          <a href="#ui-ux" style={styles.link}>
+          </Link>
+          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
             UI/UX Design
-          </a>
+          </Link>
         </div>
 
         {/* Links Column 2 */}
         <div style={styles.linksCol}>
           <h4 style={styles.colTitle}>COMPANY</h4>
-          <a href="#about" style={styles.link}>
+          <Link to="/about" style={{...styles.link,...(isActive("/about") ? styles.activeLink : {}),}}>
             About Us
-          </a>
-          <a href="#cases" style={styles.link}>
+          </Link>
+          <Link to="/projects" style={{...styles.link,...(isActive("/projects") ? styles.activeLink : {}),}}>
             Case Studies
-          </a>
-          <a href="#careers" style={styles.link}>
-            Careers
-          </a>
-          <a href="#contact" style={styles.link}>
-            Contact
-          </a>
+          </Link>
+          <Link to="/pricing" style={{...styles.link,...(isActive("/pricing") ? styles.activeLink : {}),}}>
+            Our Pricing
+          </Link>
+          <Link to="/contact" style={{...styles.link,...(isActive("/contact") ? styles.activeLink : {}),}}>
+            Contact Us
+          </Link>
         </div>
 
         {/* Newsletter Column */}
@@ -104,15 +108,15 @@ export const Footer: React.FC = () => {
           Copyright © 2026 Devbysam. Web Designer & Developer.
         </p>
         <div style={styles.legalLinks} className="mono-text">
-          <a href="#privacy" style={styles.legalLink}>
+          <Link to="/privacy" style={styles.legalLink}>
             Privacy Policy
-          </a>
-          <a href="#terms" style={styles.legalLink}>
+          </Link>
+          <Link to="/terms" style={styles.legalLink}>
             Terms and conditions
-          </a>
-          <a href="#cookie" style={styles.legalLink}>
+          </Link>
+          <Link to="/cookie" style={styles.legalLink}>
             Cookie Policy
-          </a>
+          </Link>
         </div>
       </div>
     </footer>
@@ -182,6 +186,11 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
     transition: "color 0.2s",
+  },
+    activeLink: {
+    color: "var(--accent-green)",
+    borderBottom: "2px solid var(--accent-green)",
+    paddingBottom: "4px",
   },
   newsletterCol: {
     display: "flex",

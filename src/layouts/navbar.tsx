@@ -1,18 +1,70 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 
 export const Navbar: React.FC = () => {
+  const location = useLocation();
+
+  // Helper function to see if a link is currently active
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <nav style={styles.nav}>
-      <div style={styles.logo}>Devbysam</div>
+      <Link to="/" style={{ ...styles.logo, textDecoration: "none" }}>
+        Devbysam
+      </Link>
       <div style={styles.links}>
-        <a href="#home" style={{ ...styles.link, ...styles.activeLink }}>Home</a>
-        <a href="#about" style={styles.link}>About</a>
-        <a href="#projects" style={styles.link}>Projects</a>
-        <a href="#services" style={styles.link}>Services</a>
-        <a href="#pricing" style={styles.link}>Pricing</a>
-        <a href="#contact" style={styles.link}>Contact</a>
+        <Link to="/" style={{...styles.link,...(isActive("/") ? styles.activeLink : {}),}}>
+          Home
+        </Link>
+        <Link
+          to="/about"
+          style={{
+            ...styles.link,
+            ...(isActive("/about") ? styles.activeLink : {}),
+          }}
+        >
+          About
+        </Link>
+        <Link
+          to="/services"
+          style={{
+            ...styles.link,
+            ...(isActive("/services") ? styles.activeLink : {}),
+          }}
+        >
+          Services
+        </Link>
+        <Link
+          to="/projects"
+          style={{
+            ...styles.link,
+            ...(isActive("/projects") ? styles.activeLink : {}),
+          }}
+        >
+          Projects
+        </Link>
+        <Link
+          to="/pricing"
+          style={{
+            ...styles.link,
+            ...(isActive("/pricing") ? styles.activeLink : {}),
+          }}
+        >
+          Pricing
+        </Link>
+        <Link
+          to="/contact"
+          style={{
+            ...styles.link,
+            ...(isActive("/contact") ? styles.activeLink : {}),
+          }}
+        >
+          Contact
+        </Link>
       </div>
-      <button style={styles.ctaButton}>Get Started</button>
+      <button style={styles.ctaButton} onClick={() => window.location.href = "/contact"}>
+        Get Started
+      </button>
     </nav>
   );
 };
