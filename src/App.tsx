@@ -1,10 +1,18 @@
-import { Navbar } from "./layouts/navbar";
+import { RootLayout } from "./layouts/rootLayout";
 
 function App() {
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#0d0f12" }}>
-      <Navbar />
-    </div>
+    <RootLayout>
+      <div
+        style={{
+          padding: "120px 8%",
+          textAlign: "center",
+          color: "var(--text-muted)",
+        }}
+      >
+        <h2 style={{ color: "#fff" }}>Home Page</h2>
+      </div>
+    </RootLayout>
   );
 }
 
