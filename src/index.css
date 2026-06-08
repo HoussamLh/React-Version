@@ -31,6 +31,19 @@ body {
   nav div:nth-child(2) { 
     display: none !important;
   }
+  nav {
+    padding: 20px 5% !important;
+  }
+  
+  /* Hides standard horizontal navbar layout items */
+  .desktop-menu {
+    display: none !important;
+  }
+
+  /* Reveals the interactive hamburger trigger icon button */
+  nav button[aria-label="Toggle Menu"] {
+    display: flex !important;
+  }
 
   /* Footer adjustments */
   footer div:first-child {
