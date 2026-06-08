@@ -1,7 +1,11 @@
 import React from "react";
-export const Home: React.FC = () => (
-  <div style={styles.page}>
-    <h1>Home Page</h1>
+import {Hero} from '../features/Hero';
+
+
+export const Home: React.FC = () => {
+return(
+  <div style={{padding:'0 8%',overflow:'hidden'}}>
+    <Hero/>
   </div>
-);
-const styles = { page: { padding: "100px 8%", color: "#fff" } };
+)
+};
