@@ -21,3 +21,65 @@ body {
 .mono-text {
   font-family: 'JetBrains Mono', monospace;
 }
+
+@media (max-width: 900px) {
+  /* Navbar adjustments */
+  nav {
+    padding: 20px 5% !important;
+  }
+  /* Hides links on tablet/mobile */
+  nav div:nth-child(2) { 
+    display: none !important;
+  }
+
+  /* Footer adjustments */
+  footer div:first-child {
+    /* Drops 4 columns to a 2x2 grid */
+    grid-template-columns: 1fr 1fr !important; 
+    gap: 48px !important;
+  }
+
+  /* Hero Mobile UI Overrides */
+  section {
+    grid-template-columns: 1fr !important;
+    gap: 60px !important;
+    padding: 60px 0 !important;
+    text-align: center;
+  }
+  section div:first-child {
+    align-items: center !important;
+  }
+  h1 {
+    font-size: '44px' !important;
+  }
+  div[style*="position: absolute"] {
+    left: 0 !important;
+    right: 0 !important;
+    margin: auto;
+    width: 90% !important;
+  }
+}
+@media (max-width: 600px) {
+  /* Deep mobile layout formatting */
+  footer div:first-child {
+    /* Stack columns completely vertical */
+    grid-template-columns: 1fr !important; 
+    gap: 36px !important;
+  }
+  /* social icon stay in horizontal row */
+  footer div[style*="display: flex"][style*="margin-top: 8px"] {
+    flex-direction: row !important;
+    gap: 12px !important;
+  }
+
+  footer div:last-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  .legal-links-cluster {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}

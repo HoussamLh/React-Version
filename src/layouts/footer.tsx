@@ -2,10 +2,12 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMail } from "react-icons/fi";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
+import { ArrowRight } from "lucide-react";
 
 export const Footer: React.FC = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer style={styles.footer}>
@@ -20,7 +22,7 @@ export const Footer: React.FC = () => {
             {/* Email */}
             <div style={styles.socialIcon}>
               <a href="mailto:contact@devbysam.co.uk">
-                <FiMail />
+                <FiMail color="#74f542" />
               </a>
             </div>
 
@@ -31,7 +33,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaGithub />
+                <FaGithub color="#74f542" />
               </a>
             </div>
 
@@ -42,7 +44,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaLinkedin />
+                <FaLinkedin color="#74f542" />
               </a>
             </div>
           </div>
@@ -51,16 +53,40 @@ export const Footer: React.FC = () => {
         {/* Links Column 1 */}
         <div style={styles.linksCol}>
           <h4 style={styles.colTitle}>SERVICES</h4>
-          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
+          <Link
+            to="/services"
+            style={{
+              ...styles.link,
+              ...(isActive("/services") ? styles.activeLink : {}),
+            }}
+          >
             Services
           </Link>
-          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
+          <Link
+            to="/services"
+            style={{
+              ...styles.link,
+              ...(isActive("/services") ? styles.activeLink : {}),
+            }}
+          >
             CMS Integration
           </Link>
-          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
+          <Link
+            to="/services"
+            style={{
+              ...styles.link,
+              ...(isActive("/services") ? styles.activeLink : {}),
+            }}
+          >
             Website Maintenance
           </Link>
-          <Link to="/services" style={{...styles.link,...(isActive("/services") ? styles.activeLink : {}),}}>
+          <Link
+            to="/services"
+            style={{
+              ...styles.link,
+              ...(isActive("/services") ? styles.activeLink : {}),
+            }}
+          >
             UI/UX Design
           </Link>
         </div>
@@ -68,16 +94,40 @@ export const Footer: React.FC = () => {
         {/* Links Column 2 */}
         <div style={styles.linksCol}>
           <h4 style={styles.colTitle}>COMPANY</h4>
-          <Link to="/about" style={{...styles.link,...(isActive("/about") ? styles.activeLink : {}),}}>
+          <Link
+            to="/about"
+            style={{
+              ...styles.link,
+              ...(isActive("/about") ? styles.activeLink : {}),
+            }}
+          >
             About Us
           </Link>
-          <Link to="/projects" style={{...styles.link,...(isActive("/projects") ? styles.activeLink : {}),}}>
+          <Link
+            to="/projects"
+            style={{
+              ...styles.link,
+              ...(isActive("/projects") ? styles.activeLink : {}),
+            }}
+          >
             Case Studies
           </Link>
-          <Link to="/pricing" style={{...styles.link,...(isActive("/pricing") ? styles.activeLink : {}),}}>
+          <Link
+            to="/pricing"
+            style={{
+              ...styles.link,
+              ...(isActive("/pricing") ? styles.activeLink : {}),
+            }}
+          >
             Our Pricing
           </Link>
-          <Link to="/contact" style={{...styles.link,...(isActive("/contact") ? styles.activeLink : {}),}}>
+          <Link
+            to="/contact"
+            style={{
+              ...styles.link,
+              ...(isActive("/contact") ? styles.activeLink : {}),
+            }}
+          >
             Contact Us
           </Link>
         </div>
@@ -95,7 +145,9 @@ export const Footer: React.FC = () => {
               style={styles.input}
               className="mono-text"
             />
-            <button style={styles.inputBtn}>➔</button>
+            <button style={styles.inputBtn}>
+              <ArrowRight size={18} strokeWidth={2.5} />
+            </button>
           </div>
         </div>
       </div>
@@ -105,7 +157,8 @@ export const Footer: React.FC = () => {
       {/* Bottom Section */}
       <div style={styles.bottomSection}>
         <p style={styles.copyright} className="mono-text">
-          Copyright © 2026 Devbysam. Web Designer & Developer.
+          Copyright <span className="mono-text">©</span> {currentYear} Devbysam.
+          Web Designer & Developer.
         </p>
         <div style={styles.legalLinks} className="mono-text">
           <Link to="/privacy" style={styles.legalLink}>
@@ -161,13 +214,12 @@ const styles = {
   socialIcon: {
     width: "40px",
     height: "40px",
-    borderRadius: "50%",
-    border: "1px solid var(--border-color)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    backgroundColor: "#131518",
+    fontSize: "35px",
+    gap: "12px",
   },
   linksCol: {
     display: "flex",
@@ -187,7 +239,7 @@ const styles = {
     fontSize: "14px",
     transition: "color 0.2s",
   },
-    activeLink: {
+  activeLink: {
     color: "var(--accent-green)",
     borderBottom: "2px solid var(--accent-green)",
     paddingBottom: "4px",
@@ -203,7 +255,7 @@ const styles = {
     lineHeight: "1.6",
   },
   inputGroup: {
-    display: "flex",
+    display: "inline-block",
     alignItems: "center",
   },
   input: {
