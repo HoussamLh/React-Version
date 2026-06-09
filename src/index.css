@@ -5,6 +5,7 @@
   --bg-card: #181a1e;
   --accent-green: #74F542;
   --accent-blue: #93b5ff;
+  --accent-purple: #c49bff;
   --text-main: #ffffff;
   --text-muted: #8a8f98;
   --border-color: #262930;
@@ -70,6 +71,11 @@ body {
     right: 0 !important;
     margin: auto;
     width: 90% !important;
+  }
+  /* Trust Section Mobile Layout */
+  div[style*="grid-template-columns: 1.2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
   }
 }
 @media (max-width: 600px) {
