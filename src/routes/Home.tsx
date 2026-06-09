@@ -1,6 +1,5 @@
 import React from "react";
-import {Hero} from '../features/Hero';
-
+import {Hero} from '../features/home/Hero';
 
 export const Home: React.FC = () => {
 return(
