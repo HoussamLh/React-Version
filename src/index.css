@@ -77,6 +77,17 @@ body {
     grid-template-columns: 1fr !important;
     gap: 32px !important;
   }
+  
+  /* Subscription Section Mobile Layout */
+  /* Pricing 3-Column Mobile Breakout */
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  /* Reset the scale transform on mobile so columns look even */
+  div[style*="transform: scale(1.03)"] {
+    transform: none !important;
+  }
 }
 @media (max-width: 600px) {
   /* Deep mobile layout formatting */
