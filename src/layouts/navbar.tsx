@@ -72,26 +72,51 @@ export const Navbar: React.FC = () => {
           Contact
         </Link>
       </div>
-
-      <button style={styles.ctaButton} className="desktop-menu">
+      <Link to="/services" style={styles.ctaLink} className="desktop-menu">
         Get Started
-      </button>
+      </Link>
       {/* Mobile Hamburger Menu */}
-      <button style={styles.hamburger} onClick={toggleMenu} aria-label="Toggle Menu">
-        <div style={{ ...styles.bar, transform: isOpen ? 'rotate(50deg) translate(2px, 8px)' : 'none' }} />
+      <button
+        style={styles.hamburger}
+        onClick={toggleMenu}
+        aria-label="Toggle Menu"
+      >
+        <div
+          style={{
+            ...styles.bar,
+            transform: isOpen ? "rotate(50deg) translate(2px, 8px)" : "none",
+          }}
+        />
         <div style={{ ...styles.bar, opacity: isOpen ? 0 : 1 }} />
-        <div style={{ ...styles.bar, transform: isOpen ? 'rotate(-50deg) translate(-2px, -5px)' : 'none' }} />
+        <div
+          style={{
+            ...styles.bar,
+            transform: isOpen ? "rotate(-50deg) translate(-2px, -5px)" : "none",
+          }}
+        />
       </button>
 
       {/* Mobile Pop-up Window */}
       {isOpen && (
         <div style={styles.mobilePopup}>
-          <Link to="/" style={styles.popupLink} onClick={toggleMenu}>Home</Link>
-          <Link to="/about" style={styles.popupLink} onClick={toggleMenu}>About</Link>
-          <Link to="/services" style={styles.popupLink} onClick={toggleMenu}>Services</Link>
-          <Link to="/pricing" style={styles.popupLink} onClick={toggleMenu}>Pricing</Link>
-          <Link to="/contact" style={styles.popupLink} onClick={toggleMenu}>Contact</Link>
-          <button style={{ ...styles.ctaButton, width: '100%', marginTop: '10px' }}>Get Started</button>
+          <Link to="/" style={styles.popupLink} onClick={toggleMenu}>
+            Home
+          </Link>
+          <Link to="/about" style={styles.popupLink} onClick={toggleMenu}>
+            About
+          </Link>
+          <Link to="/services" style={styles.popupLink} onClick={toggleMenu}>
+            Services
+          </Link>
+          <Link to="/pricing" style={styles.popupLink} onClick={toggleMenu}>
+            Pricing
+          </Link>
+          <Link to="/contact" style={styles.popupLink} onClick={toggleMenu}>
+            Contact
+          </Link>
+          <Link to="/services" style={styles.ctaLink}>
+            Get Started
+          </Link>
         </div>
       )}
     </nav>
@@ -131,9 +156,10 @@ const styles = {
     borderBottom: "2px solid var(--accent-green)",
     paddingBottom: "4px",
   },
-  ctaButton: {
+  ctaLink: {
     backgroundColor: "var(--accent-green)",
     color: "#000000",
+    textDecoration: "none",
     border: "none",
     padding: "10px 24px",
     borderRadius: "20px",
@@ -142,19 +168,19 @@ const styles = {
     cursor: "pointer",
   },
   hamburger: {
-  display: "none", 
-  flexDirection: "column" as const,
-  gap: "5px",
-  background: "none",
-  border: "none",
-  cursor: "pointer",
-  padding: "4px",
+    display: "none",
+    flexDirection: "column" as const,
+    gap: "5px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: "4px",
   },
   bar: {
-  width: "24px",
-  height: "2px",
-  backgroundColor: "var(--accent-green)",
-  transition: "all 0.3s ease",
+    width: "24px",
+    height: "2px",
+    backgroundColor: "var(--accent-green)",
+    transition: "all 0.3s ease",
   },
   mobilePopup: {
     position: "fixed" as const,

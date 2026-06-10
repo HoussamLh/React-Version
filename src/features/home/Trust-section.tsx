@@ -99,9 +99,9 @@ const styles = {
   },
   header: {
     display: "grid",
-    gridTemplateColumns: "1.2fr 1fr", 
+    gridTemplateColumns: "1.2fr 1fr",
     gap: "48px",
-    alignItems: "end", 
+    alignItems: "end",
     marginBottom: "64px",
   },
   textWrapper: {
@@ -129,7 +129,7 @@ const styles = {
     fontSize: "14px",
   },
   heading: {
-    fontSize: "40px", 
+    fontSize: "40px",
     fontWeight: 800,
     letterSpacing: "-1px",
     margin: "0 0 16px 0",
@@ -138,6 +138,7 @@ const styles = {
   },
   accentText: {
     color: "var(--accent-green)",
+    textShadow: "0 0 40px rgba(147, 181, 255, 0.25)",
   },
   subheading: {
     fontSize: "15px",
