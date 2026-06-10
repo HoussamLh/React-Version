@@ -34,6 +34,7 @@ const styles = {
   container: {
     padding: "80px 0 120px 0",
     backgroundColor: "var(--bg-dark)",
+    borderTop: "1px solid var(--border-color)",
   },
   card: {
     backgroundColor: "var(--bg-card)",
