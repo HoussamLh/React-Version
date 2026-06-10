@@ -8,7 +8,7 @@ export const CoreDomains: React.FC = () => {
       <div style={styles.metaLabel} className="mono-text">
         <div style={styles.badge} className="mono-text">
           <span style={styles.badgeDot}>•</span>
-          ENGINEERED FOR TECHNICAL AUTHORITY
+          CAPABILITIES & EXPERTISE
         </div>
       </div>
       {/* Main Splitted Headline */}
@@ -104,6 +104,7 @@ const styles = {
   container: {
     padding: "60px 0 80px 0",
     backgroundColor: "var(--bg-dark)",
+    borderTop: "1px solid var(--border-color)",
   },
   metaLabel: {
     fontSize: "11px",
@@ -111,10 +112,10 @@ const styles = {
     letterSpacing: "1.5px",
     color: "var(--accent-green)",
     marginBottom: "20px",
-    display:'flex',
+    display: "flex",
   },
   badge: {
-    display:'inline-flex',
+    display: "inline-flex",
     backgroundColor: "#1c1f26",
     border: "1px solid var(--border-color)",
     color: "var(--accent-green)",
