@@ -20,7 +20,7 @@ export const CoreDomains: React.FC = () => {
       <div style={styles.grid}>
         {/* Card 1: Complex Web Applications (Wider card) */}
         {/* ROW 1 - LEFT CARD: Takes 2 Grid Sizes */}
-        <div style={{ ...styles.card, gridColumn: "span 2" }} className="group">
+        <div style={{ ...styles.card, gridColumn: "span 2" }} className="team-card">
           <div style={styles.iconRow}>
             <span style={styles.icon}>💻</span>
           </div>
@@ -41,7 +41,7 @@ export const CoreDomains: React.FC = () => {
 
         {/* Card 2: Native & Cross-Platform */}
         {/* ROW 1 - RIGHT CARD: Takes the rest (1 Grid Size) */}
-        <div style={{ ...styles.card, gridColumn: "span 1" }} className="group">
+        <div style={{ ...styles.card, gridColumn: "span 1" }} className="team-card">
           <div style={styles.iconRow}>
             <span style={styles.icon}>📱</span>
           </div>
@@ -58,7 +58,7 @@ export const CoreDomains: React.FC = () => {
 
         {/* Card 3: Backend Systems */}
         {/* ROW 2 - LEFT CARD: Takes 1 Grid Size */}
-        <div style={{ ...styles.card, gridColumn: "span 1" }} className="group">
+        <div style={{ ...styles.card, gridColumn: "span 1" }} className="team-card">
           <div style={styles.iconRow}>
             <span style={styles.icon}>⚙️</span>
           </div>
@@ -73,7 +73,7 @@ export const CoreDomains: React.FC = () => {
         {/* ROW 2 - RIGHT CARD: Takes the rest (2 Grid Sizes) */}
         <div
           style={{ ...styles.card, ...styles.splitCard, gridColumn: "span 2" }}
-          className="group"
+          className="team-card"
         >
           <div style={styles.splitTextSide}>
             <div style={styles.iconRow}>
