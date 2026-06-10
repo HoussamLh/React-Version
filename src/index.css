@@ -27,6 +27,7 @@ body {
 }
 
 @media (max-width: 900px) {
+  /* Shared Navbar and Footer Styles */
   /* Navbar adjustments */
   nav {
     padding: 20px 5% !important;
@@ -56,6 +57,7 @@ body {
     gap: 48px !important;
   }
 
+  /* Home Page Styles*/
   /* Hero Mobile UI Overrides */
   section {
     grid-template-columns: 1fr !important;
@@ -98,6 +100,13 @@ body {
   }
   div[style*="fontSize: '44px'"], h2 {
     font-size: 32px !important;
+  }
+
+  /* About Page Styles */
+  /* Build Process Matrix Collapse */
+  div[style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
   }
 }
 @media (max-width: 600px) {
