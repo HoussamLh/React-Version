@@ -88,6 +88,14 @@ body {
   div[style*="transform: scale(1.03)"] {
     transform: none !important;
   }
+
+  /* CTA Section Mobile Optimization */
+  div[style*="padding: 80px 40px"] {
+    padding: 60px 20px !important;
+  }
+  div[style*="fontSize: '44px'"], h2 {
+    font-size: 32px !important;
+  }
 }
 @media (max-width: 600px) {
   /* Deep mobile layout formatting */
