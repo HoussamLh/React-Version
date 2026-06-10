@@ -36,6 +36,7 @@ export const Hero: React.FC = () => {
             ? "var(--accent-green)"
             : "var(--border-color)",
         }}
+        className="team-card"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
