@@ -7,7 +7,7 @@ export const SubscriptionSection: React.FC = () => {
       <div style={styles.header}>
         <div style={styles.textWrapper}>
           <div style={styles.badge} className="mono-text">
-            <span style={styles.badgeDot}>• Subscribe Now</span>
+            <span style={styles.badgeDot}>• Subscribe Now </span>
           </div>
           <h2 style={styles.heading}>
             Maintenance{" "}
@@ -187,6 +187,7 @@ const styles = {
   },
   badge: {
     backgroundColor: "#1c1f26",
+    boxShadow: "0 0 40px rgba(147, 181, 255, 0.25)",
     border: "1px solid var(--border-color)",
     color: "var(--accent-green)",
     padding: "6px 14px",
@@ -220,7 +221,6 @@ const styles = {
   },
   featuredCard: {
     border: "2px solid var(--accent-green)",
-    boxShadow: "0 0 40px rgba(116, 245, 94, 0.03)",
     transform: "scale(1.03)",
   },
   cardTop: {
@@ -241,6 +241,7 @@ const styles = {
   },
   popularBadge: {
     backgroundColor: "var(--accent-green)",
+    boxShadow: "0 0 40px rgba(147, 181, 255, 0.25)",
     color: "#000000",
     fontSize: "10px",
     fontWeight: 900,
