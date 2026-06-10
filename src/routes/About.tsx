@@ -3,12 +3,14 @@ import { Hero } from "../features/about/Hero";
 import { CoreDomains } from "../features/about/CoreDomains";
 import { BuildProcess } from "../features/about/BuildProcess";
 import { OurTeam } from "../features/about/OurTeam";
+import { CTASection } from "../../src/features/about/CTASection";
 export const About: React.FC = () => (
   <div style={{padding:'0 8%', overflow:'hidden'}}>
     <Hero />
     <CoreDomains />
     <BuildProcess />
     <OurTeam />
+    <CTASection />
   </div>
 );
 
