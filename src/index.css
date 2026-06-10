@@ -22,6 +22,9 @@ body {
 .mono-text {
   font-family: 'JetBrains Mono', monospace;
 }
+.group:hover {
+  border-color: var(--accent-green) !important;
+}
 
 @media (max-width: 900px) {
   /* Navbar adjustments */
