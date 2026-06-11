@@ -1,28 +1,31 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export const CTASection: React.FC = () => {
   return (
     <section style={styles.container}>
       <div style={styles.card}>
-        {/* Subtle decorative wave grid overlay background simulation */}
+        {/* Subtle mesh dot grid matrix effect */}
         <div style={styles.gridOverlay} />
 
         <div style={styles.content}>
-          <h2 style={styles.heading}>Ready to build your digital legacy?</h2>
+          <h2 style={styles.heading}>
+            Let's build something exceptional together.
+          </h2>
 
           <p style={styles.subheading}>
-            Join the elite cohort of founders who prioritize technical
-            excellence and architectural integrity.
+            Whether you need to stabilize a legacy platform, scale a cloud
+            backend, or engineer a brand new digital asset we have the expertise
+            to execute flawlessly.
           </p>
 
           <div style={styles.btnGroup}>
             <button style={styles.primaryBtn}>
-              <Link to="/contact" style={styles.primaryLink}>Book a Strategy Call</Link>
+              Schedule Architecture Call
             </button>
-            <button style={styles.secondaryBtn} className="mono-text">
-              <Link to="/projects" style={styles.secondaryLink}> View Showcases</Link>
-            </button>
+            <Link to="/services" style={styles.secondaryBtn}>
+              Explore Services
+            </Link>
           </div>
         </div>
       </div>
@@ -34,7 +37,6 @@ const styles = {
   container: {
     padding: "80px 0 120px 0",
     backgroundColor: "var(--bg-dark)",
-    borderTop: "1px solid var(--border-color)",
   },
   card: {
     backgroundColor: "var(--bg-card)",
@@ -54,9 +56,9 @@ const styles = {
     right: 0,
     bottom: 0,
     backgroundImage:
-      "radial-gradient(rgba(147, 181, 255, 0.45) 1px, transparent 1px)",
+      "radial-gradient(rgba(147, 181, 255, 0.12) 1px, transparent 1px)",
     backgroundSize: "24px 24px",
-    opacity: 0.4,
+    opacity: 0.5,
     maskImage:
       "linear-gradient(to bottom, transparent, rgba(0,0,0,1) 50%, transparent)",
     WebkitMaskImage:
@@ -70,57 +72,54 @@ const styles = {
     flexDirection: "column" as const,
     alignItems: "center",
     textAlign: "center" as const,
-    maxWidth: "680px",
+    maxWidth: "720px",
   },
   heading: {
-    fontSize: "44px",
+    fontSize: "40px",
     fontWeight: 900,
     letterSpacing: "-1.5px",
     color: "var(--text-main)",
     margin: "0 0 20px 0",
-    lineHeight: "1.1",
+    lineHeight: "1.2",
   },
   subheading: {
     fontSize: "16px",
     color: "var(--text-muted)",
     lineHeight: "1.6",
     margin: "0 0 40px 0",
-    maxWidth: "580px",
+    maxWidth: "600px",
   },
   btnGroup: {
     display: "flex",
     gap: "16px",
     flexWrap: "wrap" as const,
     justifyContent: "center",
+    alignItems: "center",
   },
   primaryBtn: {
     backgroundColor: "var(--accent-green)",
+    color: "#0d0f12",
     border: "none",
     padding: "16px 32px",
     borderRadius: "12px",
+    fontWeight: 700,
+    fontSize: "15px",
     cursor: "pointer",
     boxShadow: "0 4px 20px rgba(147, 181, 255, 0.15)",
     transition: "opacity 0.2s ease",
   },
-  primaryLink: {
-    color: "var(--bg-dark)",
-    textDecoration: "none",
-    fontWeight: 700,
-    fontSize: "18px",
-  },
   secondaryBtn: {
     backgroundColor: "transparent",
+    color: "var(--text-main)",
     border: "1px solid var(--accent-green)",
-    boxShadow: "0 0 40px rgba(147, 181, 255, 0.25)",
     padding: "16px 32px",
     borderRadius: "12px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-  },
-  secondaryLink: {
-    color: "var(--text-main)",
+    fontWeight: 600,
+    fontSize: "15px",
     textDecoration: "none",
-    fontWeight: 700,
-    fontSize: "18px",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    transition: "all 0.2s ease",
   },
 };
