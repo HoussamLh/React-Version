@@ -1,10 +1,10 @@
 import React from "react";
-import webImg from "../../Assets/services/web-dev.png";
-import mobileImg from "../../Assets/services/mobile-app.png";
-import backendImg from "../../Assets/services/backend-img.png";
+import webImg from "../../../Assets/services/web-dev.png";
+import mobileImg from "../../../Assets/services/mobile-app.png";
+import backendImg from "../../../Assets/services/backend-img.png";
 
 import { Code, Smartphone, Server, ShieldCheck } from "lucide-react";
-import { ServiceCard } from "./components/ServiceCard";
+import { ServiceCard } from "../components/ServiceCard";
 
 export const ServicesSection: React.FC = () => {
   return (
