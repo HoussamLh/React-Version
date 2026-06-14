@@ -1,8 +1,6 @@
 import React from "react";
-import { Hero } from "../features/services/sections/Hero";
-import { ServicesSection } from "../features/services/sections/ServicesSection";
-import {WorkflowSection} from "../features/services/sections/WorkflowSection";
-import { CTASection } from "../features/services/sections/CTASection";
+import { Hero, ServicesSection, WorkflowSection, CTASection} from "../features/services";
+
 
 export const Services: React.FC = () => (
   <div style={styles.page}>
