@@ -22,7 +22,26 @@ body {
 .mono-text {
   font-family: 'JetBrains Mono', monospace;
 }
+/* ==========================================
+   TEAM SECTION
+========================================== */
 
+.build-process {
+  border-color: var(--border-color);
+  cursor: pointer;
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.build-process:hover {
+  transform: translateY(-6px);
+   border-color: var(--border-color);
+    box-shadow:
+    0 0 0 1px var(--accent-green),
+    0 15px 35px rgba(116, 245, 66, 0.15);
+} 
 
 /* ==========================================
    TEAM SECTION
