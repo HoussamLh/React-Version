@@ -1,21 +1,11 @@
 import React from "react";
 import { IconBox } from "../../../shared/ui/IconBox";
 import { Badge } from "../../../shared/ui/Badge";
+import type { Service } from "../data/services.data";
 
-type Props = {
-  title: string;
-  text: string;
-  image?: string;
-  icon: React.ReactNode;
-  pills?: string[];
-  span?: string;
+type ServiceCardProps = Service;
 
-  // Special support card options
-  badge?: string;
-  monitoring?: boolean;
-};
-
-export const ServiceCard: React.FC<Props> = ({
+export const ServiceCard: React.FC<ServiceCardProps> = ({
   title,
   text,
   image,
@@ -25,6 +15,12 @@ export const ServiceCard: React.FC<Props> = ({
   badge,
   monitoring,
 }) => {
+  const avatarStyles = [
+    styles.avatarFirst,
+    styles.avatarSecond,
+    styles.avatarThird,
+  ];
+
   return (
     <div style={{ ...styles.card, gridColumn: span }} className="team-card">
       {/* Icon + Badge */}
@@ -58,39 +54,27 @@ export const ServiceCard: React.FC<Props> = ({
 
       {pills && (
         <div style={styles.pillContainer}>
-          {pills.map((p) => (
-            <span key={p} style={styles.pill} className="mono-text">
-              {p}
+          {pills.map((pill) => (
+            <span key={pill} style={styles.pill} className="mono-text">
+              {pill}
             </span>
           ))}
         </div>
       )}
 
       {/* Bottom Monitoring Section */}
-
       {monitoring && (
         <div style={styles.monitoringRow}>
           <div style={styles.avatarGroup}>
-            <div
-              style={{
-                ...styles.avatar,
-                ...styles.avatarFirst,
-              }}
-            />
-
-            <div
-              style={{
-                ...styles.avatar,
-                ...styles.avatarSecond,
-              }}
-            />
-
-            <div
-              style={{
-                ...styles.avatar,
-                ...styles.avatarThird,
-              }}
-            />
+            {avatarStyles.map((avatarStyle, index) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.avatar,
+                  ...avatarStyle,
+                }}
+              />
+            ))}
           </div>
 
           <span style={styles.monitoringText} className="mono-text">

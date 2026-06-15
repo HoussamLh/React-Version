@@ -1,28 +1,22 @@
-import React from "react";
-import webImg from "../../Assets/services/web-dev.png";
-import mobileImg from "../../Assets/services/mobile-app.png";
-import backendImg from "../../Assets/services/backend-img.png";
+import type { ReactNode } from "react";
+import webImg from "../../../Assets/services/web-dev.png";
+import mobileImg from "../../../Assets/services/mobile-app.png";
+import backendImg from "../../../Assets/services/backend-img.png";
 
 import { Code, Smartphone, Server, ShieldCheck } from "lucide-react";
-import { ServiceCard } from "./components/ServiceCard";
 
-export const ServicesSection: React.FC = () => {
-  return (
-    <section style={styles.container}>
-      <div style={styles.grid} className="team-grid">
-        {services.map((s) => (
-          <ServiceCard key={s.title} {...s} />
-        ))}
-      </div>
-    </section>
-  );
+export type Service = {
+  title: string;
+  text: string;
+  image?: string;
+  icon: ReactNode;
+  pills?: string[];
+  span?: string;
+  badge?: string;
+  monitoring?: boolean;
 };
 
-/* =======================
-   DATA LAYER
-======================= */
-
-const services = [
+export const services = [
   {
     title: "Web Development",
     text: "React, Next.js and TypeScript applications engineered for speed, scalability, and UX excellence.",
@@ -51,27 +45,7 @@ const services = [
     text: "Continuous monitoring, security patches, and iterative improvements to keep your software reliable and secure.",
     icon: <ShieldCheck size={32} color="var(--accent-green)" />,
     span: "span 1",
-
     badge: "Proactive",
-
     monitoring: true,
   },
 ];
-
-/* =======================
-   INLINE STYLES
-======================= */
-
-const styles = {
-  container: {
-    backgroundColor: "var(--bg-dark)",
-    padding: "20px 0",
-    marginBottom: "60px",
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "24px",
-  },
-};
