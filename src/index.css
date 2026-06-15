@@ -158,6 +158,14 @@ body {
   }
 
   /* About Page */
+    .feature-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feature-card {
+    grid-column: span 1 !important;
+    min-height: auto !important;
+  }
 }
 
 /*--------------------------- 
@@ -193,6 +201,10 @@ body {
   .team-grid {
     grid-template-columns: 1fr !important;
 }
+/* About Page */
+    .feature-card {
+    padding: 24px !important;
+  }
 @media (max-width: 550px) {
   .team-grid {
     grid-template-columns: 1fr !important;
