@@ -6,24 +6,28 @@ type CardProps = {
   style?: React.CSSProperties;
 };
 
-export const Card: React.FC<CardProps> = ({ children, className, style }) => {
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = "",
+  style,
+}) => {
   return (
-    <div className={className} style={{ ...styles.card, ...style }}>
+    <div
+      style={style}
+      className={`
+        bg-[var(--bg-card)]
+        border border-[var(--border-color)]
+        rounded-[24px]
+        p-7
+        flex flex-col justify-between
+        transition-all duration-300
+        hover:-translate-y-2
+        hover:border-[var(--accent-green)]
+        hover:shadow-xl
+        ${className}
+      `}
+    >
       {children}
     </div>
   );
-};
-
-const styles = {
-  card: {
-    backgroundColor: "var(--bg-card)",
-    border: "1px solid var(--border-color)",
-    borderRadius: "24px",
-    padding: "28px",
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "12px",
-    transition:
-      "transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease",
-  },
 };
