@@ -6,6 +6,8 @@ type ButtonProps = {
   href?: string;
   to?: string;
   onClick?: () => void;
+  style?: React.CSSProperties;
+  className?: string;
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -14,6 +16,8 @@ export const Button: React.FC<ButtonProps> = ({
   href,
   to,
   onClick,
+  style,
+  className,
 }) => {
   const buttonStyle =
     variant === "primary" ? styles.primaryBtn : styles.secondaryBtn;
@@ -22,14 +26,23 @@ export const Button: React.FC<ButtonProps> = ({
 
   if (linkTarget) {
     return (
-      <a href={linkTarget} style={buttonStyle}>
+      <a
+        href={linkTarget}
+        style={{ ...buttonStyle, ...style }}
+        className={className}
+      >
         {children}
       </a>
     );
   }
 
   return (
-    <button type="button" onClick={onClick} style={buttonStyle}>
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ ...buttonStyle, ...style }}
+      className={className}
+    >
       {children}
     </button>
   );

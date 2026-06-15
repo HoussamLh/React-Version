@@ -1,6 +1,6 @@
 import React from "react";
-import { ProcessSection } from "../../shared/sections";
-import { buildProcessSteps } from "./data/buildProcess.data";
+import { ProcessSection } from "../../../shared/sections";
+import { buildProcessSteps } from "../data/buildProcess.data";
 
 export const BuildProcess: React.FC = () => {
   return (

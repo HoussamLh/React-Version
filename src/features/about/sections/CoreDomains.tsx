@@ -1,6 +1,6 @@
 import React from "react";
-import { FeatureGridSection } from "../../shared/sections/FeatureGridSection";
-import { coreDomains } from "./data/coreDomains.data";
+import { FeatureGridSection } from "../../../shared/sections/FeatureGridSection";
+import { coreDomains } from "../data/coreDomains.data";
 
 export const CoreDomains: React.FC = () => {
   return (

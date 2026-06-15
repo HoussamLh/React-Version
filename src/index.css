@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@400;700&display=swap");
 
 :root {
   --bg-dark: #0d0f12;
   --bg-card: #181a1e;
-  --accent-green: #74F542;
+  --accent-green: #74f542;
   --accent-blue: #93b5ff;
   --accent-purple: #c49bff;
   --text-main: #ffffff;
@@ -15,15 +15,16 @@ body {
   margin: 0;
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .mono-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
+
 /* ==========================================
-   TEAM SECTION
+   PROCESS / WORKFLOW
 ========================================== */
 
 .build-process {
@@ -37,14 +38,14 @@ body {
 
 .build-process:hover {
   transform: translateY(-6px);
-   border-color: var(--border-color);
-    box-shadow:
+  border-color: var(--border-color);
+  box-shadow:
     0 0 0 1px var(--accent-green),
     0 15px 35px rgba(116, 245, 66, 0.15);
-} 
+}
 
 /* ==========================================
-   TEAM SECTION
+   CARD HOVER EFFECTS
 ========================================== */
 
 .team-card {
@@ -76,21 +77,17 @@ body {
   transform: scale(1.08);
 }
 
-/*--------------------------- 
-      Tablet Responsive 
------------------------------*/
+/* ==========================================
+   TABLET RESPONSIVE
+========================================== */
+
 @media (max-width: 900px) {
-
-  /* Shared Navbar and Footer Styles */
-
+  /* Navbar */
   nav {
     padding: 20px 5% !important;
   }
 
-  nav div:nth-child(2) {
-    display: none !important;
-  }
-
+  nav div:nth-child(2),
   .desktop-menu {
     display: none !important;
   }
@@ -100,14 +97,12 @@ body {
   }
 
   /* Footer */
-
   footer div:first-child {
     grid-template-columns: 1fr 1fr !important;
     gap: 48px !important;
   }
 
-  /* Home Page */
-
+  /* Legacy Home responsive rules */
   section {
     grid-template-columns: 1fr !important;
     gap: 60px !important;
@@ -135,30 +130,25 @@ body {
     gap: 32px !important;
   }
 
-  /* Pricing Section */
-
   div[style*="grid-template-columns: 1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
     gap: 40px !important;
   }
-  
+
   div[style*="transform: scale(1.03)"] {
     transform: none !important;
   }
-
-  /* CTA */
 
   div[style*="padding: 80px 40px"] {
     padding: 60px 20px !important;
   }
 
-  div[style*="fontSize: '44px'"],
   h2 {
     font-size: 32px !important;
   }
 
-  /* About Page */
-    .feature-grid {
+  /* Shared Feature Grid: About + later Services */
+  .feature-grid {
     grid-template-columns: 1fr !important;
   }
 
@@ -166,17 +156,35 @@ body {
     grid-column: span 1 !important;
     min-height: auto !important;
   }
-}
 
-/*--------------------------- 
-       Mobile Responsive 
------------------------------*/
-@media (max-width: 768px) {
-  /* Team Section */
-  .team-grid {
-    grid-template-columns: 1fr;
+  /* Our Team header */
+  .team-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+  }
+
+  .team-header-action {
+    padding-top: 0 !important;
+    margin-bottom: 48px !important;
+  }
+
+  /* BuildProcess / Workflow */
+  .workflow-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* ==========================================
+   MOBILE RESPONSIVE
+========================================== */
+
+@media (max-width: 768px) {
+  .team-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 600px) {
   footer div:first-child {
     grid-template-columns: 1fr !important;
@@ -198,16 +206,21 @@ body {
     flex-direction: column !important;
     gap: 12px !important;
   }
-  .team-grid {
-    grid-template-columns: 1fr !important;
-}
-/* About Page */
-    .feature-card {
+
+  .feature-card {
     padding: 24px !important;
   }
-@media (max-width: 550px) {
-  .team-grid {
+
+  .workflow-grid {
     grid-template-columns: 1fr !important;
   }
-}
+
+  .workflow-step {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .workflow-step p {
+    max-width: 100% !important;
+  }
 }

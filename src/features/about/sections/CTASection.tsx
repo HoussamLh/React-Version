@@ -1,5 +1,5 @@
 import React from "react";
-import { CTASection as SharedCTASection } from "../../shared/sections";
+import { CTASection as SharedCTASection } from "../../../shared/sections";
 
 export const CTASection: React.FC = () => {
   return (
