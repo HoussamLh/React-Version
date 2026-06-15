@@ -2,15 +2,20 @@ import React from "react";
 import { Button } from "../ui/Button";
 
 export type CTASectionVariant = "default" | "accent";
+export type CTAOverlayVariant = "default" | "masked";
 
 export type CTASectionProps = {
   variant?: CTASectionVariant;
+  overlayVariant?: CTAOverlayVariant;
+  showTopBorder?: boolean;
 
   titleStart: string;
   titleAccent?: string;
   titleEnd?: string;
+  titleLineHeight?: string;
 
   subtitle?: string;
+  subtitleMaxWidth?: string;
 
   primaryLabel: string;
   primaryTo?: string;
@@ -22,10 +27,14 @@ export type CTASectionProps = {
 
 export const CTASection: React.FC<CTASectionProps> = ({
   variant = "default",
+  overlayVariant = "default",
+  showTopBorder = true,
   titleStart,
   titleAccent,
   titleEnd = "",
+  titleLineHeight,
   subtitle,
+  subtitleMaxWidth,
   primaryLabel,
   primaryTo,
   onPrimaryClick,
@@ -33,9 +42,15 @@ export const CTASection: React.FC<CTASectionProps> = ({
   secondaryTo,
 }) => {
   const isAccent = variant === "accent";
+  const isMaskedOverlay = overlayVariant === "masked" || isAccent;
 
   return (
-    <section style={styles.container}>
+    <section
+      style={{
+        ...styles.container,
+        borderTop: showTopBorder ? "1px solid var(--border-color)" : undefined,
+      }}
+    >
       <div
         style={{
           ...styles.card,
@@ -45,7 +60,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
         <div
           style={{
             ...styles.overlay,
-            ...(isAccent ? styles.accentOverlay : styles.defaultOverlay),
+            ...(isMaskedOverlay ? styles.maskedOverlay : styles.defaultOverlay),
           }}
         />
 
@@ -54,6 +69,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
             style={{
               ...styles.title,
               ...(isAccent ? styles.accentTitle : {}),
+              ...(titleLineHeight ? { lineHeight: titleLineHeight } : {}),
             }}
           >
             {titleStart}
@@ -68,6 +84,7 @@ export const CTASection: React.FC<CTASectionProps> = ({
               style={{
                 ...styles.subtitle,
                 ...(isAccent ? styles.accentSubtitle : {}),
+                ...(subtitleMaxWidth ? { maxWidth: subtitleMaxWidth } : {}),
               }}
             >
               {subtitle}
@@ -95,7 +112,6 @@ const styles = {
   container: {
     padding: "80px 0 120px 0",
     backgroundColor: "var(--bg-dark)",
-    borderTop: "1px solid var(--border-color)",
   },
 
   card: {
@@ -131,7 +147,7 @@ const styles = {
     opacity: 0.4,
   },
 
-  accentOverlay: {
+  maskedOverlay: {
     top: 0,
     left: 0,
     right: 0,
