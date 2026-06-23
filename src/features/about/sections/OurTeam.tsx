@@ -1,25 +1,17 @@
 import React from "react";
 import {
   Button,
-  Card,
   colors,
-  radius,
   SectionHeader,
   spacing,
+  radius,
   typography,
 } from "../../../design-system";
+import { TeamMemberCard } from "../components/TeamMemberCard";
+import type { TeamCardAccent } from "../components/TeamMemberCard";
 import { teamMembers } from "../data/team.data";
 
-type HoverAccent = "green" | "blue" | "purple" | "pink";
-
-const hoverAccents: HoverAccent[] = ["green", "purple", "blue", "pink"];
-
-const accentColors: Record<HoverAccent, string> = {
-  green: colors.accent.green,
-  blue: colors.accent.blue,
-  purple: colors.accent.purple,
-  pink: colors.accent.pink,
-};
+const hoverAccents: TeamCardAccent[] = ["green", "purple", "blue", "pink"];
 
 export const OurTeam: React.FC = () => {
   return (
@@ -43,44 +35,13 @@ export const OurTeam: React.FC = () => {
       </div>
 
       <div style={styles.grid} className="team-grid">
-        {teamMembers.map((member, index) => {
-          const hoverAccent = hoverAccents[index % hoverAccents.length];
-          const accentColor = accentColors[hoverAccent];
-
-          return (
-            <Card
-              key={member.name}
-              interactive
-              hoverAccent={hoverAccent}
-              style={styles.card}
-            >
-              <div style={styles.imageWrapper} className="team-image-wrapper">
-                <img
-                  src={member.image}
-                  alt={member.imageAlt}
-                  style={styles.image}
-                  className="ds-zoom-image"
-                />
-              </div>
-
-              <div style={styles.content}>
-                <p
-                  style={{
-                    ...styles.role,
-                    color: accentColor,
-                  }}
-                  className="mono-text"
-                >
-                  {member.role}
-                </p>
-
-                <h3 style={styles.name}>{member.name}</h3>
-
-                <p style={styles.description}>{member.description}</p>
-              </div>
-            </Card>
-          );
-        })}
+        {teamMembers.map((member, index) => (
+          <TeamMemberCard
+            key={member.name}
+            member={member}
+            hoverAccent={hoverAccents[index % hoverAccents.length]}
+          />
+        ))}
       </div>
     </section>
   );
@@ -122,52 +83,6 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(2, 1fr)",
     gap: spacing.lg,
-  },
-
-  card: {
-    borderRadius: radius["2xl"],
-    overflow: "hidden",
-  },
-
-  imageWrapper: {
-    width: "100%",
-    height: "320px",
-    overflow: "hidden",
-    backgroundColor: "#111111",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-    display: "block",
-  },
-
-  content: {
-    padding: spacing.xl,
-  },
-
-  role: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: "1.2px",
-    margin: `0 0 ${spacing.md} 0`,
-    textTransform: "uppercase" as const,
-  },
-
-  name: {
-    fontSize: "24px",
-    fontWeight: typography.fontWeight.extraBold,
-    color: colors.text.main,
-    margin: `0 0 ${spacing.md} 0`,
-    letterSpacing: "-0.5px",
-  },
-
-  description: {
-    fontSize: typography.fontSize.md,
-    color: colors.text.muted,
-    lineHeight: typography.lineHeight.relaxed,
-    margin: 0,
   },
 
   joinButton: {
