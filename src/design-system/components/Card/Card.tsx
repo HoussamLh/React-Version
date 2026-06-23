@@ -4,7 +4,7 @@ import {
   radius 
 } from "../../components/tokens";
 
-type CardHoverAccent = "green" | "blue" | "purple";
+type CardHoverAccent = "green" | "blue" | "purple" | "pink";
 
 type CardProps = {
   children: React.ReactNode;

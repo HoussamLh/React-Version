@@ -1,0 +1,1 @@
+export { SharedHero } from "./SharedHero";
