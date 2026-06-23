@@ -8,6 +8,7 @@ export const colors = {
     green: "var(--accent-green)",
     blue: "var(--accent-blue)",
     purple: "var(--accent-purple)",
+    pink: "var(--accent-pink)",
   },
 
   text: {

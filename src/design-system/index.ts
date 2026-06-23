@@ -8,4 +8,5 @@ export { AccentText,
 } from "./components/Typography";
 export { Card } from "./components/Card";
 
-export * from "../design-system/components/tokens";
+export * from "./components/tokens";
+export { SharedHero } from "./components/SharedHero";

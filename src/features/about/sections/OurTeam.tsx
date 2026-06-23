@@ -1,19 +1,30 @@
 import React from "react";
-import { HeroSection } from "../../../shared/sections";
-import { Button } from "../../../shared/ui/Button";
+import {
+  Button,
+  colors,
+  SectionHeader,
+  spacing,
+  radius,
+  typography,
+} from "../../../design-system";
+import { TeamMemberCard } from "../components/TeamMemberCard";
+import type { TeamCardAccent } from "../components/TeamMemberCard";
 import { teamMembers } from "../data/team.data";
+
+const hoverAccents: TeamCardAccent[] = ["green", "purple", "blue", "pink"];
 
 export const OurTeam: React.FC = () => {
   return (
     <section style={styles.container}>
       <div style={styles.headerRow} className="team-header-row">
-        <HeroSection
-          badgeText="THE TEAM"
-          titleStart="The People Behind"
+        <SectionHeader
+          badgeText="Our Technical TEAM"
+          title="People Behind"
           titleAccent="Devbysam."
           subtitle="A focused technical team combining software engineering, product thinking, and modern digital execution."
           headingAs="h2"
           containerStyle={styles.header}
+          textWrapperStyle={styles.textWrapper}
         />
 
         <div style={styles.headerAction} className="team-header-action">
@@ -24,27 +35,12 @@ export const OurTeam: React.FC = () => {
       </div>
 
       <div style={styles.grid} className="team-grid">
-        {teamMembers.map((member) => (
-          <article key={member.name} style={styles.card} className="team-card">
-            <div style={styles.imageWrapper} className="team-image-wrapper">
-              <img
-                src={member.image}
-                alt={member.imageAlt}
-                style={styles.image}
-                className="team-image"
-              />
-            </div>
-
-            <div style={styles.content}>
-              <p style={styles.role} className="mono-text">
-                {member.role}
-              </p>
-
-              <h3 style={styles.name}>{member.name}</h3>
-
-              <p style={styles.description}>{member.description}</p>
-            </div>
-          </article>
+        {teamMembers.map((member, index) => (
+          <TeamMemberCard
+            key={member.name}
+            member={member}
+            hoverAccent={hoverAccents[index % hoverAccents.length]}
+          />
         ))}
       </div>
     </section>
@@ -53,20 +49,27 @@ export const OurTeam: React.FC = () => {
 
 const styles = {
   container: {
-    padding: "100px 0",
-    backgroundColor: "var(--bg-dark)",
-    borderTop: "1px solid var(--border-color)",
+    padding: `${spacing.section} 0`,
+    backgroundColor: colors.background.dark,
+    borderTop: `1px solid ${colors.border.default}`,
   },
 
   headerRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: "32px",
+    gap: spacing.xl,
   },
 
   header: {
     maxWidth: "680px",
+  },
+
+  textWrapper: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "flex-start",
+    textAlign: "left" as const,
   },
 
   headerAction: {
@@ -79,64 +82,13 @@ const styles = {
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "24px",
-  },
-  card: {
-    backgroundColor: "var(--bg-card)",
-    border: "1px solid var(--border-color)",
-    borderRadius: "24px",
-    overflow: "hidden",
-    transition:
-      "border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease",
-  },
-
-  imageWrapper: {
-    width: "100%",
-    height: "320px",
-    overflow: "hidden",
-    backgroundColor: "#111",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-    display: "block",
-    transition: "transform 0.5s ease",
-  },
-
-  content: {
-    padding: "32px",
-  },
-
-  role: {
-    fontSize: "11px",
-    fontWeight: 700,
-    letterSpacing: "1.2px",
-    color: "var(--accent-green)",
-    margin: "0 0 12px 0",
-    textTransform: "uppercase" as const,
-  },
-
-  name: {
-    fontSize: "24px",
-    fontWeight: 800,
-    color: "var(--text-main)",
-    margin: "0 0 12px 0",
-    letterSpacing: "-0.5px",
-  },
-
-  description: {
-    fontSize: "15px",
-    color: "var(--text-muted)",
-    lineHeight: "1.6",
-    margin: 0,
+    gap: spacing.lg,
   },
 
   joinButton: {
-    borderRadius: "8px",
-    padding: "14px 28px",
-    fontSize: "14px",
-    whiteSpace: "nowrap",
+    borderRadius: radius.sm,
+    padding: `14px 28px`,
+    fontSize: typography.fontSize.sm,
+    whiteSpace: "nowrap" as const,
   },
 };

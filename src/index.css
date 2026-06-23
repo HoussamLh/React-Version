@@ -6,6 +6,7 @@
   --accent-green: #93dc5c;
   --accent-blue: #93b5ff;
   --accent-purple: #c49bff;
+  --accent-pink: #ff9bc4;
   --text-main: #ffffff;
   --text-muted: #8a8f98;
   --border-color: #262930;
@@ -34,7 +35,12 @@
   --shadow-card-hover-purple:
     0 0 0 1px var(--accent-purple),
     0 15px 35px rgba(196, 155, 255, 0.15);
+  
+    --shadow-card-hover-pink:
+    0 0 0 1px var(--accent-pink),
+    0 15px 35px rgba(255, 155, 196, 0.15);
 }
+
 
 body {
   margin: 0;
@@ -62,7 +68,7 @@ body {
 
 .ds-hover-card:hover {
   transform: var(--motion-card-lift);
-  border-color: var(--ds-hove-color,var(--accent-green));
+  border-color: var(--ds-hover-color,var(--accent-green));
   box-shadow: var(--ds-hover-shadow,var(--shadow-card-hover-green));
 }
 
@@ -79,6 +85,10 @@ body {
 .ds-hover-card-purple {
   --ds-hover-color: var(--accent-purple);
   --ds-hover-shadow: var(--shadow-card-hover-purple);
+}
+.ds-hover-card-pink {
+  --ds-hover-color: var(--accent-pink);
+  --ds-hover-shadow: var(--shadow-card-hover-pink);
 }
 
 .ds-zoom-image {

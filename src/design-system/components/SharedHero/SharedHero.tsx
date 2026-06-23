@@ -1,0 +1,178 @@
+import React from "react";
+import { Button } from "../Button";
+import { Card } from "../Card";
+import { Label } from "../Label";
+import { AccentText, Heading, Text } from "../Typography";
+import { colors, radius, shadows, spacing } from "../tokens";
+
+type HeroAction = {
+  label: React.ReactNode;
+  to: string;
+  variant?: "primary" | "secondary";
+};
+
+type HoverAccent = "green" | "blue" | "purple" | "pink";
+
+type SharedHeroProps = {
+  badgeText: React.ReactNode;
+
+  titleStart: React.ReactNode;
+  titleAccent?: React.ReactNode;
+  titleEnd?: React.ReactNode;
+
+  subtitle: React.ReactNode;
+
+  image?: string;
+  imageAlt?: string;
+
+  visual?: React.ReactNode;
+
+  actions?: HeroAction[];
+
+  hoverAccent?: HoverAccent;
+  className?: string;
+};
+
+export const SharedHero: React.FC<SharedHeroProps> = ({
+  badgeText,
+  titleStart,
+  titleAccent,
+  titleEnd,
+  subtitle,
+  image,
+  imageAlt = "",
+  visual,
+  actions,
+  hoverAccent = "green",
+  className = "",
+}) => {
+  const hasVisual = Boolean(visual || image);
+
+  return (
+    <section
+      style={{
+        ...styles.heroContainer,
+        ...(!hasVisual ? styles.textOnlyHeroContainer : {}),
+      }}
+      className={["home-hero", className].filter(Boolean).join(" ")}
+    >
+      {/* Left Column */}
+      <div style={styles.leftCol} className="home-hero-left">
+        <Label text={badgeText} badgeStyle={styles.badge} />
+
+        <Heading as="h1" variant="hero">
+          {titleStart}
+          {titleAccent && (
+            <>
+              {" "}
+              <AccentText>{titleAccent}</AccentText>
+            </>
+          )}
+          {titleEnd && <> {titleEnd}</>}
+        </Heading>
+
+        <Text variant="hero">{subtitle}</Text>
+
+        {actions && actions.length > 0 && (
+          <div style={styles.ctaGroup}>
+            {actions.map((action, index) => (
+              <Button
+                key={`${action.to}-${index}`}
+                to={action.to}
+                variant={action.variant ?? "primary"}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Right Column */}
+      {hasVisual && (
+        <div style={styles.rightCol} className="home-hero-visual">
+          <div style={styles.mockupContainer} className="home-hero-mockup">
+            {visual || (
+              <Card
+                interactive
+                hoverAccent={hoverAccent}
+                style={styles.imageWindow}
+              >
+                <img
+                  src={image}
+                  alt={imageAlt}
+                  style={styles.imageRender}
+                  className="ds-zoom-image"
+                />
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+const styles = {
+  heroContainer: {
+    display: "grid",
+    gridTemplateColumns: "1.2fr 1fr",
+    gap: spacing["2xl"],
+    alignItems: "center",
+    padding: `${spacing["4xl"]} 0`,
+  },
+
+  textOnlyHeroContainer: {
+    gridTemplateColumns: "1fr",
+  },
+
+  leftCol: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "flex-start",
+  },
+
+  badge: {
+    marginBottom: spacing.xl,
+  },
+
+  ctaGroup: {
+    display: "flex",
+    gap: spacing.md,
+    flexWrap: "wrap" as const,
+  },
+
+  rightCol: {
+    display: "flex",
+    justifyContent: "center",
+    position: "relative" as const,
+    overflow: "visible",
+  },
+
+  mockupContainer: {
+    position: "relative" as const,
+    width: "100%",
+    maxWidth: "500px",
+    overflow: "visible",
+  },
+
+  imageWindow: {
+    width: "100%",
+    height: "450px",
+    backgroundColor: "#131518",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.lg,
+    boxShadow: shadows.card,
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  imageRender: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    display: "block",
+  },
+};
