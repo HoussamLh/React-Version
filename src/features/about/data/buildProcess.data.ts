@@ -1,6 +1,10 @@
-import type { ProcessStep } from "../../../shared/sections";
+export type BuildProcessStepItem = {
+  number: string;
+  title: string;
+  description: string;
+};
 
-export const buildProcessSteps: ProcessStep[] = [
+export const buildProcessSteps: BuildProcessStepItem[] = [
   {
     number: "01",
     title: "Discovery",
