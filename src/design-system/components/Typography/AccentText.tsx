@@ -2,7 +2,7 @@ import React from "react";
 import { 
   colors, 
   shadows 
-} from "../../components/tokens";
+} from "../../tokens";
 
 type AccentTextProps = {
   children: React.ReactNode;

@@ -2,7 +2,7 @@ import React from "react";
 import { 
   colors, 
   typography 
-} from "../../components/tokens";
+} from "../../tokens";
 
 type TextVariant = "hero" | "section" | "body" | "small";
 

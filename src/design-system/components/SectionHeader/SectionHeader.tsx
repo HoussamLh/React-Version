@@ -5,7 +5,7 @@ import {
   Heading, 
   Text 
 } from "../Typography";
-import { spacing } from "../..";
+import { spacing } from "../../tokens";
 
 type SectionHeaderProps = {
   badgeText: React.ReactNode;
@@ -89,6 +89,6 @@ const styles = {
     flexDirection: "column" as const,
     alignItems: "flex-start",
     textAlign: "left" as const,
-    marginBottom: spacing["xl"],
+    marginBottom: spacing["md"],
   },
 };

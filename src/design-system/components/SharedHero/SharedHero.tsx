@@ -3,7 +3,7 @@ import { Button } from "../Button";
 import { Card } from "../Card";
 import { Label } from "../Label";
 import { AccentText, Heading, Text } from "../Typography";
-import { colors, radius, shadows, spacing } from "../tokens";
+import { colors, radius, shadows, spacing } from "../../tokens";
 
 type HeroAction = {
   label: React.ReactNode;
@@ -31,6 +31,7 @@ type SharedHeroProps = {
 
   hoverAccent?: HoverAccent;
   className?: string;
+  containerStyle?: React.CSSProperties;
 };
 
 export const SharedHero: React.FC<SharedHeroProps> = ({
@@ -45,6 +46,7 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
   actions,
   hoverAccent = "green",
   className = "",
+  containerStyle = {},
 }) => {
   const hasVisual = Boolean(visual || image);
 
@@ -53,6 +55,7 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
       style={{
         ...styles.heroContainer,
         ...(!hasVisual ? styles.textOnlyHeroContainer : {}),
+        ...containerStyle
       }}
       className={["home-hero", className].filter(Boolean).join(" ")}
     >

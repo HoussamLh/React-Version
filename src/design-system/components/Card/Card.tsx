@@ -2,7 +2,7 @@ import React from "react";
 import { 
   colors, 
   radius 
-} from "../../components/tokens";
+} from "../../tokens";
 
 type CardHoverAccent = "green" | "blue" | "purple" | "pink";
 
