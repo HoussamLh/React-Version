@@ -5,7 +5,7 @@ import {
   shadows, 
   spacing, 
   typography 
-} from "../../components/tokens";
+} from "../../tokens";
 
 type LabelProps = {
   text: React.ReactNode;

@@ -1,27 +1,29 @@
 import React from "react";
-import { 
-  colors, 
-  radius, 
-  spacing, 
-  typography 
-} from "../../components/tokens";
+import { colors, radius, spacing, typography } from "../../tokens";
 import { Button } from "../Button";
 import { Card } from "../Card";
-import { 
-  Heading, 
-  Text 
-} from "../Typography";
+import { Heading, Text } from "../Typography";
 
 type CTAAction = {
   label: React.ReactNode;
   to: string;
 };
 
+type CTABackgroundAccent =
+  | "green"
+  | "blue"
+  | "purple"
+  | "pink"
+  | "yellow"
+  | "cyan";
+
 type CallToActionProps = {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   primaryAction: CTAAction;
   secondaryAction?: CTAAction;
+
+  backgroundAccent?: CTABackgroundAccent;
 
   containerStyle?: React.CSSProperties;
   cardStyle?: React.CSSProperties;
@@ -34,18 +36,39 @@ export const CallToAction: React.FC<CallToActionProps> = ({
   subtitle,
   primaryAction,
   secondaryAction,
+  backgroundAccent,
   containerStyle,
   cardStyle,
   headingStyle,
   subtitleStyle,
 }) => {
+  const accentCardStyle = backgroundAccent
+    ? {
+        backgroundColor: colors.cta.background[backgroundAccent],
+        border: `1px solid ${colors.cta.border[backgroundAccent]}`,
+      }
+    : {};
+
+  const overlayColor = backgroundAccent
+    ? colors.cta.overlay[backgroundAccent]
+    : colors.cta.overlay.blue;
+
   return (
     <section style={{ ...styles.container, ...containerStyle }}>
       <Card
-        style={{ ...styles.card, ...cardStyle }}
+        style={{
+          ...styles.card,
+          ...accentCardStyle,
+          ...cardStyle,
+        }}
         className="call-to-action-card"
       >
-        <div style={styles.gridOverlay} />
+        <div
+          style={{
+            ...styles.gridOverlay,
+            backgroundImage: `radial-gradient(${overlayColor} 1px, transparent 1px)`,
+          }}
+        />
 
         <div style={styles.content}>
           <Heading
@@ -108,8 +131,6 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundImage:
-      "radial-gradient(rgba(147, 181, 255, 0.45) 1px, transparent 1px)",
     backgroundSize: "24px 24px",
     opacity: 0.4,
     maskImage:

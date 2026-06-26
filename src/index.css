@@ -7,6 +7,8 @@
   --accent-blue: #93b5ff;
   --accent-purple: #c49bff;
   --accent-pink: #ff9bc4;
+  --accent-yellow: #ffbd2e;
+  --accent-cyan: #5eead4;
   --text-main: #ffffff;
   --text-muted: #8a8f98;
   --border-color: #262930;
@@ -39,8 +41,37 @@
     --shadow-card-hover-pink:
     0 0 0 1px var(--accent-pink),
     0 15px 35px rgba(255, 155, 196, 0.15);
-}
 
+  --shadow-card-hover-yellow:
+    0 0 0 1px var(--accent-yellow),
+    0 15px 35px rgba(255, 189, 46, 0.15);
+
+  --shadow-card-hover-cyan:
+    0 0 0 1px var(--accent-cyan),
+    0 15px 35px rgba(94, 234, 212, 0.15);
+
+/* CTA background tokens */
+--cta-bg-green: rgba(147, 220, 92, 0.08);
+--cta-bg-blue: rgba(147, 181, 255, 0.1);
+--cta-bg-purple: rgba(196, 155, 255, 0.1);
+--cta-bg-pink: rgba(255, 155, 196, 0.1);
+--cta-bg-yellow: rgba(255, 189, 46, 0.09);
+--cta-bg-cyan: rgba(94, 234, 212, 0.09);
+
+--cta-border-green: rgba(147, 220, 92, 0.24);
+--cta-border-blue: rgba(147, 181, 255, 0.28);
+--cta-border-purple: rgba(196, 155, 255, 0.28);
+--cta-border-pink: rgba(255, 155, 196, 0.28);
+--cta-border-yellow: rgba(255, 189, 46, 0.26);
+--cta-border-cyan: rgba(94, 234, 212, 0.26);
+
+--cta-overlay-green: rgba(147, 220, 92, 0.35);
+--cta-overlay-blue: rgba(147, 181, 255, 0.45);
+--cta-overlay-purple: rgba(196, 155, 255, 0.38);
+--cta-overlay-pink: rgba(255, 155, 196, 0.38);
+--cta-overlay-yellow: rgba(255, 189, 46, 0.36);
+--cta-overlay-cyan: rgba(94, 234, 212, 0.36);
+}
 
 body {
   margin: 0;
@@ -52,6 +83,119 @@ body {
 
 .mono-text {
   font-family: "JetBrains Mono", monospace;
+}
+
+/* ==========================================
+   DESIGN SYSTEM CARDS
+========================================== */
+
+.ds-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  min-width: 0;
+}
+
+.ds-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.ds-card-stack {
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.ds-card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ds-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background-color: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.ds-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 6px 12px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ds-card-title {
+  font-size: 25px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 10px 0;
+}
+
+.ds-card-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+}
+
+.ds-card-media {
+  width: 100%;
+  height: 220px;
+  min-height: 180px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  margin-bottom: 10px;
+}
+
+.ds-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--motion-slow) var(--motion-ease);
+}
+
+.ds-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ds-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.ds-card-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-color);
+  padding-top: 25px;
+  margin-top: 25px;
 }
 
 /* ==========================================
@@ -95,7 +239,8 @@ body {
   transition: transform var(--motion-slow) var(--motion-ease);
 }
 
-.ds-hover-card:hover .ds-zoom-image {
+.ds-hover-card:hover .ds-zoom-image,
+.ds-hover-card:hover .ds-card-image {
   transform: var(--motion-image-zoom);
 }
 
@@ -278,7 +423,14 @@ body {
     padding: 60px 20px !important;
   }
 
-  /* Shared Feature Grid: About + later Services */
+  .ds-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .ds-card-grid > .ds-card {
+    grid-column: span 1 !important;
+  }
+
   .feature-grid {
     grid-template-columns: 1fr !important;
   }
@@ -314,6 +466,19 @@ body {
   .team-grid {
     grid-template-columns: 1fr !important;
   }
+
+  .ds-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ds-card-grid > .ds-card {
+    grid-column: span 1 !important;
+    padding: 24px !important;
+  }
+
+  .ds-card-grid .ds-card-media {
+    height: clamp(160px, 52vw, 220px) !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -340,6 +505,10 @@ body {
 
   .home-trust-stats {
     grid-template-columns: 1fr !important;
+  }
+
+  .ds-card-grid > .ds-card {
+    padding: 22px !important;
   }
 
   .feature-card {

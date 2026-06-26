@@ -2,7 +2,7 @@ import React from "react";
 import { 
   colors, 
   typography 
-} from "../../components/tokens";
+} from "../../tokens";
 
 type HeadingTag = "h1" | "h2" | "h3";
 type HeadingVariant = "hero" | "section" | "card";

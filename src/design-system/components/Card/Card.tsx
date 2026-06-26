@@ -1,8 +1,4 @@
 import React from "react";
-import { 
-  colors, 
-  radius 
-} from "../../components/tokens";
 
 type CardHoverAccent = "green" | "blue" | "purple" | "pink";
 
@@ -22,6 +18,7 @@ export const Card: React.FC<CardProps> = ({
   style,
 }) => {
   const cardClassName = [
+    "ds-card",
     interactive ? "ds-hover-card" : "",
     interactive ? `ds-hover-card-${hoverAccent}` : "",
     className,
@@ -30,17 +27,8 @@ export const Card: React.FC<CardProps> = ({
     .join(" ");
 
   return (
-    <div style={{ ...styles.card, ...style }} 
-    className={cardClassName}>
+    <div style={style} className={cardClassName}>
       {children}
     </div>
   );
-};
-
-const styles = {
-  card: {
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.lg,
-  },
 };

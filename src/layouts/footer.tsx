@@ -1,8 +1,37 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiMail } from "react-icons/fi";
-import { FaLinkedin, FaGithub } from "react-icons/fa";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
+
+type BrandIconProps = {
+  color: string;
+  size?: number;
+};
+
+const GithubIcon: React.FC<BrandIconProps> = ({ color, size = 28 }) => (
+  <svg
+    aria-hidden="true"
+    fill={color}
+    focusable="false"
+    height={size}
+    viewBox="0 0 24 24"
+    width={size}
+  >
+    <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.36 6.84 9.72.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.38-3.37-1.38-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.33 9.33 0 0 1 12 6.99c.85 0 1.71.12 2.51.34 1.9-1.33 2.74-1.05 2.74-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.95.68 1.92 0 1.38-.01 2.5-.01 2.84 0 .27.18.59.69.49A10.18 10.18 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+  </svg>
+);
+
+const LinkedinIcon: React.FC<BrandIconProps> = ({ color, size = 28 }) => (
+  <svg
+    aria-hidden="true"
+    fill={color}
+    focusable="false"
+    height={size}
+    viewBox="0 0 24 24"
+    width={size}
+  >
+    <path d="M5.34 8.98H2.67V21h2.67V8.98ZM4 3a1.55 1.55 0 1 0 0 3.1A1.55 1.55 0 0 0 4 3Zm7.61 5.98H8.95V21h2.66v-6.32c0-1.67.31-3.28 2.35-3.28 2.01 0 2.04 1.91 2.04 3.39V21h2.66v-7.01c0-3.44-.72-6.08-4.7-6.08-1.91 0-3.19 1.07-3.71 2.08h-.04V8.98Z" />
+  </svg>
+);
 
 export const Footer: React.FC = () => {
   const location = useLocation();
@@ -22,7 +51,7 @@ export const Footer: React.FC = () => {
             {/* Email */}
             <div style={styles.socialIcon}>
               <a href="mailto:contact@devbysam.co.uk">
-                <FiMail color="#74f542" />
+                <Mail color="#74f542" size={28} strokeWidth={2.2} />
               </a>
             </div>
 
@@ -33,7 +62,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaGithub color="#74f542" />
+                <GithubIcon color="#74f542" />
               </a>
             </div>
 
@@ -44,7 +73,7 @@ export const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FaLinkedin color="#74f542" />
+                <LinkedinIcon color="#74f542" />
               </a>
             </div>
           </div>

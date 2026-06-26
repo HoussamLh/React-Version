@@ -1,9 +1,19 @@
 import React from "react";
-import { IconBox } from "../../../shared/ui/IconBox";
-import { Badge } from "../../../shared/ui/Badge";
+import { Card, colors } from "../../../design-system";
 import type { Service } from "../data/services.data";
 
-type ServiceCardProps = Service;
+export type ServiceCardAccent = "green" | "blue" | "purple" | "pink";
+
+type ServiceCardProps = Service & {
+  hoverAccent?: ServiceCardAccent;
+};
+
+const accentColors: Record<ServiceCardAccent, string> = {
+  green: colors.accent.green,
+  blue: colors.accent.blue,
+  purple: colors.accent.purple,
+  pink: colors.accent.pink,
+};
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   title,
@@ -14,48 +24,73 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   span,
   badge,
   monitoring,
+  hoverAccent = "green",
 }) => {
+  const accentColor = accentColors[hoverAccent];
+
   const avatarStyles = [
     styles.avatarFirst,
-    styles.avatarSecond,
+    { ...styles.avatarSecond, backgroundColor: accentColor },
     styles.avatarThird,
   ];
 
   return (
-    <div style={{ ...styles.card, gridColumn: span }} className="team-card">
+    <Card
+      interactive
+      hoverAccent={hoverAccent}
+      className="service-card ds-card-stack"
+      style={{ gridColumn: span }}
+    >
       {/* Icon + Badge */}
       <div style={styles.iconRow}>
         <div
+          className="ds-card-toolbar"
           style={{
-            ...styles.iconGroup,
-            gap: badge ? "70px" : "12px",
+            justifyContent: badge ? "space-between" : "flex-start",
           }}
         >
-          <IconBox>{icon}</IconBox>
+          <div
+            className="ds-icon-box"
+            style={{
+              borderColor: accentColor,
+              color: accentColor,
+            }}
+          >
+            {icon}
+          </div>
 
-          {badge && <Badge label={badge} />}
+          {badge && (
+            <span
+              style={{
+                color: accentColor,
+                borderColor: accentColor,
+              }}
+              className="ds-badge mono-text"
+            >
+              {badge}
+            </span>
+          )}
         </div>
       </div>
 
-      <h3 style={styles.cardTitle}>{title}</h3>
+      <h3 className="ds-card-title">{title}</h3>
 
-      <p style={styles.cardText}>{text}</p>
+      <p className="ds-card-text">{text}</p>
 
       {image && (
-        <div style={styles.graphicSide} className="team-image-wrapper">
+        <div className="ds-card-media">
           <img
             src={image}
-            style={styles.graphicImage}
-            className="team-image"
+            className="ds-card-image"
             alt={title}
           />
         </div>
       )}
 
       {pills && (
-        <div style={styles.pillContainer}>
+        <div className="ds-pill-row">
           {pills.map((pill) => (
-            <span key={pill} style={styles.pill} className="mono-text">
+            <span key={pill} className="ds-pill mono-text">
               {pill}
             </span>
           ))}
@@ -64,7 +99,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
       {/* Bottom Monitoring Section */}
       {monitoring && (
-        <div style={styles.monitoringRow}>
+        <div className="ds-card-footer-row">
           <div style={styles.avatarGroup}>
             {avatarStyles.map((avatarStyle, index) => (
               <div
@@ -82,85 +117,13 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           </span>
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
 const styles = {
-  card: {
-    backgroundColor: "var(--bg-card)",
-    border: "1px solid var(--border-color)",
-    borderRadius: "24px",
-    padding: "28px",
-    display: "flex",
-    flexDirection: "column" as const,
-    justifyContent: "space-between",
-    transition:
-      "transform 0.35s ease,border-color 0.35s ease,box-shadow 0.35s ease",
-  },
-
   iconRow: {
     marginBottom: "10px",
-  },
-
-  iconGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-
-  cardTitle: {
-    fontSize: "25px",
-    fontWeight: 700,
-    color: "var(--text-main)",
-    margin: "0 0 10px 0",
-  },
-
-  cardText: {
-    fontSize: "13px",
-    color: "var(--text-muted)",
-    lineHeight: "1.6",
-    margin: "0 0 8px 0",
-  },
-
-  graphicSide: {
-    width: "100%",
-    height: "220px",
-    borderRadius: "16px",
-    overflow: "hidden",
-    border: "1px solid var(--border-color)",
-    marginBottom: "10px",
-  },
-
-  graphicImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-    transition: "transform .5s ease",
-  },
-
-  pillContainer: {
-    display: "flex",
-    gap: "8px",
-    flexWrap: "wrap" as const,
-  },
-
-  pill: {
-    fontSize: "10px",
-    fontWeight: 700,
-    color: "var(--text-main)",
-    border: "1px solid var(--border-color)",
-    padding: "4px 12px",
-    borderRadius: "12px",
-  },
-
-  monitoringRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-    borderTop: "1px solid var(--border-color)",
-    paddingTop: "25px",
-    marginTop: "25px",
   },
 
   avatarGroup: {
@@ -170,26 +133,26 @@ const styles = {
   avatar: {
     width: "40px",
     height: "40px",
-    borderRadius: "50%",
-    border: "2px solid var(--bg-card)",
+    borderRadius: "999px",
+    border: `2px solid ${colors.background.card}`,
     marginLeft: "-10px",
   },
 
   avatarFirst: {
     marginLeft: "0",
-    backgroundColor: "var(--text-muted)",
+    backgroundColor: colors.text.muted,
   },
 
   avatarSecond: {
-    backgroundColor: "var(--accent-green)",
+    backgroundColor: colors.accent.green,
   },
 
   avatarThird: {
-    backgroundColor: "var(--text-main)",
+    backgroundColor: colors.text.main,
   },
 
   monitoringText: {
     fontSize: "12px",
-    color: "var(--text-main)",
+    color: colors.text.main,
   },
 };
