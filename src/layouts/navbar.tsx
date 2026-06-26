@@ -108,6 +108,9 @@ export const Navbar: React.FC = () => {
           <Link to="/services" style={styles.popupLink} onClick={toggleMenu}>
             Services
           </Link>
+          <Link to="/projects" style={styles.popupLink} onClick={toggleMenu}>
+            Projects
+          </Link>
           <Link to="/pricing" style={styles.popupLink} onClick={toggleMenu}>
             Pricing
           </Link>
