@@ -1,9 +1,8 @@
 import React from "react";
-import { HeroSection } from "../../../shared/sections";
-
+import { SharedHero } from "../../../design-system";
 export const Hero: React.FC = () => {
   return (
-    <HeroSection
+    <SharedHero
       badgeText="TECHNICAL EXPERTISE"
       titleStart="Engineering Excellence."
       titleAccent="Built to Scale."

@@ -1,17 +1,24 @@
 import React from "react";
-import { CTASection as SharedCTASection } from "../../../shared/sections";
+import { CallToAction, AccentText } from "../../../design-system";
 
 export const CTASection: React.FC = () => {
   return (
-    <SharedCTASection
-      variant="accent"
-      titleStart="Ready to Scale Your"
-      titleAccent=" Business."
-      titleEnd="?"
+    <CallToAction
+      backgroundAccent="pink"
+      title={
+        <>
+          Ready to Scale Your <AccentText>Business.</AccentText>?
+        </>
+      }
       subtitle="Let’s discuss your project, technical challenges, and growth goals."
-      primaryLabel="Book a Consultation"
-      secondaryLabel="View Pricing"
-      secondaryTo="/pricing"
+      primaryAction={{
+        label: "Book a Consultation",
+        to: "/contact",
+      }}
+      secondaryAction={{
+        label: "View Pricing",
+        to: "/pricing",
+      }}
     />
   );
 };
