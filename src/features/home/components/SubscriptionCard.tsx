@@ -30,14 +30,12 @@ React.FC<SubscriptionCardProps> = ({ plan }) => {
     >
       <div style={styles.cardTop}>
         <div style={styles.featuredHeader}>
-          <div style={styles.tierName} 
-          className="mono-text">
+          <div style={styles.tierName} className="mono-text">
             {plan.tier}
           </div>
 
           {plan.featured && (
-            <span style={styles.popularBadge} 
-            className="mono-text">
+            <span style={styles.popularBadge} className="mono-text">
               MOST POPULAR
             </span>
           )}
@@ -57,9 +55,7 @@ React.FC<SubscriptionCardProps> = ({ plan }) => {
       <hr
         style={{
           ...styles.divider,
-          ...(plan.featured ? 
-            { borderColor: "rgba(116, 245, 66, 0.2)" }
-             : {}),
+          ...(plan.featured ? { borderColor: "rgba(116, 245, 66, 0.2)" } : {}),
         }}
       />
 
@@ -74,9 +70,7 @@ React.FC<SubscriptionCardProps> = ({ plan }) => {
       <Button
         fullWidth
         variant={plan.featured ? "primary" : "secondary"}
-        style={plan.featured ? 
-          styles.btnPrimary : 
-          styles.btnSecondary}
+        style={plan.featured ? styles.btnPrimary : styles.btnSecondary}
       >
         {plan.buttonLabel}
       </Button>

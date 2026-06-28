@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer style={styles.footer}>
-      <div style={styles.topSection}>
+      <div style={styles.topSection} className="ds-footer-grid">
         {/* Brand Column */}
         <div style={styles.brandCol}>
           <h3 style={styles.logo}>Devbysam</h3>
@@ -184,12 +184,12 @@ export const Footer: React.FC = () => {
       <hr style={styles.divider} />
 
       {/* Bottom Section */}
-      <div style={styles.bottomSection}>
+      <div style={styles.bottomSection} className="ds-footer-bottom">
         <p style={styles.copyright} className="mono-text">
           Copyright <span className="mono-text">©</span> {currentYear} Devbysam.
           Web Designer & Developer.
         </p>
-        <div style={styles.legalLinks} className="mono-text">
+        <div style={styles.legalLinks} className="mono-text legal-links-cluster">
           <Link to="/privacy" style={styles.legalLink}>
             Privacy Policy
           </Link>
@@ -213,10 +213,10 @@ const styles = {
     color: "var(--text-main)",
   },
   topSection: {
-    display: "grid",
-    gridTemplateColumns: "2.5fr 1.5fr 1.5fr 2.5fr",
-    gap: "40px",
     paddingBottom: "60px",
+  },
+  bottomSection: {
+
   },
   brandCol: {
     display: "flex",
@@ -310,13 +310,6 @@ const styles = {
     border: "none",
     borderTop: "1px solid var(--border-color)",
     margin: "0 0 30px 0",
-  },
-  bottomSection: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap" as const,
-    gap: "20px",
   },
   copyright: {
     color: "var(--text-muted)",

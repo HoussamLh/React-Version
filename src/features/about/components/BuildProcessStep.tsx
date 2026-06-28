@@ -33,7 +33,7 @@ export const BuildProcessStep: React.FC<BuildProcessStepProps> = ({
       interactive
       hoverAccent={hoverAccent}
       style={styles.card}
-      className="about-build-process-step"
+      className="ds-card"
     >
       <div
         style={{

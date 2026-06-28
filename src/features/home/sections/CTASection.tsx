@@ -1,12 +1,18 @@
 import React from "react";
 import { 
+  AccentText,
   CallToAction 
 } from "../../../design-system";
 
 export const CTASection: React.FC = () => {
   return (
     <CallToAction
-      title="Ready to build your digital legacy?"
+      backgroundAccent="green"
+      title={
+        <>
+          Ready to Build your <AccentText> Digital legacy </AccentText> ?
+        </>
+      }
       subtitle="Join the elite cohort of founders 
       who prioritize technical excellence and 
       architectural integrity."

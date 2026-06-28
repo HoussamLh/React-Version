@@ -78,6 +78,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile Hamburger Menu */}
       <button
         style={styles.hamburger}
+        className="mobile-menu-button"
         onClick={toggleMenu}
         aria-label="Toggle Menu"
       >

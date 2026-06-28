@@ -46,6 +46,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <div
           className="ds-card-toolbar"
           style={{
+            ...styles.iconToolbar,
             justifyContent: badge ? "space-between" : "flex-start",
           }}
         >
@@ -78,10 +79,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       <p className="ds-card-text">{text}</p>
 
       {image && (
-        <div className="ds-card-media">
+        <div className="ds-card-media" style={styles.media}>
           <img
             src={image}
-            className="ds-card-image"
+            className="ds-card-image ds-zoom-image"
+            style={styles.image}
             alt={title}
           />
         </div>
@@ -124,6 +126,29 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 const styles = {
   iconRow: {
     marginBottom: "10px",
+    width: "100%",
+  },
+
+  iconToolbar: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    flexWrap: "nowrap" as const,
+  },
+
+  media: {
+    width: "100%",
+    height: "220px",
+    minHeight: "180px",
+    flexShrink: 0,
+  },
+
+  image: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    display: "block",
   },
 
   avatarGroup: {
