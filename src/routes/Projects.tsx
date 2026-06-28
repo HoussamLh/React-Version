@@ -1,7 +1,12 @@
 import React from "react";
-export const Projects: React.FC = () => (
-  <div style={styles.page}>
-    <h1>Projects Page</h1>
-  </div>
-);
-const styles = { page: { padding: "100px 8%", color: "#fff" } };
+import { CTASection, HeroSection, ProjectsSection } from "../features/projects";
+
+export const Projects: React.FC = () => {
+  return (
+    <div className="ds-page">
+      <HeroSection />
+      <ProjectsSection />
+      <CTASection />
+    </div>
+  );
+};
