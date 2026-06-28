@@ -2,8 +2,13 @@ import React from "react";
 import { Card, colors } from "../../../design-system";
 import type { Service } from "../data/services.data";
 
-export type ServiceCardAccent = "green" | "blue" | "purple" | "pink";
-
+export type ServiceCardAccent =
+  | "green"
+  | "blue"
+  | "purple"
+  | "pink"
+  | "yellow"
+  | "cyan";
 type ServiceCardProps = Service & {
   hoverAccent?: ServiceCardAccent;
 };
@@ -13,6 +18,8 @@ const accentColors: Record<ServiceCardAccent, string> = {
   blue: colors.accent.blue,
   purple: colors.accent.purple,
   pink: colors.accent.pink,
+  yellow: colors.accent.yellow,
+  cyan: colors.accent.cyan,
 };
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({

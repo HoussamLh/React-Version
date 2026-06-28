@@ -4,7 +4,14 @@ import { ServiceCard } from "../components/ServiceCard";
 import type { ServiceCardAccent } from "../components/ServiceCard";
 import { services } from "../data/services.data";
 
-const hoverAccents: ServiceCardAccent[] = ["green", "purple", "blue", "pink"];
+const hoverAccents: ServiceCardAccent[] = [
+  "green",
+  "purple",
+  "blue",
+  "pink",
+  "yellow",
+  "cyan",
+];
 
 export const ServicesSection: React.FC = () => {
   return (
