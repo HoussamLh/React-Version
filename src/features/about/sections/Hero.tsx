@@ -11,7 +11,7 @@ export const Hero: React.FC = () => {
       subtitle="Devbysam, we engineer scalable, resilient systems that empower enterprise stakeholders and forward-thinking founders to lead their industries with confidence."
       image={heroImage}
       imageAlt="Data Center Server Infrastructure"
-      hoverAccent="green"
+      hoverAccent="blue"
     />
   );
 };

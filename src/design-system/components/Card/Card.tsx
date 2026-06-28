@@ -1,4 +1,5 @@
 import React from "react";
+import { colors, radius } from "../../tokens";
 
 type CardHoverAccent = "green" | "blue" | "purple" | "pink";
 
@@ -27,8 +28,17 @@ export const Card: React.FC<CardProps> = ({
     .join(" ");
 
   return (
-    <div style={style} className={cardClassName}>
+    <div style={{ ...styles.card, ...style }} 
+    className={cardClassName}>
       {children}
     </div>
   );
+};
+
+const styles = {
+  card: {
+    backgroundColor: colors.background.card,
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.lg,
+  },
 };

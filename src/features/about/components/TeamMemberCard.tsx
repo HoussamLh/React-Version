@@ -30,7 +30,7 @@ export const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 
   return (
     <Card interactive hoverAccent={hoverAccent} style={styles.card}>
-      <div style={styles.imageWrapper} className="team-image-wrapper">
+      <div style={styles.imageWrapper} className="ds-image-hover-frame">
         <img
           src={member.image}
           alt={member.imageAlt}

@@ -15,11 +15,9 @@ import {
 
 export const TrustSection: React.FC = () => {
   return (
-    <section style={styles.container} 
-    className="home-trust-section">
+    <section style={styles.container} className="ds-section">
       {/* Section Header Grid Wrapper */}
-      <div style={styles.header} 
-      className="home-trust-header">
+      <div style={styles.header} className="ds-grid ds-grid-2">
         {/* Left Side: Header Elements */}
         <SectionHeader
           badgeText="WHY CHOOSE US"
@@ -35,8 +33,7 @@ export const TrustSection: React.FC = () => {
         />
 
         {/* Right Side: Small Stat Cards */}
-        <div style={styles.smallCards} 
-        className="home-trust-stats">
+        <div style={styles.smallCards} className="ds-grid ds-grid-2">
           {trustStats.map((stat) => (
             <TrustStatCard key={stat.label} stat={stat} />
           ))}
@@ -45,11 +42,9 @@ export const TrustSection: React.FC = () => {
 
       {/* Trust Grid Cards */}
       <div style={styles.grid} 
-      className="home-trust-grid">
+      className="ds-grid ds-grid-3">
         {trustFeatures.map((feature) => (
-          <TrustFeatureCard 
-          key={feature.title} 
-          feature={feature} />
+          <TrustFeatureCard key={feature.title} feature={feature} />
         ))}
       </div>
     </section>

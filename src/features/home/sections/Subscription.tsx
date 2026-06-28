@@ -15,8 +15,7 @@ import {
 
 export const SubscriptionSection: React.FC = () => {
   return (
-    <section style={styles.container} 
-    className="home-subscription-section">
+    <section style={styles.container} className="ds-section">
       {/* Section Header */}
       <div style={styles.header}>
         <SectionHeader
@@ -27,8 +26,7 @@ export const SubscriptionSection: React.FC = () => {
             <>
               <h2 style={styles.heading}>
                 Maintenance{" "}
-                <span style={styles.subBadge} 
-                className="mono-text">
+                <span style={styles.subBadge} className="mono-text">
                   Subscription.
                 </span>
               </h2>
@@ -42,17 +40,15 @@ export const SubscriptionSection: React.FC = () => {
         />
 
         {/* Anti-Churn Protection Banner */}
-        <div style={styles.emergencyBanner} 
-        className="mono-text">
+        <div style={styles.emergencyBanner} className="mono-text">
           ⚠️ Website currently broken? A one-time{" "}
-          <strong>£150 Restoration Fee</strong> applies 
-          to stabilize pre-existing crashes.
+          <strong>£150 Restoration Fee</strong> applies to stabilize
+          pre-existing crashes.
         </div>
       </div>
 
       {/* 3-Column Tier Grid */}
-      <div style={styles.grid} 
-      className="home-subscription-grid">
+      <div style={styles.grid} className="ds-grid ds-grid-3">
         {subscriptionPlans.map((plan) => (
           <SubscriptionCard key={plan.tier} plan={plan} />
         ))}
@@ -63,7 +59,6 @@ export const SubscriptionSection: React.FC = () => {
 
 const styles = {
   container: {
-    padding: `${spacing.section} 0`,
     backgroundColor: colors.background.dark,
     borderTop: `1px solid ${colors.border.default}`,
   },
@@ -127,8 +122,6 @@ const styles = {
   },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
     gap: spacing.xl,
     alignItems: "stretch",
   },

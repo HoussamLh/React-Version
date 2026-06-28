@@ -7,7 +7,7 @@ const hoverAccents = ["green", "purple", "blue", "pink"] as const;
 
 export const BuildProcess: React.FC = () => {
   return (
-    <section style={styles.container} className="about-build-process">
+    <section style={styles.container}>
       <SectionHeader
         badgeText="OUR PROCESS"
         title="Our Build"
@@ -17,7 +17,7 @@ export const BuildProcess: React.FC = () => {
         textWrapperStyle={styles.textWrapper}
       />
 
-      <div style={styles.grid} className="about-build-process-grid">
+      <div style={styles.grid} className="ds-grid ds-grid-4">
         {buildProcessSteps.map((step, index) => (
           <BuildProcessStep
             key={step.number}
@@ -49,8 +49,6 @@ const styles = {
   },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
     gap: spacing.lg,
   },
 };

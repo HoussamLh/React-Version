@@ -3,12 +3,14 @@ import { Button } from "../Button";
 import { Card } from "../Card";
 import { Label } from "../Label";
 import { AccentText, Heading, Text } from "../Typography";
-import { colors, radius, shadows, spacing } from "../../tokens";
+import { radius, spacing } from "../../tokens";
 
 type HeroAction = {
   label: React.ReactNode;
   to: string;
   variant?: "primary" | "secondary";
+  style?: React.CSSProperties;
+  className?: string;
 };
 
 type HoverAccent = "green" | "blue" | "purple" | "pink";
@@ -55,12 +57,12 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
       style={{
         ...styles.heroContainer,
         ...(!hasVisual ? styles.textOnlyHeroContainer : {}),
-        ...containerStyle
+        ...containerStyle,
       }}
-      className={["home-hero", className].filter(Boolean).join(" ")}
+      className={["ds-hero", className].filter(Boolean).join(" ")}
     >
       {/* Left Column */}
-      <div style={styles.leftCol} className="home-hero-left">
+      <div style={styles.leftCol} className="ds-hero-left">
         <Label text={badgeText} badgeStyle={styles.badge} />
 
         <Heading as="h1" variant="hero">
@@ -83,6 +85,8 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
                 key={`${action.to}-${index}`}
                 to={action.to}
                 variant={action.variant ?? "primary"}
+                style={action.style}
+                className={action.className}
               >
                 {action.label}
               </Button>
@@ -93,20 +97,24 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
 
       {/* Right Column */}
       {hasVisual && (
-        <div style={styles.rightCol} className="home-hero-visual">
-          <div style={styles.mockupContainer} className="home-hero-mockup">
+        <div style={styles.rightCol} 
+        className="ds-hero-visual">
+          <div style={styles.mockupContainer} 
+          className="ds-hero-visual-inner">
             {visual || (
               <Card
                 interactive
                 hoverAccent={hoverAccent}
                 style={styles.imageWindow}
               >
-                <img
-                  src={image}
-                  alt={imageAlt}
-                  style={styles.imageRender}
-                  className="ds-zoom-image"
-                />
+                <div style={styles.heroMedia}>
+                  <img
+                    src={image}
+                    alt={imageAlt}
+                    className="ds-card-image ds-zoom-image"
+                    style={styles.imageRender}
+                  />
+                </div>
               </Card>
             )}
           </div>
@@ -159,13 +167,21 @@ const styles = {
     overflow: "visible",
   },
 
+  heroMedia: {
+    width: "100%",
+    height: "100%",
+    minHeight: "unset",
+    marginBottom: 0,
+    border: "none",
+    borderRadius: radius.lg,
+    overflow: "hidden",
+  },
+
   imageWindow: {
     width: "100%",
     height: "450px",
     backgroundColor: "#131518",
-    border: `1px solid ${colors.border.default}`,
     borderRadius: radius.lg,
-    boxShadow: shadows.card,
     overflow: "hidden",
     display: "flex",
     alignItems: "center",

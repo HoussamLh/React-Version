@@ -16,7 +16,7 @@ const hoverAccents: TeamCardAccent[] = ["green", "purple", "blue", "pink"];
 export const OurTeam: React.FC = () => {
   return (
     <section style={styles.container}>
-      <div style={styles.headerRow} className="team-header-row">
+      <div style={styles.headerRow} className="ds-grid ds-grid-2">
         <SectionHeader
           badgeText="Our Technical TEAM"
           title="People Behind"
@@ -27,14 +27,14 @@ export const OurTeam: React.FC = () => {
           textWrapperStyle={styles.textWrapper}
         />
 
-        <div style={styles.headerAction} className="team-header-action">
+        <div style={styles.headerAction}>
           <Button to="/contact" style={styles.joinButton}>
             Join the Team
           </Button>
         </div>
       </div>
 
-      <div style={styles.grid} className="team-grid">
+      <div style={styles.grid} className="ds-grid ds-grid-2">
         {teamMembers.map((member, index) => (
           <TeamMemberCard
             key={member.name}
@@ -55,10 +55,9 @@ const styles = {
   },
 
   headerRow: {
-    display: "flex",
-    justifyContent: "space-between",
     alignItems: "flex-start",
     gap: spacing.xl,
+    marginBottom: spacing["3xl"],
   },
 
   header: {
@@ -80,8 +79,6 @@ const styles = {
   },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
     gap: spacing.lg,
   },
 
