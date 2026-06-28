@@ -13,7 +13,7 @@ type HeroAction = {
   className?: string;
 };
 
-type HoverAccent = "green" | "blue" | "purple" | "pink";
+type HoverAccent = "green" | "blue" | "purple" | "pink" | "yellow" | "cyan";
 
 type SharedHeroProps = {
   badgeText: React.ReactNode;

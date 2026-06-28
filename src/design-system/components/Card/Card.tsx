@@ -1,7 +1,13 @@
 import React from "react";
 import { colors, radius } from "../../tokens";
 
-type CardHoverAccent = "green" | "blue" | "purple" | "pink";
+export type CardHoverAccent =
+  | "green"
+  | "blue"
+  | "purple"
+  | "pink"
+  | "yellow"
+  | "cyan";
 
 type CardProps = {
   children: React.ReactNode;
@@ -28,8 +34,7 @@ export const Card: React.FC<CardProps> = ({
     .join(" ");
 
   return (
-    <div style={{ ...styles.card, ...style }} 
-    className={cardClassName}>
+    <div style={{ ...styles.card, ...style }} className={cardClassName}>
       {children}
     </div>
   );
