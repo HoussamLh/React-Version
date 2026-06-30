@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router";
 import {
   colors,
@@ -34,17 +34,33 @@ export const Button: React.FC<ButtonProps> = ({
   className,
   style,
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const variantStyle =
+    variant === "primary"
+      ? styles.primary
+      : isHovered
+        ? styles.secondaryHover
+        : styles.secondary;
+
   const buttonStyle = {
     ...styles.base,
-    ...(variant === "primary" ? styles.primary : styles.secondary),
+    ...variantStyle,
     ...(fullWidth ? styles.fullWidth : {}),
     ...style,
   };
 
+  const hoverEvents =
+    variant === "secondary"
+      ? {
+          onMouseEnter: () => setIsHovered(true),
+          onMouseLeave: () => setIsHovered(false),
+        }
+      : {};
+
   if (to) {
     return (
-      <Link to={to} style={buttonStyle} 
-      className={className}>
+      <Link to={to} style={buttonStyle} className={className} {...hoverEvents}>
         {children}
       </Link>
     );
@@ -52,8 +68,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   if (href) {
     return (
-      <a href={href} style={buttonStyle} 
-      className={className}>
+      <a href={href} style={buttonStyle} className={className} {...hoverEvents}>
         {children}
       </a>
     );
@@ -65,6 +80,7 @@ export const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       style={buttonStyle}
       className={className}
+      {...hoverEvents}
     >
       {children}
     </button>
@@ -93,8 +109,15 @@ const styles = {
   },
 
   secondary: {
-    backgroundColor: "transparent",
-    color: colors.text.main,
+    backgroundColor: "#f4f1e8",
+    color: colors.background.dark,
+    border: `1px solid ${colors.accent.green}`,
+    boxShadow: shadows.glow,
+  },
+
+  secondaryHover: {
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
     border: `1px solid ${colors.accent.green}`,
     boxShadow: shadows.glow,
   },

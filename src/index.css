@@ -238,6 +238,10 @@ a {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.ds-grid-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .ds-grid-auto {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
@@ -335,6 +339,111 @@ a {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+/* ==========================================
+   SPECIAL PRICING / SUBSCRIPTION CARD SYSTEM
+========================================== */
+
+.ds-special-card-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.ds-special-card-wrapper-recommended {
+  z-index: 10;
+}
+
+.ds-special-card {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  padding: 28px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background-color: rgba(24, 26, 30, 0.78);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform: translateZ(0);
+  will-change: transform, border-color, box-shadow;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ds-special-card:hover {
+  transform: translateY(-4px) translateZ(0);
+  border-color: var(--accent-green);
+  background-color: rgba(24, 26, 30, 0.92);
+}
+
+.ds-special-card-recommended {
+  border: 2px solid var(--accent-green);
+  background-color: var(--bg-card);
+  box-shadow: 0 20px 50px rgba(147, 220, 92, 0.12);
+}
+
+.ds-special-card-recommended:hover {
+  border-color: var(--accent-green);
+  box-shadow: 0 24px 55px rgba(147, 220, 92, 0.18);
+}
+
+.ds-special-card-recommended-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background-color: var(--accent-green);
+  color: #000000;
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* Desktop recommended scale effect */
+@media (min-width: 1201px) {
+  .ds-special-card-wrapper-recommended {
+    transform: scale(1.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ds-special-card-wrapper-recommended:hover {
+    transform: scale(1);
+  }
+}
+
+/* Recommended card overlap on tablet and mobile */
+@media (max-width: 900px) {
+  .ds-special-card-wrapper-recommended,
+  .ds-special-card-wrapper-recommended:hover {
+    transform: none;
+  }
+}
+
+/* Medium desktop / small laptop */
+@media (max-width: 1200px) and (min-width: 901px) {
+  .ds-grid-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+    .ds-special-card {
+    padding: 24px;
+  }
+
+  .ds-special-card-wrapper-recommended,
+  .ds-special-card-wrapper-recommended:hover {
+    transform: none;
+  }
 }
 
 /* ==========================================
@@ -508,7 +617,6 @@ a {
 /* ==========================================
    RESPONSIVE
 ========================================== */
-
 /* Tablet */
 @media (max-width: 900px) {
   .ds-page {
@@ -539,9 +647,15 @@ a {
     font-size: 44px !important;
   }
 
+  /* recommended card overlap*/
+  .ds-special-card-wrapper-recommended {
+    transform: none;
+  }
+
   /* Reusable grids */
   .ds-grid-3,
   .ds-grid-4,
+  .ds-grid-5,
   .ds-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
@@ -584,6 +698,7 @@ a {
   .ds-grid-2,
   .ds-grid-3,
   .ds-grid-4,
+  .ds-grid-5,
   .ds-card-grid {
     grid-template-columns: 1fr !important;
   }
@@ -631,4 +746,12 @@ a {
     flex-direction: column !important;
     gap: 12px !important;
   }
+}
+
+/* ==========================================
+   HERO SPACING UTILITIES
+========================================== */
+
+.ds-hero-no-bottom-gap {
+  padding-bottom: 0 !important;
 }

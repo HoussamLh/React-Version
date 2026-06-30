@@ -34,6 +34,7 @@ type SharedHeroProps = {
   hoverAccent?: HoverAccent;
   className?: string;
   containerStyle?: React.CSSProperties;
+  align?: "left" | "center";
 };
 
 export const SharedHero: React.FC<SharedHeroProps> = ({
@@ -49,6 +50,7 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
   hoverAccent = "green",
   className = "",
   containerStyle = {},
+  align = "left",
 }) => {
   const hasVisual = Boolean(visual || image);
 
@@ -62,7 +64,13 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
       className={["ds-hero", className].filter(Boolean).join(" ")}
     >
       {/* Left Column */}
-      <div style={styles.leftCol} className="ds-hero-left">
+      <div
+        style={{
+          ...styles.leftCol,
+          ...(align === "center" ? styles.centeredLeftCol : {}),
+        }}
+        className="ds-hero-left"
+      >
         <Label text={badgeText} badgeStyle={styles.badge} />
 
         <Heading as="h1" variant="hero">
@@ -79,7 +87,12 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
         <Text variant="hero">{subtitle}</Text>
 
         {actions && actions.length > 0 && (
-          <div style={styles.ctaGroup}>
+          <div
+            style={{
+              ...styles.ctaGroup,
+              ...(align === "center" ? styles.centeredCtaGroup : {}),
+            }}
+          >
             {actions.map((action, index) => (
               <Button
                 key={`${action.to}-${index}`}
@@ -97,10 +110,8 @@ export const SharedHero: React.FC<SharedHeroProps> = ({
 
       {/* Right Column */}
       {hasVisual && (
-        <div style={styles.rightCol} 
-        className="ds-hero-visual">
-          <div style={styles.mockupContainer} 
-          className="ds-hero-visual-inner">
+        <div style={styles.rightCol} className="ds-hero-visual">
+          <div style={styles.mockupContainer} className="ds-hero-visual-inner">
             {visual || (
               <Card
                 interactive
@@ -193,5 +204,16 @@ const styles = {
     height: "100%",
     objectFit: "cover" as const,
     display: "block",
+  },
+
+  centeredLeftCol: {
+    alignItems: "center",
+    textAlign: "center" as const,
+    maxWidth: "820px",
+    margin: "0 auto",
+  },
+
+  centeredCtaGroup: {
+    justifyContent: "center",
   },
 };
