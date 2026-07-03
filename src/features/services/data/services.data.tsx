@@ -3,7 +3,12 @@ import webImg from "../../../Assets/services/web-dev.png";
 import mobileImg from "../../../Assets/services/mobile-app.png";
 import backendImg from "../../../Assets/services/backend-img.png";
 
-import { Code, Smartphone, Server, ShieldCheck } from "lucide-react";
+import { 
+  Code, 
+  Smartphone, 
+  Server, 
+  ShieldCheck 
+} from "lucide-react";
 
 export type Service = {
   title: string;

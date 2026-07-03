@@ -1,13 +1,13 @@
 import React from "react";
 import { Button } from "../Button";
 
-type SpecialCardAction = {
+export type SpecialCardAction = {
   label: React.ReactNode;
   to: string;
   variant?: "primary" | "secondary";
 };
 
-type SpecialCardProps = {
+export type SpecialCardProps = {
   children: React.ReactNode;
   recommended?: boolean;
   recommendedLabel?: string;
