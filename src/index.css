@@ -722,6 +722,10 @@ a {
     align-items: flex-start !important;
     gap: 16px !important;
   }
+  .devbysam-live-chat-root {
+    right: 18px !important;
+    bottom: 18px !important;
+  }
 }
 
 /* Small mobile */

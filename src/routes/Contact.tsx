@@ -1,7 +1,15 @@
-import React from 'react';
-export const Contact: React.FC = () => (
-  <div style={styles.page}>
-    <h1>Contact Page</h1>
-  </div>
-);
-const styles = { page: { padding: "100px 8%", color: "#fff" } };
+import React from "react";
+import {
+  ContactFormSection,
+  CTASection,
+  HeroSection,
+} from "../features/contact";
+export const Contact: React.FC = () => {
+  return (
+    <div className="ds-page">
+      <HeroSection />
+      <ContactFormSection />
+      <CTASection />
+    </div>
+  );
+};
