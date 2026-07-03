@@ -6,6 +6,7 @@ import { Services } from "./routes/Services";
 import { Projects } from "./routes/Projects";
 import { Pricing } from "./routes/Pricing";
 import { Contact } from "./routes/Contact";
+import { LiveChatBubble } from "./features/contact";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </RootLayout>
+      <LiveChatBubble />
     </BrowserRouter>
   );
 }

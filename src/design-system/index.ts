@@ -10,7 +10,10 @@ export {
 export { Card } from "./components/Card";
 
 export { SpecialCard } from "./components/SpecialCard";
-export type { SpecialCardAccent } from "./components/SpecialCard";
+export type {
+  SpecialCardAction,
+  SpecialCardProps,
+} from "./components/SpecialCard";
 
 export * from "./tokens";
 export { SharedHero } from "./components/SharedHero";
