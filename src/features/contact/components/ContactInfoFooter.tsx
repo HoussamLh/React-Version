@@ -10,60 +10,43 @@ export const ContactInfoFooter: React.FC<ContactInfoFooterProps> = ({
   location,
 }) => {
   return (
-    <div style={styles.bottomContent}>
-      <div style={styles.divider} />
-
-      <div style={styles.contactVisual}>
-        <span style={{ ...styles.circle, backgroundColor: "#6B6F7B" }} />
+    <>
+      <div style={styles.avatarGroup}>
         <span
-          style={{ ...styles.circle, backgroundColor: colors.accent.pink }}
+          style={{ ...styles.avatar, backgroundColor: colors.text.muted }}
         />
-        <span style={{ ...styles.circle, backgroundColor: colors.text.main }} />
+        <span
+          style={{ ...styles.avatar, backgroundColor: colors.accent.pink }}
+        />
+        <span style={{ ...styles.avatar, backgroundColor: colors.text.main }} />
       </div>
 
-      <div style={styles.footerWrapper}>
-        <MapPin size={20} />
-        <span>{location}</span>
-      </div>
-    </div>
+      <span style={styles.locationText} className="mono-text">
+        <MapPin size={18} />
+        {location}
+      </span>
+    </>
   );
 };
 
 const styles = {
-  bottomContent: {
-    flexShrink: 0,
-  },
-
-  divider: {
-    width: "100%",
-    height: "1px",
-    backgroundColor: "#252731",
-    marginBottom: "26px",
-  },
-
-  contactVisual: {
+  avatarGroup: {
     display: "flex",
-    alignItems: "center",
-    marginBottom: spacing.lg,
   },
 
-  circle: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "50%",
-    display: "block",
-    marginRight: "-8px",
-    border: "1px solid rgba(255, 255, 255, 0.06)",
+  avatar: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "999px",
+    border: `2px solid ${colors.background.card}`,
+    marginLeft: "-10px",
   },
 
-  footerWrapper: {
+  locationText: {
     display: "flex",
     alignItems: "center",
     gap: spacing.sm,
-    fontSize: "13px",
-    lineHeight: "18px",
-    color: colors.text.muted,
-    fontFamily: "JetBrains Mono, monospace",
-    letterSpacing: "0.02em",
+    fontSize: "12px",
+    color: colors.text.main,
   },
 };

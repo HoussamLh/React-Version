@@ -1,7 +1,7 @@
 export const contactInfo = {
   badge: "Contact Details",
 
-  title: "Let’s discuss your project.",
+  title: "Call us",
 
   text: "Tell us what you want to build, improve, or fix. We’ll help you choose the right technical direction.",
 

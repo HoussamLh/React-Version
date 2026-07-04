@@ -15,5 +15,8 @@ export type {
   SpecialCardProps,
 } from "./components/SpecialCard";
 
+export { ExceptionalCard } from "./components/ExceptionalCard";
+export type { ExceptionalCardAccent } from "./components/ExceptionalCard";
+
 export * from "./tokens";
 export { SharedHero } from "./components/SharedHero";

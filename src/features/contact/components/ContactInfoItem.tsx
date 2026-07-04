@@ -1,46 +1,45 @@
 import React from "react";
 import { ArrowUpRight, Mail, Phone } from "lucide-react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import {
+  ExceptionalCard,
+  colors,
+  radius,
+  spacing,
+  typography,
+} from "../../../design-system";
 import { contactInfo } from "../data/contactInfo.data";
 import { ContactActionRow } from "./ContactActionRow";
 import { ContactInfoFooter } from "./ContactInfoFooter";
 
 export const ContactInfoItem: React.FC = () => {
   return (
-    <div style={styles.card}>
-      <div style={styles.topContent}>
-        <div style={styles.topRow}>
-          <div style={styles.iconBox}>
-            <Mail size={24} />
-          </div>
+    <ExceptionalCard
+      icon={<Mail size={28} />}
+      badge={contactInfo.badge}
+      title={contactInfo.title}
+      text={contactInfo.text}
+      accent="pink"
+      style={styles.card}
+      titleStyle={styles.title}
+      textStyle={styles.text}
+      bodyStyle={styles.middleContent}
+      footer={<ContactInfoFooter location={contactInfo.location} />}
+    >
+      <ContactActionRow
+        href={contactInfo.email.href}
+        label={contactInfo.email.label}
+        value={contactInfo.email.value}
+        icon={<ArrowUpRight size={24} />}
+        active
+      />
 
-          <span style={styles.badge}>{contactInfo.badge}</span>
-        </div>
-
-        <h2 style={styles.title}>{contactInfo.title}</h2>
-
-        <p style={styles.text}>{contactInfo.text}</p>
-      </div>
-
-      <div style={styles.middleContent}>
-        <ContactActionRow
-          href={contactInfo.email.href}
-          label={contactInfo.email.label}
-          value={contactInfo.email.value}
-          icon={<ArrowUpRight size={20} />}
-          active
-        />
-
-        <ContactActionRow
-          href={contactInfo.phone.href}
-          label={contactInfo.phone.label}
-          value={contactInfo.phone.value}
-          icon={<Phone size={20} />}
-        />
-      </div>
-
-      <ContactInfoFooter location={contactInfo.location} />
-    </div>
+      <ContactActionRow
+        href={contactInfo.phone.href}
+        label={contactInfo.phone.label}
+        value={contactInfo.phone.value}
+        icon={<Phone size={24} />}
+      />
+    </ExceptionalCard>
   );
 };
 
@@ -55,45 +54,6 @@ const styles = {
     backgroundColor: "#15161C",
     border: "1px solid #252731",
     color: colors.text.main,
-    display: "flex",
-    flexDirection: "column" as const,
-  },
-
-  topContent: {
-    flexShrink: 0,
-  },
-
-  topRow: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.lg,
-    marginBottom: spacing.xl,
-  },
-
-  iconBox: {
-    width: "52px",
-    height: "52px",
-    borderRadius: radius.lg,
-    border: `1px solid ${colors.accent.pink}`,
-    color: colors.accent.pink,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-
-  badge: {
-    padding: "7px 18px",
-    borderRadius: radius.pill,
-    border: `1px solid ${colors.accent.pink}`,
-    color: colors.accent.pink,
-    fontSize: "10px",
-    lineHeight: "12px",
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: "0.18em",
-    textTransform: "uppercase" as const,
-    whiteSpace: "nowrap" as const,
   },
 
   title: {
