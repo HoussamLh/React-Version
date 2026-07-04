@@ -72,7 +72,10 @@ export const Navbar: React.FC = () => {
           Contact
         </Link>
       </div>
-      <Link to="/services" style={styles.ctaLink} className="desktop-menu">
+      <Link to="/services" 
+      style={styles.ctaLink} 
+      className="desktop-menu"
+      onClick={toggleMenu}>
         Get Started
       </Link>
       {/* Mobile Hamburger Menu */}
@@ -99,7 +102,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Pop-up Window */}
       {isOpen && (
-        <div style={styles.mobilePopup}>
+        <div style={styles.mobilePopup} className="mobile-menu-panel">
           <Link to="/" style={styles.popupLink} onClick={toggleMenu}>
             Home
           </Link>
@@ -118,7 +121,11 @@ export const Navbar: React.FC = () => {
           <Link to="/contact" style={styles.popupLink} onClick={toggleMenu}>
             Contact
           </Link>
-          <Link to="/services" style={styles.ctaLink}>
+          <Link
+            to="/services"
+            style={styles.ctaLink}
+            className="mobile-menu-cta"
+          >
             Get Started
           </Link>
         </div>
@@ -190,18 +197,18 @@ const styles = {
     position: "fixed" as const,
     top: "80px",
     right: "5%",
-    width: "40%",
+    width: "min(390px, calc(100vw - 32px))",
     height: "auto",
-    maxHeight: "calc(100vh - 80px)",
+    maxHeight: "calc(100vh - 96px)",
     backgroundColor: "var(--bg-card)",
     border: "1px solid var(--border-color)",
-    borderRadius: "12px 12px 12px 12px",
-    padding: "40px 24px",
+    borderRadius: "16px",
+    padding: "36px 24px",
     display: "flex",
     flexDirection: "column" as const,
     alignItems: "center",
     justifyContent: "center",
-    gap: "24px",
+    gap: "22px",
     boxShadow: "-10px 20px 40px rgba(0,0,0,0.5)",
     zIndex: 1000,
   },
