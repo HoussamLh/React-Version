@@ -12,7 +12,15 @@ import {
   Smile,
   X,
 } from "lucide-react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography, 
+} from "../../../design-system";
+
+import { TeamAvatars } from "../../../design-system";
+import { teamAvatars } from "../../../data/teamAvatars.data";
 
 type ChatView = "home" | "messages" | "chat";
 
@@ -87,36 +95,12 @@ ${message || "No message sent yet."}
               <div style={styles.homeHero}>
                 <div style={styles.homeTopRow}>
                   <div style={styles.logoText}>DevBySam</div>
-
-                  <div style={styles.avatarGroup}>
-                    <span
-                      style={{
-                        ...styles.avatar,
-                        backgroundColor: colors.accent.pink,
-                      }}
-                    >
-                      S
-                    </span>
-
-                    <span
-                      style={{
-                        ...styles.avatar,
-                        backgroundColor: colors.accent.green,
-                      }}
-                    >
-                      D
-                    </span>
-
-                    <span
-                      style={{
-                        ...styles.avatar,
-                        backgroundColor: colors.accent.blue,
-                      }}
-                    >
-                      A
-                    </span>
-                  </div>
-
+                  <TeamAvatars
+                    avatars={teamAvatars}
+                    size={64}
+                    borderColor="#06171d"
+                    overlap={16}
+                  />
                   <button
                     type="button"
                     aria-label="Close live chat"
@@ -184,7 +168,11 @@ ${message || "No message sent yet."}
                       backgroundColor: colors.accent.pink,
                     }}
                   >
-                    S
+                  <img
+                    src={teamAvatars[0].src}
+                    alt={teamAvatars[0].alt}
+                    style={{ width: "100%", height: "100%", borderRadius: "50%" }}  
+                    />
                   </span>
 
                   <div style={styles.previewContent}>
@@ -236,7 +224,11 @@ ${message || "No message sent yet."}
                       backgroundColor: colors.accent.pink,
                     }}
                   >
-                    S
+                    <img
+                      src={teamAvatars[0].src}
+                      alt={teamAvatars[0].alt}
+                      style={{ width: "100%", height: "100%", borderRadius: "50%" }}  
+                    />
                   </span>
 
                   <div>
@@ -484,25 +476,6 @@ const styles = {
     fontWeight: typography.fontWeight.black,
     fontSize: "15px",
     letterSpacing: "-0.02em",
-  },
-
-  avatarGroup: {
-    display: "flex",
-    alignItems: "center",
-  },
-
-  avatar: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "50%",
-    border: `2px solid #06171d`,
-    color: colors.background.dark,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.black,
-    marginLeft: "-8px",
   },
 
   iconButton: {
