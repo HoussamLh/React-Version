@@ -1,5 +1,6 @@
 import React from "react";
 import { Card } from "../Card";
+import { Badge } from "../Badge";
 
 export type ExceptionalCardAccent =
   | "green"
@@ -78,17 +79,7 @@ export const ExceptionalCard: React.FC<ExceptionalCardProps> = ({
             {icon}
           </div>
 
-          {badge && (
-            <span
-              className="ds-badge mono-text"
-              style={{
-                color: accentColor,
-                borderColor: accentColor,
-              }}
-            >
-              {badge}
-            </span>
-          )}
+          {badge && <Badge accent={accent}>{badge}</Badge>}
         </div>
 
         <h3

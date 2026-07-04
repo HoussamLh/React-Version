@@ -8,6 +8,7 @@ export {
     Text 
 } from "./components/Typography";
 export { Card } from "./components/Card";
+export type { Badge, BadgeAccent } from "./components/Badge";
 
 export { SpecialCard } from "./components/SpecialCard";
 export type {
