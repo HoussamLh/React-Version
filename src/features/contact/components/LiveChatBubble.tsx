@@ -69,9 +69,14 @@ ${message || "No message sent yet."}
   }
 
   return createPortal(
-    <div style={styles.wrapper}>
+    <div className="devbysam-live-chat-root" style={styles.wrapper}>
       {isOpen && (
         <div
+          className={
+            isExpanded
+              ? "devbysam-live-chat-popup devbysam-live-chat-popup-expanded"
+              : "devbysam-live-chat-popup"
+          }
           style={{
             ...styles.popup,
             ...(isExpanded ? styles.popupExpanded : {}),
@@ -138,7 +143,7 @@ ${message || "No message sent yet."}
                     setIsOptionsOpen(false);
                   }}
                 >
-                  <span>Send us a message</span>
+                  <span>Send a message</span>
                   <SendHorizontal size={18} />
                 </button>
               </div>
@@ -475,7 +480,7 @@ const styles = {
   },
 
   logoText: {
-    color: colors.text.main,
+    color: colors.accent.green,
     fontWeight: typography.fontWeight.black,
     fontSize: "15px",
     letterSpacing: "-0.02em",
