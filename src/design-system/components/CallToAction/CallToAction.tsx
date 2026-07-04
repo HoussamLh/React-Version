@@ -29,9 +29,11 @@ type CallToActionProps = {
   cardStyle?: React.CSSProperties;
   headingStyle?: React.CSSProperties;
   subtitleStyle?: React.CSSProperties;
+  topContent?: React.ReactNode;
 };
 
 export const CallToAction: React.FC<CallToActionProps> = ({
+  topContent,
   title,
   subtitle,
   primaryAction,
@@ -69,8 +71,10 @@ export const CallToAction: React.FC<CallToActionProps> = ({
             backgroundImage: `radial-gradient(${overlayColor} 1px, transparent 1px)`,
           }}
         />
-
         <div style={styles.content}>
+
+          {topContent && <div style={styles.topContent}>{topContent}</div>}
+          
           <Heading
             as="h2"
             variant="section"
@@ -148,6 +152,12 @@ const styles = {
     alignItems: "center",
     textAlign: "center" as const,
     maxWidth: "680px",
+  },
+
+  topContent: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "24px",
   },
 
   heading: {

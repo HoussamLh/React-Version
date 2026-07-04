@@ -436,7 +436,15 @@ a {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
-    .ds-special-card {
+  .ds-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .ds-footer-grid form {
+    max-width: 100% !important;
+  }
+
+  .ds-special-card {
     padding: 24px;
   }
 
@@ -467,8 +475,8 @@ a {
   font-weight: 700;
   letter-spacing: 0.8px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -596,6 +604,27 @@ a {
 }
 
 /* ==========================================
+   MOBILE NAV POPUP
+========================================== */
+
+.mobile-menu-panel {
+  width: min(390px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+}
+
+.mobile-menu-panel .mobile-menu-cta,
+.mobile-menu-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 200px !important;
+  min-height: 44px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+/* ==========================================
    FOOTER LAYOUT
 ========================================== */
 
@@ -614,8 +643,51 @@ a {
   gap: 20px;
 }
 
+
 /* ==========================================
-   RESPONSIVE
+   HERO ACTION BUTTON
+========================================== */
+
+.ds-hero-left .ds-toolbar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 16px !important;
+  flex-wrap: nowrap !important;
+}
+
+.ds-hero-left .ds-toolbar > * {
+  min-width: 180px !important;
+  justify-content: center !important;
+}
+
+/* ==========================================
+   FOOTER NEWSLETTER 
+========================================== */
+
+.ds-footer-grid form {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.ds-footer-grid form input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  height: 48px !important;
+}
+
+.ds-footer-grid form button {
+  flex: 0 0 auto !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  white-space: nowrap !important;
+}
+
+
+/* ==========================================
+   RESPONSIVE DESIGN
 ========================================== */
 /* Tablet */
 @media (max-width: 900px) {
@@ -728,7 +800,10 @@ a {
   }
 }
 
-/* Small mobile */
+/* ==========================================
+   MOBILE RESPONSIVE 
+========================================== */
+
 @media (max-width: 600px) {
   .ds-section {
     padding: var(--section-y-mobile) 0;
@@ -750,6 +825,26 @@ a {
     flex-direction: column !important;
     gap: 12px !important;
   }
+
+  .devbysam-live-chat-root {
+    right: 14px !important;
+    bottom: 14px !important;
+  }
+
+  .devbysam-live-chat-popup {
+    width: min(392px, calc(100vw - 32px)) !important;
+    height: min(560px, calc(100vh - 112px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 112px) !important;
+    border-radius: 22px !important;
+  }
+
+  .devbysam-live-chat-popup-expanded {
+    width: min(520px, calc(100vw - 24px)) !important;
+    height: min(660px, calc(100vh - 88px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 88px) !important;
+  }
 }
 
 /* ==========================================
@@ -758,4 +853,63 @@ a {
 
 .ds-hero-no-bottom-gap {
   padding-bottom: 0 !important;
+}
+
+  /* ==========================================
+   LIVE CHAT RESPONSIVE VERY SMALL SCREEN
+========================================== */
+
+@media (max-width: 480px) {
+/*  LIVE CHAT RESPONSIVE */
+  .devbysam-live-chat-root {
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+
+  .devbysam-live-chat-popup {
+    width: calc(100vw - 24px) !important;
+    height: min(540px, calc(100vh - 96px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 96px) !important;
+  }
+
+  .devbysam-live-chat-popup-expanded {
+    width: calc(100vw - 16px) !important;
+    height: min(620px, calc(100vh - 72px)) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 72px) !important;
+  }
+/* FOOTER RESPONSIVE */
+  .ds-footer-grid form {
+    flex-direction: column !important;
+  }
+
+  .ds-footer-grid form button {
+    width: 100% !important;
+  }
+
+/* NAVBAR POPUP RESPONSIVE */
+.mobile-menu-panel {
+  width: calc(100vw - 100px) !important;
+  max-width: calc(100vw - 100px) !important;
+}
+
+.mobile-menu-panel .mobile-menu-cta,
+.mobile-menu-cta {
+  width: 100% !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* HERO TOOLBAR RESPONSIVE */
+    .ds-hero-left .ds-toolbar {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .ds-hero-left .ds-toolbar > * {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
