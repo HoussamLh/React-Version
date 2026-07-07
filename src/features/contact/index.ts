@@ -6,5 +6,5 @@ export {
 export { 
     ContactForm, 
     ContactInfoItem, 
-    LiveChatBubble } 
+} 
     from "./components";

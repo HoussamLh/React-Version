@@ -6,7 +6,7 @@ import { Services } from "./routes/Services";
 import { Projects } from "./routes/Projects";
 import { Pricing } from "./routes/Pricing";
 import { Contact } from "./routes/Contact";
-import { LiveChatBubble } from "./features/contact";
+import { LiveChatBubble } from "./features/live-chat";
 
 function App() {
   return (
