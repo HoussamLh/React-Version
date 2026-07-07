@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSupabaseConfigured } from "../../../lib/supabase";
 import {
+  createLiveChatRealtimeChannel,
   ensureAnonymousVisitor,
   getConversationMessages,
   getOrCreateOpenConversation,
@@ -11,6 +12,7 @@ import {
 import type {
   LiveChatConversation,
   LiveChatMessage,
+  LiveChatPresenceState,
 } from "../types/liveChat.types";
 
 const appendUniqueMessage = (
@@ -34,9 +36,17 @@ export const useLiveChat = (enabled: boolean) => {
     null,
   );
   const [messages, setMessages] = useState<LiveChatMessage[]>([]);
+  const [presence, setPresence] = useState<LiveChatPresenceState[]>([]);
+  const [isAdminTyping, setIsAdminTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const typingTimeoutRef = useRef<number | null>(null);
+  const realtimeRef = useRef<{
+    sendTypingStatus: (isTyping: boolean) => Promise<void>;
+    unsubscribe: () => void;
+  } | null>(null);
 
   const conversationId = conversation?.id ?? null;
 
@@ -69,7 +79,9 @@ export const useLiveChat = (enabled: boolean) => {
         setVisitorId(nextVisitorId);
         setConversation(nextConversation);
         setMessages(nextMessages);
-      } catch {
+      } catch (error) {
+        console.error("Live chat init failed:", error);
+
         if (!isMounted) return;
 
         setError("Live chat could not connect. Please try again later.");
@@ -102,6 +114,30 @@ export const useLiveChat = (enabled: boolean) => {
     return unsubscribe;
   }, [enabled, conversationId]);
 
+  useEffect(() => {
+    if (!enabled || !conversationId || !visitorId) return;
+
+    const realtime = createLiveChatRealtimeChannel({
+      conversationId,
+      visitorId,
+      onTypingChange: (payload) => {
+        if (payload.role !== "admin") return;
+
+        setIsAdminTyping(payload.isTyping);
+      },
+      onPresenceChange: setPresence,
+    });
+
+    realtimeRef.current = realtime;
+
+    return () => {
+      realtime.unsubscribe();
+      realtimeRef.current = null;
+      setPresence([]);
+      setIsAdminTyping(false);
+    };
+  }, [enabled, conversationId, visitorId]);
+
   const sendMessage = useCallback(
     async (body: string): Promise<boolean> => {
       const trimmedBody = body.trim();
@@ -119,6 +155,8 @@ export const useLiveChat = (enabled: boolean) => {
       setError(null);
 
       try {
+        await realtimeRef.current?.sendTypingStatus(false);
+
         const nextMessage = await sendVisitorMessage({
           conversationId,
           body: trimmedBody,
@@ -129,7 +167,9 @@ export const useLiveChat = (enabled: boolean) => {
         );
 
         return true;
-      } catch {
+      } catch (error) {
+        console.error("Live chat send failed:", error);
+
         setError("Message could not be sent. Please try again.");
         return false;
       } finally {
@@ -139,9 +179,31 @@ export const useLiveChat = (enabled: boolean) => {
     [conversationId],
   );
 
+  const sendTypingStatus = useCallback((isTyping: boolean) => {
+    if (typingTimeoutRef.current) {
+      window.clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    realtimeRef.current?.sendTypingStatus(isTyping);
+
+    if (!isTyping) return;
+
+    typingTimeoutRef.current = window.setTimeout(() => {
+      realtimeRef.current?.sendTypingStatus(false);
+      typingTimeoutRef.current = null;
+    }, 1500);
+  }, []);
+
   const latestMessage = useMemo(() => {
     return messages[messages.length - 1] ?? null;
   }, [messages]);
+
+  const isVisitorOnline = Boolean(
+    visitorId && presence.some((item) => item.userId === visitorId),
+  );
+
+  const isAdminOnline = presence.some((item) => item.role === "admin");
 
   return {
     visitorId,
@@ -149,9 +211,14 @@ export const useLiveChat = (enabled: boolean) => {
     conversationId,
     messages,
     latestMessage,
+    presence,
+    isVisitorOnline,
+    isAdminOnline,
+    isAdminTyping,
     isLoading,
     isSending,
     error,
     sendMessage,
+    sendTypingStatus,
   };
 };

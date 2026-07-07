@@ -22,6 +22,8 @@ type LiveChatChatViewProps = {
   error: string | null;
   isOptionsOpen: boolean;
   isExpanded: boolean;
+  isAdminTyping: boolean;
+  isAdminOnline: boolean;
   onBack: () => void;
   onClose: () => void;
   onToggleOptions: () => void;
@@ -30,6 +32,7 @@ type LiveChatChatViewProps = {
   onEmailChange: (value: string) => void;
   onMessageChange: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
+  onTypingChange: (isTyping: boolean) => void;
 };
 
 export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
@@ -41,6 +44,8 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   error,
   isOptionsOpen,
   isExpanded,
+  isAdminTyping,
+  isAdminOnline,
   onBack,
   onClose,
   onToggleOptions,
@@ -49,6 +54,7 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   onEmailChange,
   onMessageChange,
   onSubmit,
+  onTypingChange,
 }) => {
   return (
     <>
@@ -67,7 +73,9 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
 
           <div>
             <h3 style={styles.agentName}>{liveChatAgent.name}</h3>
-            <p style={styles.agentStatus}>{liveChatAgent.status}</p>
+            <p style={styles.agentStatus}>
+              {isAdminOnline ? "Online" : liveChatAgent.status}
+            </p>
           </div>
         </div>
 
@@ -124,6 +132,14 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
           </div>
         )}
 
+        {isAdminTyping && (
+          <div style={styles.typingIndicator}>
+            <span style={styles.typingDot} />
+            <span style={styles.typingDot} />
+            <span style={styles.typingDot} />
+          </div>
+        )}
+
         {error && <p style={styles.errorText}>{error}</p>}
       </div>
 
@@ -142,7 +158,10 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
           <input
             style={styles.messageInput}
             value={message}
-            onChange={(event) => onMessageChange(event.target.value)}
+            onChange={(event) => {
+              onMessageChange(event.target.value);
+              onTypingChange(Boolean(event.target.value.trim()));
+            }}
             placeholder="Message..."
             disabled={isSending}
           />
@@ -330,5 +349,25 @@ const styles = {
     justifyContent: "center",
     cursor: "pointer",
     flexShrink: 0,
+  },
+
+  typingIndicator: {
+    width: "fit-content",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+    marginTop: spacing.lg,
+    padding: `${spacing.sm} ${spacing.md}`,
+    borderRadius: "18px 18px 18px 6px",
+    backgroundColor: colors.background.card,
+    border: `1px solid ${colors.border.default}`,
+  },
+
+  typingDot: {
+    width: "5px",
+    height: "5px",
+    borderRadius: "50%",
+    backgroundColor: colors.text.muted,
+    display: "block",
   },
 };

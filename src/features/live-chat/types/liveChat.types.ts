@@ -21,3 +21,18 @@ export type LiveChatConversation = {
   updatedAt: string;
   lastMessageAt: string;
 };
+
+export type LiveChatPresenceRole = "visitor" | "admin";
+
+export type LiveChatPresenceState = {
+  userId: string;
+  role: LiveChatPresenceRole;
+  onlineAt: string;
+};
+
+export type LiveChatTypingPayload = {
+  conversationId: string;
+  userId: string;
+  role: LiveChatPresenceRole;
+  isTyping: boolean;
+};
