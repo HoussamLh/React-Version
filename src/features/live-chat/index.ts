@@ -1,2 +1,9 @@
 export { LiveChatBubble } from "./components";
-export type { ChatView } from "./types/liveChat.types";
+export { useLiveChat } from "./hooks/useLiveChat";
+export type {
+  ChatView,
+  LiveChatConversation,
+  LiveChatConversationStatus,
+  LiveChatMessage,
+  LiveChatMessageSender,
+} from "./types/liveChat.types";
