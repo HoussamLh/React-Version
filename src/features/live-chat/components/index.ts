@@ -1,1 +1,9 @@
 export { LiveChatBubble } from "./LiveChatBubble";
+export { LiveChatHomeView } from "./LiveChatHomeView";
+export { LiveChatMessagesView } from "./LiveChatMessagesView";
+export { LiveChatChatView } from "./LiveChatChatView";
+export { LiveChatNav } from "./LiveChatNav";
+export { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
+export { LiveChatMessageBubble } from "./LiveChatMessageBubble";
+export { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
+export { LiveChatFloatingButton } from "./LiveChatFloatingButton";

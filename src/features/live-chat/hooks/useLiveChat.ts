@@ -103,10 +103,17 @@ export const useLiveChat = (enabled: boolean) => {
   }, [enabled, conversationId]);
 
   const sendMessage = useCallback(
-    async (body: string) => {
+    async (body: string): Promise<boolean> => {
       const trimmedBody = body.trim();
 
-      if (!trimmedBody || !conversationId) return;
+      if (!trimmedBody) {
+        return false;
+      }
+
+      if (!conversationId) {
+        setError("Live chat is still connecting. Please try again.");
+        return false;
+      }
 
       setIsSending(true);
       setError(null);
@@ -120,8 +127,11 @@ export const useLiveChat = (enabled: boolean) => {
         setMessages((currentMessages) =>
           appendUniqueMessage(currentMessages, nextMessage),
         );
+
+        return true;
       } catch {
         setError("Message could not be sent. Please try again.");
+        return false;
       } finally {
         setIsSending(false);
       }
