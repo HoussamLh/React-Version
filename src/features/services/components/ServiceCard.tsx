@@ -1,14 +1,10 @@
 import React from "react";
-import { Card, colors } from "../../../design-system";
+import { ExceptionalCard, colors } from "../../../design-system";
+import type { ExceptionalCardAccent } from "../../../design-system";
 import type { Service } from "../data/services.data";
 
-export type ServiceCardAccent =
-  | "green"
-  | "blue"
-  | "purple"
-  | "pink"
-  | "yellow"
-  | "cyan";
+export type ServiceCardAccent = ExceptionalCardAccent;
+
 type ServiceCardProps = Service & {
   hoverAccent?: ServiceCardAccent;
 };
@@ -42,49 +38,38 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   ];
 
   return (
-    <Card
+    <ExceptionalCard
       interactive
-      hoverAccent={hoverAccent}
-      className="service-card ds-card-stack"
+      accent={hoverAccent}
+      icon={icon}
+      badge={badge}
+      title={title}
+      text={text}
+      className="service-card"
       style={{ gridColumn: span }}
-    >
-      {/* Icon + Badge */}
-      <div style={styles.iconRow}>
-        <div
-          className="ds-card-toolbar"
-          style={{
-            ...styles.iconToolbar,
-            justifyContent: badge ? "space-between" : "flex-start",
-          }}
-        >
-          <div
-            className="ds-icon-box"
-            style={{
-              borderColor: accentColor,
-              color: accentColor,
-            }}
-          >
-            {icon}
-          </div>
+      bodyStyle={styles.body}
+      footer={
+        monitoring ? (
+          <>
+            <div style={styles.avatarGroup}>
+              {avatarStyles.map((avatarStyle, index) => (
+                <div
+                  key={index}
+                  style={{
+                    ...styles.avatar,
+                    ...avatarStyle,
+                  }}
+                />
+              ))}
+            </div>
 
-          {badge && (
-            <span
-              style={{
-                color: accentColor,
-                borderColor: accentColor,
-              }}
-              className="ds-badge mono-text"
-            >
-              {badge}
+            <span style={styles.monitoringText} className="mono-text">
+              24/7 Monitoring Dashboard
             </span>
-          )}
-        </div>
-      </div>
-
-      <h3 className="ds-card-title">{title}</h3>
-
-      <p className="ds-card-text">{text}</p>
-
+          </>
+        ) : undefined
+      }
+    >
       {image && (
         <div className="ds-card-media" style={styles.media}>
           <img
@@ -105,43 +90,15 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
           ))}
         </div>
       )}
-
-      {/* Bottom Monitoring Section */}
-      {monitoring && (
-        <div className="ds-card-footer-row">
-          <div style={styles.avatarGroup}>
-            {avatarStyles.map((avatarStyle, index) => (
-              <div
-                key={index}
-                style={{
-                  ...styles.avatar,
-                  ...avatarStyle,
-                }}
-              />
-            ))}
-          </div>
-
-          <span style={styles.monitoringText} className="mono-text">
-            24/7 Monitoring Dashboard
-          </span>
-        </div>
-      )}
-    </Card>
+    </ExceptionalCard>
   );
 };
 
 const styles = {
-  iconRow: {
-    marginBottom: "10px",
-    width: "100%",
-  },
-
-  iconToolbar: {
-    width: "100%",
+  body: {
     display: "flex",
-    alignItems: "center",
-    gap: "16px",
-    flexWrap: "nowrap" as const,
+    flexDirection: "column" as const,
+    gap: "18px",
   },
 
   media: {
