@@ -3,6 +3,8 @@ import type {
   LiveChatConversation,
   LiveChatMessage,
   LiveChatMessageSender,
+  LiveChatPresenceState,
+  LiveChatTypingPayload,
 } from "../types/liveChat.types";
 
 type MessageRow = {
@@ -208,5 +210,70 @@ export const subscribeToConversationMessages = ({
 
   return () => {
     client.removeChannel(channel);
+  };
+};
+
+export const createLiveChatRealtimeChannel = ({
+  conversationId,
+  visitorId,
+  onTypingChange,
+  onPresenceChange,
+}: {
+  conversationId: string;
+  visitorId: string;
+  onTypingChange: (payload: LiveChatTypingPayload) => void;
+  onPresenceChange: (presence: LiveChatPresenceState[]) => void;
+}) => {
+  const client = requireSupabase();
+
+  const channel = client.channel(`live-chat-room-${conversationId}`, {
+    config: {
+      broadcast: {
+        self: false,
+      },
+      presence: {
+        key: visitorId,
+      },
+    },
+  });
+
+  channel
+    .on("broadcast", { event: "typing" }, ({ payload }) => {
+      onTypingChange(payload as LiveChatTypingPayload);
+    })
+    .on("presence", { event: "sync" }, () => {
+      const state = channel.presenceState<LiveChatPresenceState>();
+
+      const presence = Object.values(state).flat().filter(Boolean);
+
+      onPresenceChange(presence);
+    })
+    .subscribe(async (status) => {
+      if (status !== "SUBSCRIBED") return;
+
+      await channel.track({
+        userId: visitorId,
+        role: "visitor",
+        onlineAt: new Date().toISOString(),
+      });
+    });
+
+  return {
+    sendTypingStatus: async (isTyping: boolean) => {
+      await channel.send({
+        type: "broadcast",
+        event: "typing",
+        payload: {
+          conversationId,
+          userId: visitorId,
+          role: "visitor",
+          isTyping,
+        } satisfies LiveChatTypingPayload,
+      });
+    },
+
+    unsubscribe: () => {
+      client.removeChannel(channel);
+    },
   };
 };

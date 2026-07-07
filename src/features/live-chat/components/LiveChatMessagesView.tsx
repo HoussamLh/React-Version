@@ -11,6 +11,8 @@ type LiveChatMessagesViewProps = {
   latestMessage: LiveChatMessage | null;
   isLoading: boolean;
   error: string | null;
+  isAdminTyping: boolean;
+  isAdminOnline: boolean;
   onClose: () => void;
   onOpenChat: () => void;
   onChangeView: (view: ChatView) => void;
@@ -28,15 +30,19 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
   latestMessage,
   isLoading,
   error,
+  isAdminOnline,
+  isAdminTyping,
   onClose,
   onOpenChat,
   onChangeView,
 }) => {
-  const previewText = latestMessage
-    ? latestMessage.senderType === "visitor"
-      ? `You: ${latestMessage.body}`
-      : latestMessage.body
-    : liveChatAgent.greeting;
+  const previewText = isAdminTyping
+    ? `${liveChatAgent.name} is typing...`
+    : latestMessage
+      ? latestMessage.senderType === "visitor"
+        ? `You: ${latestMessage.body}`
+        : latestMessage.body
+      : liveChatAgent.greeting;
 
   const previewTime = latestMessage
     ? formatTime(latestMessage.createdAt)
@@ -71,7 +77,21 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
 
           <div style={styles.previewContent}>
             <div style={styles.previewTopRow}>
-              <span style={styles.previewName}>{liveChatAgent.name}</span>
+              <div style={styles.agentInfo}>
+                <span style={styles.previewName}>{liveChatAgent.name}</span>
+
+                <span
+                  style={{
+                    ...styles.onlineStatus,
+                    color: isAdminOnline
+                      ? colors.accent.green
+                      : colors.text.muted,
+                  }}
+                >
+                  {isAdminOnline ? "Online" : "Offline"}
+                </span>
+              </div>
+
               <span style={styles.previewTime}>{previewTime}</span>
             </div>
 
@@ -173,10 +193,21 @@ const styles = {
     gap: spacing.md,
   },
 
+  agentInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    minWidth: 0,
+  },
+
   previewName: {
     color: colors.text.main,
     fontSize: "14px",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  onlineStatus: {
+    fontSize: "11px",
   },
 
   previewTime: {

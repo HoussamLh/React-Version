@@ -43,8 +43,17 @@ export const LiveChatBubble: React.FC = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { messages, latestMessage, isLoading, isSending, error, sendMessage } =
-    useLiveChat(isOpen);
+  const {
+    messages,
+    latestMessage,
+    isLoading,
+    isSending,
+    error,
+    isAdminOnline,
+    isAdminTyping,
+    sendMessage,
+    sendTypingStatus,
+  } = useLiveChat(isOpen);
 
   const closeChat = () => {
     setIsOpen(false);
@@ -85,6 +94,7 @@ export const LiveChatBubble: React.FC = () => {
 
     if (sent) {
       setMessage("");
+      sendTypingStatus(false);
     }
   };
 
@@ -139,6 +149,8 @@ export const LiveChatBubble: React.FC = () => {
               latestMessage={latestMessage}
               isLoading={isLoading}
               error={error}
+              isAdminOnline={isAdminOnline}
+              isAdminTyping={isAdminTyping}
               onClose={closeChat}
               onOpenChat={openChatView}
               onChangeView={changeView}
@@ -153,6 +165,8 @@ export const LiveChatBubble: React.FC = () => {
               isLoading={isLoading}
               isSending={isSending}
               error={error}
+              isAdminOnline={isAdminOnline}
+              isAdminTyping={isAdminTyping}
               isOptionsOpen={isOptionsOpen}
               isExpanded={isExpanded}
               onBack={openMessagesView}
@@ -162,6 +176,7 @@ export const LiveChatBubble: React.FC = () => {
               onDownloadTranscript={handleDownloadTranscript}
               onEmailChange={setEmail}
               onMessageChange={setMessage}
+              onTypingChange={sendTypingStatus}
               onSubmit={handleSubmit}
             />
           )}
