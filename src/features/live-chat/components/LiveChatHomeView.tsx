@@ -7,7 +7,7 @@ import {
   spacing,
   typography,
 } from "../../../design-system";
-import { teamAvatars } from "../../../data/teamAvatars.data";
+import { teamAvatars } from "../data/teamAvatars.data";
 import { liveChatBrand } from "../data/liveChat.data";
 import type { ChatView } from "../types/liveChat.types";
 import { LiveChatNav } from "./LiveChatNav";

@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, typography } from "../../../design-system";
-import { teamAvatars } from "../../../data/teamAvatars.data";
+import { teamAvatars } from "../data/teamAvatars.data";
 import { liveChatAgent } from "../data/liveChat.data";
 
 type LiveChatAgentAvatarProps = {
