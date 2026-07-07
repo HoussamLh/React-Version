@@ -1,12 +1,39 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { colors, radius } from "../../../design-system";
+import { useLiveChat } from "../hooks/useLiveChat";
 import { liveChatAgent, liveChatTranscript } from "../data/liveChat.data";
-import type { ChatView } from "../types/liveChat.types";
+import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatChatView } from "./LiveChatChatView";
 import { LiveChatFloatingButton } from "./LiveChatFloatingButton";
 import { LiveChatHomeView } from "./LiveChatHomeView";
 import { LiveChatMessagesView } from "./LiveChatMessagesView";
+
+const getTranscriptSender = (message: LiveChatMessage) => {
+  if (message.senderType === "visitor") return "Visitor";
+  if (message.senderType === "admin") return liveChatAgent.name;
+
+  return "System";
+};
+
+const buildTranscript = (messages: LiveChatMessage[]) => {
+  const storedMessages = messages.length
+    ? messages
+        .map((chatMessage) => {
+          return `${getTranscriptSender(chatMessage)}:\n${chatMessage.body}`;
+        })
+        .join("\n\n")
+    : "No visitor messages sent yet.";
+
+  return `
+${liveChatTranscript.title}
+
+${liveChatAgent.name}:
+${liveChatAgent.greeting}
+
+${storedMessages}
+`;
+};
 
 export const LiveChatBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +42,9 @@ export const LiveChatBubble: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const { messages, latestMessage, isLoading, isSending, error, sendMessage } =
+    useLiveChat(isOpen);
 
   const closeChat = () => {
     setIsOpen(false);
@@ -48,24 +78,18 @@ export const LiveChatBubble: React.FC = () => {
     setIsOptionsOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!message.trim()) return;
+    const sent = await sendMessage(message);
 
-    setMessage("");
+    if (sent) {
+      setMessage("");
+    }
   };
 
   const handleDownloadTranscript = () => {
-    const transcript = `
-${liveChatTranscript.title}
-
-${liveChatAgent.name}:
-${liveChatAgent.greeting}
-
-Visitor:
-${message || "No message sent yet."}
-`;
+    const transcript = buildTranscript(messages);
 
     const blob = new Blob([transcript], {
       type: "text/plain;charset=utf-8",
@@ -112,6 +136,9 @@ ${message || "No message sent yet."}
           {view === "messages" && (
             <LiveChatMessagesView
               activeView={view}
+              latestMessage={latestMessage}
+              isLoading={isLoading}
+              error={error}
               onClose={closeChat}
               onOpenChat={openChatView}
               onChangeView={changeView}
@@ -122,6 +149,10 @@ ${message || "No message sent yet."}
             <LiveChatChatView
               email={email}
               message={message}
+              messages={messages}
+              isLoading={isLoading}
+              isSending={isSending}
+              error={error}
               isOptionsOpen={isOptionsOpen}
               isExpanded={isExpanded}
               onBack={openMessagesView}

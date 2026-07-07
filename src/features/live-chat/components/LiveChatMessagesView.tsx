@@ -2,23 +2,46 @@ import React from "react";
 import { SendHorizontal, X } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { liveChatAgent } from "../data/liveChat.data";
-import type { ChatView } from "../types/liveChat.types";
+import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatNav } from "./LiveChatNav";
 
 type LiveChatMessagesViewProps = {
   activeView: ChatView;
+  latestMessage: LiveChatMessage | null;
+  isLoading: boolean;
+  error: string | null;
   onClose: () => void;
   onOpenChat: () => void;
   onChangeView: (view: ChatView) => void;
 };
 
+const formatTime = (value: string) => {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+};
+
 export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
   activeView,
+  latestMessage,
+  isLoading,
+  error,
   onClose,
   onOpenChat,
   onChangeView,
 }) => {
+  const previewText = latestMessage
+    ? latestMessage.senderType === "visitor"
+      ? `You: ${latestMessage.body}`
+      : latestMessage.body
+    : liveChatAgent.greeting;
+
+  const previewTime = latestMessage
+    ? formatTime(latestMessage.createdAt)
+    : liveChatAgent.previewTime;
+
   return (
     <>
       <div style={styles.lightHeader}>
@@ -35,6 +58,10 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
       </div>
 
       <div style={styles.messagesBody}>
+        {isLoading && <p style={styles.stateText}>Connecting live chat...</p>}
+
+        {error && <p style={styles.errorText}>{error}</p>}
+
         <button
           type="button"
           style={styles.messagePreview}
@@ -45,12 +72,10 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
           <div style={styles.previewContent}>
             <div style={styles.previewTopRow}>
               <span style={styles.previewName}>{liveChatAgent.name}</span>
-              <span style={styles.previewTime}>
-                {liveChatAgent.previewTime}
-              </span>
+              <span style={styles.previewTime}>{previewTime}</span>
             </div>
 
-            <p style={styles.previewText}>{liveChatAgent.greeting}</p>
+            <p style={styles.previewText}>{previewText}</p>
           </div>
         </button>
 
@@ -110,6 +135,19 @@ const styles = {
     flexDirection: "column" as const,
   },
 
+  stateText: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    margin: `0 0 ${spacing.sm} 0`,
+  },
+
+  errorText: {
+    color: colors.accent.yellow,
+    fontSize: "13px",
+    lineHeight: "18px",
+    margin: `0 0 ${spacing.sm} 0`,
+  },
+
   messagePreview: {
     width: "100%",
     border: "none",
@@ -150,6 +188,9 @@ const styles = {
     color: colors.text.muted,
     fontSize: "14px",
     margin: "4px 0 0 0",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
   },
 
   primaryMessageButton: {

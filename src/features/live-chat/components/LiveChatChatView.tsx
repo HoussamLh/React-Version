@@ -8,12 +8,18 @@ import {
 } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { liveChatAgent } from "../data/liveChat.data";
+import type { LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
+import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 
 type LiveChatChatViewProps = {
   email: string;
   message: string;
+  messages: LiveChatMessage[];
+  isLoading: boolean;
+  isSending: boolean;
+  error: string | null;
   isOptionsOpen: boolean;
   isExpanded: boolean;
   onBack: () => void;
@@ -23,12 +29,16 @@ type LiveChatChatViewProps = {
   onDownloadTranscript: () => void;
   onEmailChange: (value: string) => void;
   onMessageChange: (value: string) => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
 };
 
 export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   email,
   message,
+  messages,
+  isLoading,
+  isSending,
+  error,
   isOptionsOpen,
   isExpanded,
   onBack,
@@ -100,6 +110,21 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
         <div style={styles.messageMeta}>
           {liveChatAgent.name} · {liveChatAgent.previewTime}
         </div>
+
+        {isLoading && <p style={styles.stateText}>Connecting live chat...</p>}
+
+        {messages.length > 0 && (
+          <div style={styles.messageList}>
+            {messages.map((chatMessage) => (
+              <LiveChatMessageBubble
+                key={chatMessage.id}
+                message={chatMessage}
+              />
+            ))}
+          </div>
+        )}
+
+        {error && <p style={styles.errorText}>{error}</p>}
       </div>
 
       <form style={styles.composer} onSubmit={onSubmit}>
@@ -119,11 +144,19 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
             value={message}
             onChange={(event) => onMessageChange(event.target.value)}
             placeholder="Message..."
+            disabled={isSending}
           />
 
           <Smile size={18} color={colors.text.muted} />
 
-          <button type="submit" style={styles.roundSendButton}>
+          <button
+            type="submit"
+            style={{
+              ...styles.roundSendButton,
+              opacity: isSending ? 0.55 : 1,
+            }}
+            disabled={isSending}
+          >
             <SendHorizontal size={18} />
           </button>
         </div>
@@ -201,6 +234,7 @@ const styles = {
     flex: 1,
     padding: spacing.lg,
     backgroundColor: colors.background.dark,
+    overflowY: "auto" as const,
   },
 
   agentMessage: {
@@ -219,6 +253,26 @@ const styles = {
     color: colors.text.muted,
     fontSize: "12px",
     marginTop: "6px",
+  },
+
+  messageList: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: spacing.md,
+    marginTop: spacing.lg,
+  },
+
+  stateText: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    margin: `${spacing.lg} 0 0 0`,
+  },
+
+  errorText: {
+    color: colors.accent.yellow,
+    fontSize: "13px",
+    lineHeight: "18px",
+    margin: `${spacing.lg} 0 0 0`,
   },
 
   composer: {
