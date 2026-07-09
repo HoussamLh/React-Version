@@ -8,13 +8,21 @@ import {
   subscribeToAdminConversationMessages,
   updateConversationStatus,
 } from "./adminChat.service";
-import type { AdminConversation, AdminMessage } from "./adminChat.types";
+import type {
+  AdminConversation,
+  AdminConversationStatus,
+  AdminMessage,
+} from "./adminChat.types";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
+
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
   onConversationUpdated: () => void;
 };
+
+const statusOptions: AdminConversationStatus[] = ["open", "pending", "closed"];
+
 const appendUniqueMessage = (
   currentMessages: AdminMessage[],
   nextMessage: AdminMessage,
@@ -22,11 +30,59 @@ const appendUniqueMessage = (
   const exists = currentMessages.some(
     (message) => message.id === nextMessage.id,
   );
+
   if (exists) {
     return currentMessages;
   }
+
   return [...currentMessages, nextMessage];
 };
+
+const formatDate = (value: string) => {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+};
+
+const getVisitorLabel = (conversation: AdminConversation) => {
+  return (
+    conversation.visitorName ??
+    conversation.visitorEmail ??
+    `Visitor ${conversation.visitorId.slice(0, 8)}`
+  );
+};
+
+const getStatusBadgeStyle = (status: AdminConversationStatus) => {
+  if (status === "open") {
+    return {
+      ...styles.badge,
+      color: colors.accent.green,
+      borderColor: "rgba(147, 220, 92, 0.45)",
+      backgroundColor: "rgba(147, 220, 92, 0.1)",
+    };
+  }
+
+  if (status === "pending") {
+    return {
+      ...styles.badge,
+      color: "#93b5ff",
+      borderColor: "rgba(147, 181, 255, 0.45)",
+      backgroundColor: "rgba(147, 181, 255, 0.1)",
+    };
+  }
+
+  return {
+    ...styles.badge,
+    color: colors.text.muted,
+    borderColor: colors.border.default,
+    backgroundColor: "rgba(255,255,255,0.04)",
+  };
+};
+
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   conversation,
   onConversationUpdated,
@@ -35,19 +91,25 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   const [reply, setReply] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
   const [isVisitorOnline, setIsVisitorOnline] = useState(false);
   const [isVisitorTyping, setIsVisitorTyping] = useState(false);
+
   const typingTimeoutRef = useRef<number | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
   const realtimeRef = useRef<{
     sendTypingStatus: (isTyping: boolean) => Promise<void>;
     unsubscribe: () => void;
   } | null>(null);
+
   const conversationId = conversation?.id ?? null;
   const conversationStatus = conversation?.status ?? null;
+
   useEffect(() => {
     let isMounted = true;
+
     void Promise.resolve().then(async () => {
       if (!conversationId) {
         if (isMounted) {
@@ -55,16 +117,22 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           setReply("");
           setError("");
         }
+
         return;
       }
+
       setIsLoading(true);
       setError("");
+
       try {
         const nextMessages = await getAdminConversationMessages(conversationId);
+
         if (!isMounted) return;
+
         setMessages(nextMessages);
       } catch {
         if (!isMounted) return;
+
         setError("Could not load messages.");
       } finally {
         if (isMounted) {
@@ -72,12 +140,15 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         }
       }
     });
+
     return () => {
       isMounted = false;
     };
   }, [conversationId]);
+
   useEffect(() => {
     if (!conversationId) return;
+
     const unsubscribe = subscribeToAdminConversationMessages({
       conversationId,
       onMessage: (nextMessage) => {
@@ -87,68 +158,113 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         onConversationUpdated();
       },
     });
+
     return unsubscribe;
   }, [conversationId, onConversationUpdated]);
+
   useEffect(() => {
     if (!conversationId) return;
+
     let isMounted = true;
+
     void Promise.resolve().then(async () => {
       const adminProfile = await getCurrentAdminProfile();
+
       if (!isMounted || !adminProfile) return;
+
       const realtime = createAdminRealtimeChannel({
         conversationId,
         adminId: adminProfile.id,
         onVisitorTypingChange: setIsVisitorTyping,
         onPresenceChange: setIsVisitorOnline,
       });
+
       realtimeRef.current = realtime;
     });
+
     return () => {
       isMounted = false;
+
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = null;
       }
+
       realtimeRef.current?.unsubscribe();
       realtimeRef.current = null;
       setIsVisitorOnline(false);
       setIsVisitorTyping(false);
     };
   }, [conversationId]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages.length, isVisitorTyping]);
+
   const handleTypingChange = (isTyping: boolean) => {
     if (typingTimeoutRef.current) {
       window.clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
+
     void realtimeRef.current?.sendTypingStatus(isTyping);
+
     if (!isTyping) return;
+
     typingTimeoutRef.current = window.setTimeout(() => {
       void realtimeRef.current?.sendTypingStatus(false);
       typingTimeoutRef.current = null;
     }, 1500);
   };
+
+  const handleStatusChange = async (status: AdminConversationStatus) => {
+    if (!conversationId || conversationStatus === status) return;
+
+    setIsUpdatingStatus(true);
+    setError("");
+
+    try {
+      await updateConversationStatus({
+        conversationId,
+        status,
+      });
+
+      onConversationUpdated();
+    } catch {
+      setError("Could not update conversation status.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     const trimmedReply = reply.trim();
+
     if (!conversationId || !trimmedReply) return;
+
     setIsSending(true);
     setError("");
+
     try {
       await realtimeRef.current?.sendTypingStatus(false);
+
       const nextMessage = await sendAdminMessage({
         conversationId,
         body: trimmedReply,
       });
+
       setMessages((currentMessages) =>
         appendUniqueMessage(currentMessages, nextMessage),
       );
+
       setReply("");
+
       if (conversationStatus !== "open") {
         await updateConversationStatus({ conversationId, status: "open" });
       }
+
       onConversationUpdated();
     } catch {
       setError("Could not send reply.");
@@ -156,69 +272,155 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
       setIsSending(false);
     }
   };
+
   if (!conversation) {
     return (
       <section style={styles.emptyState}>
-        {" "}
-        <h2 style={styles.emptyTitle}>Select a conversation</h2>{" "}
+        <h2 style={styles.emptyTitle}>Select a conversation</h2>
         <p style={styles.emptyText}>
-          {" "}
           Choose a visitor conversation from the inbox to view messages and
-          reply.{" "}
-        </p>{" "}
+          reply.
+        </p>
       </section>
     );
   }
-  const visitorLabel =
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`;
+
+  const visitorLabel = getVisitorLabel(conversation);
+  const hasVisitorEmail = Boolean(conversation.visitorEmail);
+
   return (
     <section style={styles.window}>
-      {" "}
       <header style={styles.header}>
-        {" "}
-        <div>
-          {" "}
-          <h2 style={styles.title}>{visitorLabel}</h2>{" "}
+        <div style={styles.headerMain}>
+          <div style={styles.headerTitleRow}>
+            <h2 style={styles.title}>{visitorLabel}</h2>
+
+            <span style={getStatusBadgeStyle(conversation.status)}>
+              {conversation.status}
+            </span>
+          </div>
+
           <p style={styles.status}>
-            {" "}
-            {isVisitorOnline ? "Visitor online" : "Visitor offline"}{" "}
-            {isVisitorTyping ? " · typing..." : ""}{" "}
-          </p>{" "}
-        </div>{" "}
-        <span style={styles.badge}>{conversation.status}</span>{" "}
-      </header>{" "}
+            {isVisitorOnline ? "Visitor online" : "Visitor offline"}
+            {isVisitorTyping ? " · typing..." : ""}
+          </p>
+
+          <div style={styles.contactMeta}>
+            {hasVisitorEmail && (
+              <a
+                href={`mailto:${conversation.visitorEmail}`}
+                style={styles.contactLink}
+              >
+                {conversation.visitorEmail}
+              </a>
+            )}
+
+            <span style={styles.metaChip}>
+              {conversation.chatMode === "offline"
+                ? "Offline enquiry"
+                : "Live chat"}
+            </span>
+
+            <span style={styles.metaChip}>Source: {conversation.source}</span>
+
+            <span style={styles.metaChip}>
+              Last message: {formatDate(conversation.lastMessageAt)}
+            </span>
+
+            <span style={styles.metaChip}>
+              Visitor ID: {conversation.visitorId.slice(0, 8)}
+            </span>
+          </div>
+        </div>
+
+        <div style={styles.headerActions}>
+          <select
+            value={conversation.status}
+            disabled={isUpdatingStatus}
+            style={styles.statusSelect}
+            onChange={(event) =>
+              handleStatusChange(event.target.value as AdminConversationStatus)
+            }
+          >
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+
+          <div style={styles.quickActions}>
+            {conversation.status !== "open" && (
+              <button
+                type="button"
+                style={styles.primaryAction}
+                disabled={isUpdatingStatus}
+                onClick={() => handleStatusChange("open")}
+              >
+                Open
+              </button>
+            )}
+
+            {conversation.status !== "pending" && (
+              <button
+                type="button"
+                style={styles.secondaryAction}
+                disabled={isUpdatingStatus}
+                onClick={() => handleStatusChange("pending")}
+              >
+                Pending
+              </button>
+            )}
+
+            {conversation.status !== "closed" && (
+              <button
+                type="button"
+                style={styles.secondaryAction}
+                disabled={isUpdatingStatus}
+                onClick={() => handleStatusChange("closed")}
+              >
+                Close
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
       <div style={styles.body}>
-        {" "}
-        {isLoading && <p style={styles.stateText}>Loading messages...</p>}{" "}
+        {isLoading && <p style={styles.stateText}>Loading messages...</p>}
+
+        {!isLoading && messages.length === 0 && (
+          <p style={styles.stateText}>No messages in this conversation yet.</p>
+        )}
+
         {messages.map((message) => (
           <AdminMessageBubble key={message.id} message={message} />
-        ))}{" "}
+        ))}
+
         {isVisitorTyping && (
           <div style={styles.typingIndicator}>
-            {" "}
-            <span
-              className="typing-dot-delay-1"
-              style={styles.typingDot}
-            />{" "}
-            <span className="typing-dot-delay-2" style={styles.typingDot} />{" "}
-            <span style={styles.typingDot} />{" "}
+            <span className="typing-dot-delay-1" style={styles.typingDot} />
+            <span className="typing-dot-delay-2" style={styles.typingDot} />
+            <span style={styles.typingDot} />
           </div>
-        )}{" "}
-        {error && <p style={styles.error}>{error}</p>}{" "}
-        <div ref={bottomRef} />{" "}
-      </div>{" "}
+        )}
+
+        {error && <p style={styles.error}>{error}</p>}
+
+        <div ref={bottomRef} />
+      </div>
+
       <AdminMessageComposer
         value={reply}
         isSending={isSending}
         onChange={setReply}
         onTypingChange={handleTypingChange}
         onSubmit={handleSubmit}
-      />{" "}
+      />
     </section>
   );
 };
+
 const styles = {
   window: {
     flex: 1,
@@ -227,29 +429,122 @@ const styles = {
     flexDirection: "column" as const,
     backgroundColor: colors.background.dark,
   },
+
   header: {
-    height: "72px",
+    minHeight: "112px",
     borderBottom: `1px solid ${colors.border.default}`,
-    padding: `0 ${spacing.lg}`,
+    padding: spacing.lg,
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.lg,
+  },
+
+  headerMain: {
+    minWidth: 0,
+  },
+
+  headerTitleRow: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: spacing.md,
+    flexWrap: "wrap" as const,
   },
+
   title: {
     color: colors.text.main,
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: typography.fontWeight.black,
     margin: 0,
   },
-  status: { color: colors.text.muted, fontSize: "13px", margin: "4px 0 0 0" },
-  badge: {
+
+  status: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    margin: `${spacing.xs} 0 0 0`,
+  },
+
+  contactMeta: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexWrap: "wrap" as const,
+    marginTop: spacing.md,
+  },
+
+  contactLink: {
     color: colors.accent.green,
-    border: `1px solid ${colors.accent.green}`,
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
+    overflowWrap: "anywhere" as const,
+  },
+
+  metaChip: {
+    color: colors.text.muted,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    padding: "5px 9px",
+    fontSize: "11px",
+  },
+
+  badge: {
+    border: "1px solid",
     borderRadius: radius.pill,
     padding: "6px 10px",
     fontSize: "11px",
-    textTransform: "uppercase" as const,
+    textTransform: "capitalize" as const,
   },
+
+  headerActions: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "flex-end",
+    gap: spacing.sm,
+    flexShrink: 0,
+  },
+
+  statusSelect: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: `10px ${spacing.md}`,
+    textTransform: "capitalize" as const,
+    outline: "none",
+  },
+
+  quickActions: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: spacing.sm,
+    flexWrap: "wrap" as const,
+  },
+
+  primaryAction: {
+    border: "none",
+    borderRadius: radius.md,
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
+    padding: "9px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.black,
+    cursor: "pointer",
+  },
+
+  secondaryAction: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: "9px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+  },
+
   body: {
     flex: 1,
     overflowY: "auto" as const,
@@ -258,8 +553,19 @@ const styles = {
     flexDirection: "column" as const,
     gap: spacing.md,
   },
-  stateText: { color: colors.text.muted, fontSize: "14px", margin: 0 },
-  error: { color: colors.accent.yellow, fontSize: "13px", margin: 0 },
+
+  stateText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    margin: 0,
+  },
+
+  error: {
+    color: colors.accent.yellow,
+    fontSize: "13px",
+    margin: 0,
+  },
+
   typingIndicator: {
     width: "fit-content",
     display: "flex",
@@ -270,6 +576,7 @@ const styles = {
     backgroundColor: colors.background.card,
     border: `1px solid ${colors.border.default}`,
   },
+
   typingDot: {
     width: "5px",
     height: "5px",
@@ -278,6 +585,7 @@ const styles = {
     display: "block",
     animation: "liveChatTypingDot 1.4s infinite ease-in-out both",
   },
+
   emptyState: {
     flex: 1,
     borderRadius: radius.lg,
@@ -290,11 +598,13 @@ const styles = {
     padding: spacing.xl,
     textAlign: "center" as const,
   },
+
   emptyTitle: {
     color: colors.text.main,
     fontSize: "24px",
     margin: `0 0 ${spacing.sm} 0`,
   },
+
   emptyText: {
     color: colors.text.muted,
     fontSize: "14px",
