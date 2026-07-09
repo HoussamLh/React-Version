@@ -173,6 +173,7 @@ export const AdminDashboard: React.FC = () => {
           style={{
             ...styles.refreshButton,
             ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
+            ...(isLoading ? styles.disabledAction : {}),
           }}
           onClick={loadDashboard}
           disabled={isLoading}
@@ -182,6 +183,14 @@ export const AdminDashboard: React.FC = () => {
       </header>
 
       {error && <p style={styles.error}>{error}</p>}
+
+      {isLoading && (
+        <p style={styles.loadingText}>
+          {submissions.length === 0 && conversations.length === 0
+            ? "Loading dashboard overview..."
+            : "Refreshing dashboard overview..."}
+        </p>
+      )}
 
       <div
         style={{
@@ -440,6 +449,18 @@ const styles = {
 
   refreshButtonNarrow: {
     width: "100%",
+  },
+
+  loadingText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: 0,
+  },
+
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
   error: {
