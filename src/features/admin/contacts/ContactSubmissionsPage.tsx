@@ -396,9 +396,24 @@ export const ContactSubmissionsPage: React.FC = () => {
           </p>
         )}
 
+        {error && (
+          <div style={styles.errorRecovery}>
+            <p style={styles.errorRecoveryText}>{error}</p>
+
+            <button
+              type="button"
+              style={styles.errorRecoveryButton}
+              onClick={loadSubmissions}
+              disabled={isLoading}
+            >
+              {isLoading ? "Retrying..." : "Retry"}
+            </button>
+          </div>
+        )}
+
         {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
 
-        {!isLoading && filteredSubmissions.length === 0 && (
+        {!isLoading && !error && filteredSubmissions.length === 0 && (
           <div style={styles.listEmptyState}>
             <h3 style={styles.listEmptyTitle}>No submissions found</h3>
             <p style={styles.listEmptyText}>
@@ -702,8 +717,6 @@ export const ContactSubmissionsPage: React.FC = () => {
             </article>
           </>
         )}
-
-        {error && <p style={styles.error}>{error}</p>}
       </main>
     </section>
   );
@@ -1258,9 +1271,34 @@ const styles = {
     margin: 0,
   },
 
-  error: {
+  errorRecovery: {
+    margin: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(255, 210, 122, 0.35)`,
+    backgroundColor: "rgba(255, 210, 122, 0.08)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+
+  errorRecoveryText: {
     color: colors.accent.yellow,
     fontSize: "13px",
-    margin: `${spacing.lg} 0 0 0`,
+    lineHeight: "20px",
+    margin: 0,
+  },
+
+  errorRecoveryButton: {
+    border: `1px solid rgba(255, 210, 122, 0.45)`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.accent.yellow,
+    padding: "7px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
   },
 };

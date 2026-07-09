@@ -208,11 +208,24 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </p>
       )}
 
-      {error && <p style={styles.errorText}>{error}</p>}
+      {error && (
+        <div style={styles.errorRecovery}>
+          <p style={styles.errorRecoveryText}>{error}</p>
+
+          <button
+            type="button"
+            style={styles.errorRecoveryButton}
+            onClick={onRefresh}
+            disabled={isLoading}
+          >
+            {isLoading ? "Retrying..." : "Retry"}
+          </button>
+        </div>
+      )}
 
       {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
 
-      {!isLoading && conversations.length === 0 && (
+      {!isLoading && !error && conversations.length === 0 && (
         <div style={styles.emptyState}>
           <h3 style={styles.emptyTitle}>No conversations found</h3>
           <p style={styles.emptyText}>
@@ -466,13 +479,35 @@ const styles = {
     borderBottom: `1px solid ${colors.border.default}`,
   },
 
-  errorText: {
+  errorRecovery: {
+    margin: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(255, 210, 122, 0.35)`,
+    backgroundColor: "rgba(255, 210, 122, 0.08)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+
+  errorRecoveryText: {
     color: colors.accent.yellow,
     fontSize: "13px",
     lineHeight: "20px",
     margin: 0,
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
+  errorRecoveryButton: {
+    border: `1px solid rgba(255, 210, 122, 0.45)`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.accent.yellow,
+    padding: "7px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
   },
 
   stateText: {
