@@ -1,38 +1,119 @@
-import React from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import React, { useCallback, useEffect, useState } from "react";
+import { colors, radius } from "../../../design-system";
+import {
+  getAdminConversations,
+  markConversationReadForAdmin,
+  subscribeToAllAdminMessages,
+} from "./adminChat.service";
+import type { AdminConversation } from "./adminChat.types";
+import { AdminChatWindow } from "./AdminChatWindow";
+import { ConversationList } from "./ConversationList";
 
 export const AdminChatPage: React.FC = () => {
-  return (
-    <section style={styles.card}>
-      <h2 style={styles.title}>Admin Chat Inbox</h2>
+  const [conversations, setConversations] = useState<AdminConversation[]>([]);
+  const [selectedConversation, setSelectedConversation] =
+    useState<AdminConversation | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-      <p style={styles.text}>
-        This route is protected and ready. In the next step, we will connect it
-        to live conversations, messages, realtime presence, and admin replies.
-      </p>
+  const selectedConversationId = selectedConversation?.id ?? null;
+  const selectedConversationUnreadCount =
+    selectedConversation?.unreadCount ?? 0;
+
+  const loadConversations = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const nextConversations = await getAdminConversations();
+
+      setConversations(nextConversations);
+
+      setSelectedConversation((current) => {
+        if (!current) {
+          return nextConversations[0] ?? null;
+        }
+
+        return (
+          nextConversations.find(
+            (conversation) => conversation.id === current.id,
+          ) ??
+          nextConversations[0] ??
+          null
+        );
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      loadConversations();
+    });
+  }, [loadConversations]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAllAdminMessages({
+      onMessage: () => {
+        void loadConversations();
+      },
+    });
+
+    return unsubscribe;
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (!selectedConversationId || selectedConversationUnreadCount === 0) {
+      return;
+    }
+
+    let isMounted = true;
+
+    void Promise.resolve().then(async () => {
+      try {
+        await markConversationReadForAdmin(selectedConversationId);
+
+        if (!isMounted) return;
+
+        await loadConversations();
+      } catch {
+        // Keep the inbox usable even if read-state update fails.
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    selectedConversationId,
+    selectedConversationUnreadCount,
+    loadConversations,
+  ]);
+
+  return (
+    <section style={styles.shell}>
+      <ConversationList
+        conversations={conversations}
+        selectedConversationId={selectedConversationId}
+        isLoading={isLoading}
+        onSelectConversation={setSelectedConversation}
+      />
+
+      <AdminChatWindow
+        conversation={selectedConversation}
+        onConversationUpdated={loadConversations}
+      />
     </section>
   );
 };
 
 const styles = {
-  card: {
-    padding: spacing.xl,
+  shell: {
+    height: "calc(100vh - 146px)",
+    minHeight: "620px",
     borderRadius: radius.lg,
-    backgroundColor: colors.background.card,
     border: `1px solid ${colors.border.default}`,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "28px",
-    fontWeight: typography.fontWeight.black,
-    margin: `0 0 ${spacing.md} 0`,
-  },
-
-  text: {
-    color: colors.text.muted,
-    fontSize: "15px",
-    lineHeight: "24px",
-    margin: 0,
+    overflow: "hidden",
+    display: "flex",
+    backgroundColor: colors.background.dark,
   },
 };
