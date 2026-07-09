@@ -1,4 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { RootLayout } from "./layouts/rootLayout";
 import { Home } from "./routes/Home";
 import { About } from "./routes/About";
@@ -17,21 +23,82 @@ import {
   ProtectedAdminRoute,
 } from "./features/admin";
 
+const LiveChatVisibility = () => {
+  const location = useLocation();
+
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return null;
+  }
+
+  return <LiveChatBubble />;
+};
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<RootLayout><Home /></RootLayout>}/>
-        <Route path="/about" element={<RootLayout><About /></RootLayout>}/>
-        <Route path="/services" element={<RootLayout><Services /></RootLayout>}/>
-        <Route path="/projects" element={<RootLayout><Projects /></RootLayout>}/>
-        <Route path="/pricing" element={<RootLayout><Pricing /></RootLayout>}/>
-        <Route path="/contact" element={<RootLayout><Contact /></RootLayout>}/>
+        <Route
+          path="/"
+          element={
+            <RootLayout>
+              <Home />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <RootLayout>
+              <About />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <RootLayout>
+              <Services />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <RootLayout>
+              <Projects />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <RootLayout>
+              <Pricing />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <RootLayout>
+              <Contact />
+            </RootLayout>
+          }
+        />
 
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+          }
+        >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="chat" element={<AdminChatPage />} />
@@ -39,7 +106,7 @@ function App() {
         </Route>
       </Routes>
 
-      <LiveChatBubble />
+      <LiveChatVisibility />
     </BrowserRouter>
   );
 }
