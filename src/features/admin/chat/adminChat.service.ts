@@ -1,5 +1,6 @@
 import { supabase } from "../../../lib/supabase";
 import type {
+  AdminConversationChatMode,
   AdminConversation,
   AdminConversationStatus,
   AdminMessage,
@@ -8,6 +9,7 @@ import type {
 type ConversationRow = {
   id: string;
   visitor_id: string;
+  chat_mode: AdminConversationChatMode | null;
   status: AdminConversationStatus;
   source: string;
   created_at: string;
@@ -15,8 +17,21 @@ type ConversationRow = {
   last_message_at: string;
   admin_last_read_at: string | null;
   visitor_profiles:
-    | { display_name: string | null; email: string | null }
-    | { display_name: string | null; email: string | null }[]
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }[]
     | null;
 };
 type MessageRow = {
@@ -55,6 +70,7 @@ const mapConversation = (
     visitorId: row.visitor_id,
     visitorEmail: visitorProfile?.email ?? null,
     visitorName: visitorProfile?.display_name ?? null,
+    chatMode: visitorProfile?.chat_mode ?? null,
     status: row.status,
     source: row.source,
     createdAt: row.created_at,
@@ -77,7 +93,7 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
   const { data: conversations, error } = await client
     .from("conversations")
     .select(
-      ` id, visitor_id, status, source, created_at, updated_at, last_message_at, admin_last_read_at, visitor_profiles ( display_name, email ) `,
+      ` id, visitor_id, status, source, created_at, updated_at, last_message_at, admin_last_read_at, visitor_profiles ( display_name, email, chat_mode ) `,
     )
     .order("last_message_at", { ascending: false })
     .returns<ConversationRow[]>();
