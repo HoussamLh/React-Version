@@ -194,13 +194,17 @@ export const updateConversationStatus = async ({
   status: AdminConversationStatus;
 }) => {
   const client = requireSupabase();
+
   const { error } = await client
     .from("conversations")
     .update({ status })
     .eq("id", conversationId);
+
   if (error) {
     throw error;
   }
+
+  window.dispatchEvent(new Event("admin-badges-changed"));
 };
 
 export const markConversationReadForAdmin = async (conversationId: string) => {

@@ -1,13 +1,44 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import type { AdminConversation } from "./adminChat.types";
+import type {
+  AdminConversation,
+  AdminConversationStatus,
+} from "./adminChat.types";
+
+export type AdminConversationFilter =
+  | "all"
+  | AdminConversationStatus
+  | "unread"
+  | "offline";
 
 type ConversationListProps = {
   conversations: AdminConversation[];
+  totalConversationCount: number;
   selectedConversationId: string | null;
   isLoading: boolean;
+  error: string;
+  searchQuery: string;
+  conversationFilter: AdminConversationFilter;
+  filterCounts: Record<AdminConversationFilter, number>;
+  hasActiveFilters: boolean;
+  onSearchChange: (value: string) => void;
+  onFilterChange: (filter: AdminConversationFilter) => void;
+  onResetFilters: () => void;
+  onRefresh: () => void;
   onSelectConversation: (conversation: AdminConversation) => void;
 };
+
+const filterOptions: {
+  label: string;
+  value: AdminConversationFilter;
+}[] = [
+  { label: "All", value: "all" },
+  { label: "Open", value: "open" },
+  { label: "Pending", value: "pending" },
+  { label: "Closed", value: "closed" },
+  { label: "Unread", value: "unread" },
+  { label: "Offline", value: "offline" },
+];
 
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {
@@ -18,34 +49,143 @@ const formatDate = (value: string) => {
   }).format(new Date(value));
 };
 
+const getVisitorLabel = (conversation: AdminConversation) => {
+  return (
+    conversation.visitorName ??
+    conversation.visitorEmail ??
+    `Visitor ${conversation.visitorId.slice(0, 8)}`
+  );
+};
+
+const getStatusStyle = (status: AdminConversationStatus) => {
+  if (status === "open") {
+    return {
+      ...styles.status,
+      color: colors.accent.green,
+      borderColor: "rgba(147, 220, 92, 0.4)",
+      backgroundColor: "rgba(147, 220, 92, 0.1)",
+    };
+  }
+
+  if (status === "pending") {
+    return {
+      ...styles.status,
+      color: "#93b5ff",
+      borderColor: "rgba(147, 181, 255, 0.4)",
+      backgroundColor: "rgba(147, 181, 255, 0.1)",
+    };
+  }
+
+  return {
+    ...styles.status,
+    color: colors.text.muted,
+    borderColor: colors.border.default,
+    backgroundColor: "rgba(255,255,255,0.04)",
+  };
+};
+
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
+  totalConversationCount,
   selectedConversationId,
   isLoading,
+  error,
+  searchQuery,
+  conversationFilter,
+  filterCounts,
+  hasActiveFilters,
+  onSearchChange,
+  onFilterChange,
+  onResetFilters,
+  onRefresh,
   onSelectConversation,
 }) => {
   return (
     <aside style={styles.panel}>
       <div style={styles.header}>
-        <h2 style={styles.title}>Conversations</h2>
-        <span style={styles.count}>{conversations.length}</span>
+        <div>
+          <h2 style={styles.title}>Conversations</h2>
+          <p style={styles.subtitle}>Live chat inbox</p>
+        </div>
+
+        <div style={styles.headerActions}>
+          <span style={styles.count}>{conversations.length}</span>
+
+          <button
+            type="button"
+            style={styles.refreshButton}
+            onClick={onRefresh}
+            disabled={isLoading}
+          >
+            {isLoading ? "..." : "Refresh"}
+          </button>
+        </div>
       </div>
+
+      <div style={styles.searchArea}>
+        <input
+          type="search"
+          value={searchQuery}
+          placeholder="Search visitor, email, message..."
+          style={styles.searchInput}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            style={styles.resetButton}
+            onClick={onResetFilters}
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div style={styles.filters}>
+        {filterOptions.map((filter) => (
+          <button
+            key={filter.value}
+            type="button"
+            style={{
+              ...styles.filterButton,
+              ...(conversationFilter === filter.value
+                ? styles.filterButtonActive
+                : {}),
+            }}
+            onClick={() => onFilterChange(filter.value)}
+          >
+            {filter.label}
+            <span style={styles.filterCount}>{filterCounts[filter.value]}</span>
+          </button>
+        ))}
+      </div>
+
+      {hasActiveFilters && (
+        <p style={styles.activeFilterText}>
+          Showing {conversations.length} of {totalConversationCount}{" "}
+          conversations.
+        </p>
+      )}
+
+      {error && <p style={styles.errorText}>{error}</p>}
 
       {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
 
       {!isLoading && conversations.length === 0 && (
-        <p style={styles.stateText}>No conversations yet.</p>
+        <div style={styles.emptyState}>
+          <h3 style={styles.emptyTitle}>No conversations found</h3>
+          <p style={styles.emptyText}>
+            Try another filter, reset search, or wait for new visitor messages.
+          </p>
+        </div>
       )}
 
       <div style={styles.list}>
         {conversations.map((conversation) => {
           const isActive = conversation.id === selectedConversationId;
           const hasUnread = conversation.unreadCount > 0;
-
-          const visitorLabel =
-            conversation.visitorName ??
-            conversation.visitorEmail ??
-            `Visitor ${conversation.visitorId.slice(0, 8)}`;
+          const visitorLabel = getVisitorLabel(conversation);
 
           return (
             <button
@@ -71,7 +211,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 <div style={styles.itemMeta}>
                   {hasUnread && (
                     <span style={styles.unreadBadge}>
-                      {conversation.unreadCount}
+                      {conversation.unreadCount > 99
+                        ? "99+"
+                        : conversation.unreadCount}
                     </span>
                   )}
 
@@ -90,7 +232,17 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                 {conversation.lastMessageBody ?? "New conversation"}
               </p>
 
-              <span style={styles.status}>{conversation.status}</span>
+              <div style={styles.itemFooter}>
+                <span style={getStatusStyle(conversation.status)}>
+                  {conversation.status}
+                </span>
+
+                <span style={styles.modeBadge}>
+                  {conversation.chatMode === "offline"
+                    ? "Offline"
+                    : "Live chat"}
+                </span>
+              </div>
             </button>
           );
         })}
@@ -101,8 +253,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
 const styles = {
   panel: {
-    width: "340px",
-    minWidth: "300px",
+    width: "380px",
+    minWidth: "320px",
     borderRight: `1px solid ${colors.border.default}`,
     backgroundColor: colors.background.card,
     display: "flex",
@@ -110,12 +262,13 @@ const styles = {
   },
 
   header: {
-    height: "72px",
-    padding: `0 ${spacing.lg}`,
+    minHeight: "72px",
+    padding: spacing.lg,
     borderBottom: `1px solid ${colors.border.default}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: spacing.md,
   },
 
   title: {
@@ -123,6 +276,20 @@ const styles = {
     fontSize: "18px",
     fontWeight: typography.fontWeight.black,
     margin: 0,
+  },
+
+  subtitle: {
+    color: colors.text.muted,
+    fontSize: "12px",
+    lineHeight: "18px",
+    margin: "4px 0 0 0",
+  },
+
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexShrink: 0,
   },
 
   count: {
@@ -134,12 +301,126 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
   },
 
+  refreshButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.text.muted,
+    padding: "6px 10px",
+    fontSize: "11px",
+    cursor: "pointer",
+  },
+
+  searchArea: {
+    padding: spacing.md,
+    borderBottom: `1px solid ${colors.border.default}`,
+    display: "flex",
+    gap: spacing.sm,
+  },
+
+  searchInput: {
+    width: "100%",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.dark,
+    color: colors.text.main,
+    padding: "11px 12px",
+    fontSize: "13px",
+    outline: "none",
+  },
+
+  resetButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: "0 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
+  },
+
+  filters: {
+    padding: spacing.md,
+    borderBottom: `1px solid ${colors.border.default}`,
+    display: "flex",
+    gap: spacing.sm,
+    flexWrap: "wrap" as const,
+  },
+
+  filterButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.text.muted,
+    padding: "7px 12px",
+    fontSize: "12px",
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+
+  filterButtonActive: {
+    backgroundColor: "rgba(147, 220, 92, 0.12)",
+    borderColor: colors.accent.green,
+    color: colors.accent.green,
+  },
+
+  filterCount: {
+    minWidth: "18px",
+    height: "18px",
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "10px",
+  },
+
+  activeFilterText: {
+    color: colors.text.muted,
+    fontSize: "12px",
+    lineHeight: "18px",
+    margin: 0,
+    padding: `${spacing.sm} ${spacing.md}`,
+    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
+  errorText: {
+    color: colors.accent.yellow,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: 0,
+    padding: spacing.md,
+    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
   stateText: {
     color: colors.text.muted,
     fontSize: "14px",
     lineHeight: "22px",
     margin: 0,
     padding: spacing.lg,
+  },
+
+  emptyState: {
+    padding: spacing.xl,
+    textAlign: "center" as const,
+  },
+
+  emptyTitle: {
+    color: colors.text.main,
+    fontSize: "16px",
+    margin: `0 0 ${spacing.sm} 0`,
+  },
+
+  emptyText: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: 0,
   },
 
   list: {
@@ -227,10 +508,27 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
   },
 
+  itemFooter: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexWrap: "wrap" as const,
+  },
+
   status: {
-    color: colors.accent.green,
+    border: "1px solid",
+    borderRadius: radius.pill,
+    padding: "5px 9px",
     fontSize: "11px",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.08em",
+    textTransform: "capitalize" as const,
+  },
+
+  modeBadge: {
+    color: colors.text.muted,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    padding: "5px 9px",
+    fontSize: "11px",
   },
 };
