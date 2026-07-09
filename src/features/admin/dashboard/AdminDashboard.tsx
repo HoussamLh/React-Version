@@ -250,8 +250,18 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div style={styles.list}>
-            {recentSubmissions.length === 0 && (
-              <p style={styles.emptyText}>No contact submissions yet.</p>
+            {!isLoading && recentSubmissions.length === 0 && (
+              <div style={styles.listEmptyState}>
+                <h4 style={styles.listEmptyTitle}>
+                  No contact submissions yet
+                </h4>
+                <p style={styles.listEmptyText}>
+                  New website contact form enquiries will appear here.
+                </p>
+                <Link to="/admin/contacts" style={styles.listEmptyLink}>
+                  Open contacts
+                </Link>
+              </div>
             )}
 
             {recentSubmissions.map((submission) => (
@@ -298,8 +308,19 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div style={styles.list}>
-            {recentConversations.length === 0 && (
-              <p style={styles.emptyText}>No live chat conversations yet.</p>
+            {!isLoading && recentConversations.length === 0 && (
+              <div style={styles.listEmptyState}>
+                <h4 style={styles.listEmptyTitle}>
+                  No live chat conversations yet
+                </h4>
+                <p style={styles.listEmptyText}>
+                  New visitor conversations will appear here after someone
+                  starts a chat.
+                </p>
+                <Link to="/admin/chat" style={styles.listEmptyLink}>
+                  Open chat inbox
+                </Link>
+              </div>
             )}
 
             {recentConversations.map((conversation) => (
@@ -646,6 +667,32 @@ const styles = {
     lineHeight: "22px",
     margin: 0,
     padding: spacing.lg,
+  },
+
+  listEmptyState: {
+    padding: spacing.xl,
+    textAlign: "center" as const,
+  },
+
+  listEmptyTitle: {
+    color: colors.text.main,
+    fontSize: "16px",
+    fontWeight: typography.fontWeight.black,
+    margin: `0 0 ${spacing.sm} 0`,
+  },
+
+  listEmptyText: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: `0 0 ${spacing.md} 0`,
+  },
+
+  listEmptyLink: {
+    color: colors.accent.green,
+    fontSize: "13px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
   },
 
   quickActions: {
