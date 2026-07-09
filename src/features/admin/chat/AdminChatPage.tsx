@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { colors, radius } from "../../../design-system";
 import {
   getAdminConversations,
@@ -11,6 +17,38 @@ import {
   ConversationList,
   type AdminConversationFilter,
 } from "./ConversationList";
+
+const subscribeToCompactChat = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 1250px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getCompactChatSnapshot = () => {
+  return window.matchMedia("(max-width: 1250px)").matches;
+};
+
+const getServerCompactChatSnapshot = () => false;
+
+const subscribeToNarrowChat = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 640px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getNarrowChatSnapshot = () => {
+  return window.matchMedia("(max-width: 640px)").matches;
+};
+
+const getServerNarrowChatSnapshot = () => false;
 
 const getSearchableConversationText = (conversation: AdminConversation) => {
   return [
@@ -28,6 +66,18 @@ const getSearchableConversationText = (conversation: AdminConversation) => {
 };
 
 export const AdminChatPage: React.FC = () => {
+  const isCompactChat = useSyncExternalStore(
+    subscribeToCompactChat,
+    getCompactChatSnapshot,
+    getServerCompactChatSnapshot,
+  );
+
+  const isNarrowChat = useSyncExternalStore(
+    subscribeToNarrowChat,
+    getNarrowChatSnapshot,
+    getServerNarrowChatSnapshot,
+  );
+
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<AdminConversation | null>(null);
@@ -169,7 +219,12 @@ export const AdminChatPage: React.FC = () => {
   ]);
 
   return (
-    <section style={styles.shell}>
+    <section
+      style={{
+        ...styles.shell,
+        ...(isCompactChat ? styles.shellCompact : {}),
+      }}
+    >
       <ConversationList
         conversations={filteredConversations}
         totalConversationCount={conversations.length}
@@ -180,6 +235,8 @@ export const AdminChatPage: React.FC = () => {
         conversationFilter={conversationFilter}
         filterCounts={filterCounts}
         hasActiveFilters={hasActiveFilters}
+        isCompactChat={isCompactChat}
+        isNarrowChat={isNarrowChat}
         onSearchChange={setSearchQuery}
         onFilterChange={setConversationFilter}
         onResetFilters={handleResetFilters}
@@ -189,6 +246,8 @@ export const AdminChatPage: React.FC = () => {
 
       <AdminChatWindow
         conversation={selectedConversation}
+        isCompactChat={isCompactChat}
+        isNarrowChat={isNarrowChat}
         onConversationUpdated={loadConversations}
       />
     </section>
@@ -204,5 +263,12 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     backgroundColor: colors.background.dark,
+  },
+
+  shellCompact: {
+    height: "auto",
+    minHeight: "auto",
+    flexDirection: "column" as const,
+    overflow: "visible",
   },
 };

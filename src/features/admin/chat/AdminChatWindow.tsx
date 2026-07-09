@@ -18,6 +18,8 @@ import { AdminMessageComposer } from "./AdminMessageComposer";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
+  isCompactChat: boolean;
+  isNarrowChat: boolean;
   onConversationUpdated: () => void;
 };
 
@@ -85,6 +87,8 @@ const getStatusBadgeStyle = (status: AdminConversationStatus) => {
 
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   conversation,
+  isCompactChat,
+  isNarrowChat,
   onConversationUpdated,
 }) => {
   const [messages, setMessages] = useState<AdminMessage[]>([]);
@@ -275,7 +279,12 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
 
   if (!conversation) {
     return (
-      <section style={styles.emptyState}>
+      <section
+        style={{
+          ...styles.emptyState,
+          ...(isCompactChat ? styles.emptyStateCompact : {}),
+        }}
+      >
         <h2 style={styles.emptyTitle}>Select a conversation</h2>
         <p style={styles.emptyText}>
           Choose a visitor conversation from the inbox to view messages and
@@ -289,8 +298,18 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   const hasVisitorEmail = Boolean(conversation.visitorEmail);
 
   return (
-    <section style={styles.window}>
-      <header style={styles.header}>
+    <section
+      style={{
+        ...styles.window,
+        ...(isCompactChat ? styles.windowCompact : {}),
+      }}
+    >
+      <header
+        style={{
+          ...styles.header,
+          ...(isCompactChat ? styles.headerCompact : {}),
+        }}
+      >
         <div style={styles.headerMain}>
           <div style={styles.headerTitleRow}>
             <h2 style={styles.title}>{visitorLabel}</h2>
@@ -333,11 +352,19 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           </div>
         </div>
 
-        <div style={styles.headerActions}>
+        <div
+          style={{
+            ...styles.headerActions,
+            ...(isCompactChat ? styles.headerActionsCompact : {}),
+          }}
+        >
           <select
             value={conversation.status}
             disabled={isUpdatingStatus}
-            style={styles.statusSelect}
+            style={{
+              ...styles.statusSelect,
+              ...(isNarrowChat ? styles.statusSelectNarrow : {}),
+            }}
             onChange={(event) =>
               handleStatusChange(event.target.value as AdminConversationStatus)
             }
@@ -349,11 +376,20 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             ))}
           </select>
 
-          <div style={styles.quickActions}>
+          <div
+            style={{
+              ...styles.quickActions,
+              ...(isCompactChat ? styles.quickActionsCompact : {}),
+              ...(isNarrowChat ? styles.quickActionsNarrow : {}),
+            }}
+          >
             {conversation.status !== "open" && (
               <button
                 type="button"
-                style={styles.primaryAction}
+                style={{
+                  ...styles.primaryAction,
+                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("open")}
               >
@@ -364,7 +400,10 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             {conversation.status !== "pending" && (
               <button
                 type="button"
-                style={styles.secondaryAction}
+                style={{
+                  ...styles.secondaryAction,
+                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("pending")}
               >
@@ -375,7 +414,10 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             {conversation.status !== "closed" && (
               <button
                 type="button"
-                style={styles.secondaryAction}
+                style={{
+                  ...styles.secondaryAction,
+                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("closed")}
               >
@@ -386,7 +428,12 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         </div>
       </header>
 
-      <div style={styles.body}>
+      <div
+        style={{
+          ...styles.body,
+          ...(isCompactChat ? styles.bodyCompact : {}),
+        }}
+      >
         {isLoading && <p style={styles.stateText}>Loading messages...</p>}
 
         {!isLoading && messages.length === 0 && (
@@ -611,5 +658,45 @@ const styles = {
     lineHeight: "22px",
     margin: 0,
     maxWidth: "360px",
+  },
+
+  windowCompact: {
+    minHeight: "620px",
+  },
+
+  headerCompact: {
+    minHeight: "auto",
+    flexDirection: "column" as const,
+  },
+
+  headerActionsCompact: {
+    width: "100%",
+    alignItems: "flex-start",
+  },
+
+  statusSelectNarrow: {
+    width: "100%",
+  },
+
+  quickActionsCompact: {
+    justifyContent: "flex-start",
+  },
+
+  quickActionsNarrow: {
+    width: "100%",
+    flexDirection: "column" as const,
+    alignItems: "stretch",
+  },
+
+  actionButtonNarrow: {
+    width: "100%",
+  },
+
+  bodyCompact: {
+    minHeight: "420px",
+  },
+
+  emptyStateCompact: {
+    minHeight: "420px",
   },
 };
