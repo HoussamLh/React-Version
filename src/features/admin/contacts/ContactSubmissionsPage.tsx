@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getContactSubmissions,
@@ -23,6 +29,38 @@ const filterOptions: {
   { label: "Contacted", value: "contacted" },
   { label: "Closed", value: "closed" },
 ];
+
+const subscribeToCompactContacts = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 1250px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getCompactContactsSnapshot = () => {
+  return window.matchMedia("(max-width: 1250px)").matches;
+};
+
+const getServerCompactContactsSnapshot = () => false;
+
+const subscribeToNarrowContacts = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 640px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getNarrowContactsSnapshot = () => {
+  return window.matchMedia("(max-width: 640px)").matches;
+};
+
+const getServerNarrowContactsSnapshot = () => false;
 
 const statusMeta: Record<
   ContactSubmissionStatus,
@@ -100,6 +138,18 @@ const getSearchableText = (submission: ContactSubmission) => {
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
+  const isCompactContacts = useSyncExternalStore(
+    subscribeToCompactContacts,
+    getCompactContactsSnapshot,
+    getServerCompactContactsSnapshot,
+  );
+
+  const isNarrowContacts = useSyncExternalStore(
+    subscribeToNarrowContacts,
+    getNarrowContactsSnapshot,
+    getServerNarrowContactsSnapshot,
+  );
+
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
     useState<ContactSubmission | null>(null);
@@ -240,9 +290,24 @@ export const ContactSubmissionsPage: React.FC = () => {
   };
 
   return (
-    <section style={styles.shell}>
-      <aside style={styles.listPanel}>
-        <div style={styles.listHeader}>
+    <section
+      style={{
+        ...styles.shell,
+        ...(isCompactContacts ? styles.shellCompact : {}),
+      }}
+    >
+      <aside
+        style={{
+          ...styles.listPanel,
+          ...(isCompactContacts ? styles.listPanelCompact : {}),
+        }}
+      >
+        <div
+          style={{
+            ...styles.listHeader,
+            ...(isNarrowContacts ? styles.listHeaderNarrow : {}),
+          }}
+        >
           <div>
             <h2 style={styles.title}>Contact Submissions</h2>
             <p style={styles.subtitle}>
@@ -253,7 +318,12 @@ export const ContactSubmissionsPage: React.FC = () => {
           <span style={styles.count}>{filteredSubmissions.length}</span>
         </div>
 
-        <div style={styles.searchArea}>
+        <div
+          style={{
+            ...styles.searchArea,
+            ...(isNarrowContacts ? styles.searchAreaNarrow : {}),
+          }}
+        >
           <input
             type="search"
             value={searchQuery}
@@ -265,7 +335,10 @@ export const ContactSubmissionsPage: React.FC = () => {
           {hasActiveFilters && (
             <button
               type="button"
-              style={styles.resetButton}
+              style={{
+                ...styles.resetButton,
+                ...(isNarrowContacts ? styles.resetButtonNarrow : {}),
+              }}
               onClick={handleResetFilters}
             >
               Reset
@@ -312,7 +385,12 @@ export const ContactSubmissionsPage: React.FC = () => {
           </div>
         )}
 
-        <div style={styles.list}>
+        <div
+          style={{
+            ...styles.list,
+            ...(isCompactContacts ? styles.listCompact : {}),
+          }}
+        >
           {filteredSubmissions.map((submission) => {
             const isActive = submission.id === selectedSubmission?.id;
 
@@ -347,7 +425,13 @@ export const ContactSubmissionsPage: React.FC = () => {
         </div>
       </aside>
 
-      <main style={styles.detailPanel}>
+      <main
+        style={{
+          ...styles.detailPanel,
+          ...(isCompactContacts ? styles.detailPanelCompact : {}),
+          ...(isNarrowContacts ? styles.detailPanelNarrow : {}),
+        }}
+      >
         {!selectedSubmission && (
           <div style={styles.emptyState}>
             <h3 style={styles.emptyTitle}>Select a submission</h3>
@@ -359,13 +443,25 @@ export const ContactSubmissionsPage: React.FC = () => {
 
         {selectedSubmission && (
           <>
-            <header style={styles.detailHeader}>
+            <header
+              style={{
+                ...styles.detailHeader,
+                ...(isCompactContacts ? styles.detailHeaderCompact : {}),
+              }}
+            >
               <div style={styles.detailHeaderContent}>
                 <span style={getStatusBadgeStyle(selectedSubmission.status)}>
                   {statusMeta[selectedSubmission.status].label}
                 </span>
 
-                <h3 style={styles.detailTitle}>{selectedSubmission.name}</h3>
+                <h3
+                  style={{
+                    ...styles.detailTitle,
+                    ...(isNarrowContacts ? styles.detailTitleNarrow : {}),
+                  }}
+                >
+                  {selectedSubmission.name}
+                </h3>
 
                 <p style={styles.detailMeta}>
                   Submitted {formatDate(selectedSubmission.createdAt)}
@@ -376,11 +472,19 @@ export const ContactSubmissionsPage: React.FC = () => {
                 </p>
               </div>
 
-              <div style={styles.statusControls}>
+              <div
+                style={{
+                  ...styles.statusControls,
+                  ...(isCompactContacts ? styles.statusControlsCompact : {}),
+                }}
+              >
                 <select
                   value={selectedSubmission.status}
                   disabled={isUpdatingStatus}
-                  style={styles.statusSelect}
+                  style={{
+                    ...styles.statusSelect,
+                    ...(isNarrowContacts ? styles.statusSelectNarrow : {}),
+                  }}
                   onChange={(event) =>
                     handleStatusChange(
                       selectedSubmission.id,
@@ -395,11 +499,26 @@ export const ContactSubmissionsPage: React.FC = () => {
                   ))}
                 </select>
 
-                <div style={styles.quickStatusActions}>
+                <div
+                  style={{
+                    ...styles.quickStatusActions,
+                    ...(isCompactContacts
+                      ? styles.quickStatusActionsCompact
+                      : {}),
+                    ...(isNarrowContacts
+                      ? styles.quickStatusActionsNarrow
+                      : {}),
+                  }}
+                >
                   {selectedSubmission.status !== "contacted" && (
                     <button
                       type="button"
-                      style={styles.quickStatusButton}
+                      style={{
+                        ...styles.quickStatusButton,
+                        ...(isNarrowContacts
+                          ? styles.quickStatusButtonNarrow
+                          : {}),
+                      }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "contacted")
@@ -412,7 +531,12 @@ export const ContactSubmissionsPage: React.FC = () => {
                   {selectedSubmission.status !== "closed" && (
                     <button
                       type="button"
-                      style={styles.quickStatusButtonSecondary}
+                      style={{
+                        ...styles.quickStatusButtonSecondary,
+                        ...(isNarrowContacts
+                          ? styles.quickStatusButtonNarrow
+                          : {}),
+                      }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "closed")
@@ -425,7 +549,12 @@ export const ContactSubmissionsPage: React.FC = () => {
                   {selectedSubmission.status !== "new" && (
                     <button
                       type="button"
-                      style={styles.quickStatusButtonSecondary}
+                      style={{
+                        ...styles.quickStatusButtonSecondary,
+                        ...(isNarrowContacts
+                          ? styles.quickStatusButtonNarrow
+                          : {}),
+                      }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "new")
@@ -438,7 +567,13 @@ export const ContactSubmissionsPage: React.FC = () => {
               </div>
             </header>
 
-            <div style={styles.infoGrid}>
+            <div
+              style={{
+                ...styles.infoGrid,
+                ...(isCompactContacts ? styles.infoGridCompact : {}),
+                ...(isNarrowContacts ? styles.infoGridNarrow : {}),
+              }}
+            >
               <div style={styles.infoCard}>
                 <div style={styles.infoCardHeader}>
                   <span style={styles.infoLabel}>Email</span>
@@ -525,7 +660,12 @@ export const ContactSubmissionsPage: React.FC = () => {
             </div>
 
             <article style={styles.messageCard}>
-              <div style={styles.messageHeader}>
+              <div
+                style={{
+                  ...styles.messageHeader,
+                  ...(isNarrowContacts ? styles.messageHeaderNarrow : {}),
+                }}
+              >
                 <span style={styles.infoLabel}>Message</span>
                 <span style={styles.messageDate}>
                   {formatDate(selectedSubmission.createdAt)}
@@ -554,6 +694,13 @@ const styles = {
     backgroundColor: colors.background.dark,
   },
 
+  shellCompact: {
+    height: "auto",
+    minHeight: "auto",
+    flexDirection: "column" as const,
+    overflow: "visible",
+  },
+
   listPanel: {
     width: "380px",
     minWidth: "320px",
@@ -563,12 +710,23 @@ const styles = {
     flexDirection: "column" as const,
   },
 
+  listPanelCompact: {
+    width: "100%",
+    minWidth: 0,
+    borderRight: "none",
+    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
   listHeader: {
     padding: spacing.lg,
     borderBottom: `1px solid ${colors.border.default}`,
     display: "flex",
     justifyContent: "space-between",
     gap: spacing.md,
+  },
+
+  listHeaderNarrow: {
+    alignItems: "flex-start",
   },
 
   title: {
@@ -606,6 +764,10 @@ const styles = {
     gap: spacing.sm,
   },
 
+  searchAreaNarrow: {
+    flexDirection: "column" as const,
+  },
+
   searchInput: {
     width: "100%",
     border: `1px solid ${colors.border.default}`,
@@ -615,6 +777,7 @@ const styles = {
     padding: "11px 12px",
     fontSize: "13px",
     outline: "none",
+    boxSizing: "border-box" as const,
   },
 
   resetButton: {
@@ -627,6 +790,10 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
     flexShrink: 0,
+  },
+
+  resetButtonNarrow: {
+    padding: "11px 12px",
   },
 
   filters: {
@@ -703,7 +870,14 @@ const styles = {
   },
 
   list: {
+    flex: 1,
+    minHeight: 0,
     overflowY: "auto" as const,
+  },
+
+  listCompact: {
+    flex: "none",
+    maxHeight: "420px",
   },
 
   submissionItem: {
@@ -735,6 +909,7 @@ const styles = {
     overflow: "hidden",
     whiteSpace: "nowrap" as const,
     textOverflow: "ellipsis",
+    minWidth: 0,
   },
 
   date: {
@@ -787,12 +962,24 @@ const styles = {
     backgroundColor: colors.background.dark,
   },
 
+  detailPanelCompact: {
+    overflowY: "visible" as const,
+  },
+
+  detailPanelNarrow: {
+    padding: spacing.lg,
+  },
+
   detailHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
     gap: spacing.lg,
     marginBottom: spacing.xl,
+  },
+
+  detailHeaderCompact: {
+    flexDirection: "column" as const,
   },
 
   detailHeaderContent: {
@@ -804,6 +991,11 @@ const styles = {
     fontSize: "28px",
     fontWeight: typography.fontWeight.black,
     margin: `${spacing.md} 0 0 0`,
+    overflowWrap: "anywhere" as const,
+  },
+
+  detailTitleNarrow: {
+    fontSize: "24px",
   },
 
   detailMeta: {
@@ -827,6 +1019,11 @@ const styles = {
     flexShrink: 0,
   },
 
+  statusControlsCompact: {
+    width: "100%",
+    alignItems: "flex-start",
+  },
+
   statusSelect: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -837,12 +1034,26 @@ const styles = {
     outline: "none",
   },
 
+  statusSelectNarrow: {
+    width: "100%",
+  },
+
   quickStatusActions: {
     display: "flex",
     alignItems: "center",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
     justifyContent: "flex-end",
+  },
+
+  quickStatusActionsCompact: {
+    justifyContent: "flex-start",
+  },
+
+  quickStatusActionsNarrow: {
+    width: "100%",
+    flexDirection: "column" as const,
+    alignItems: "stretch",
   },
 
   quickStatusButton: {
@@ -867,11 +1078,23 @@ const styles = {
     cursor: "pointer",
   },
 
+  quickStatusButtonNarrow: {
+    width: "100%",
+  },
+
   infoGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     gap: spacing.md,
     marginBottom: spacing.xl,
+  },
+
+  infoGridCompact: {
+    gridTemplateColumns: "1fr",
+  },
+
+  infoGridNarrow: {
+    gridTemplateColumns: "1fr",
   },
 
   infoCard: {
@@ -944,6 +1167,11 @@ const styles = {
     marginBottom: spacing.md,
   },
 
+  messageHeaderNarrow: {
+    flexDirection: "column" as const,
+    gap: spacing.xs,
+  },
+
   messageDate: {
     color: colors.text.muted,
     fontSize: "11px",
@@ -961,6 +1189,7 @@ const styles = {
 
   emptyState: {
     height: "100%",
+    minHeight: "320px",
     display: "flex",
     flexDirection: "column" as const,
     justifyContent: "center",

@@ -1,10 +1,48 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
+
+const subscribeToCompactDashboard = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 900px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getCompactDashboardSnapshot = () => {
+  return window.matchMedia("(max-width: 900px)").matches;
+};
+
+const getServerCompactDashboardSnapshot = () => false;
+
+const subscribeToNarrowDashboard = (callback: () => void) => {
+  const mediaQuery = window.matchMedia("(max-width: 640px)");
+
+  mediaQuery.addEventListener("change", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+  };
+};
+
+const getNarrowDashboardSnapshot = () => {
+  return window.matchMedia("(max-width: 640px)").matches;
+};
+
+const getServerNarrowDashboardSnapshot = () => false;
 
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {
@@ -24,6 +62,18 @@ const getVisitorLabel = (conversation: AdminConversation) => {
 };
 
 export const AdminDashboard: React.FC = () => {
+  const isCompactDashboard = useSyncExternalStore(
+    subscribeToCompactDashboard,
+    getCompactDashboardSnapshot,
+    getServerCompactDashboardSnapshot,
+  );
+
+  const isNarrowDashboard = useSyncExternalStore(
+    subscribeToNarrowDashboard,
+    getNarrowDashboardSnapshot,
+    getServerNarrowDashboardSnapshot,
+  );
+
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +99,16 @@ export const AdminDashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    void loadDashboard();
+    let isMounted = true;
+
+    window.setTimeout(() => {
+      if (!isMounted) return;
+      void loadDashboard();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadDashboard]);
 
   const stats = useMemo(() => {
@@ -87,10 +146,22 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <section style={styles.page}>
-      <header style={styles.header}>
-        <div>
+      <header
+        style={{
+          ...styles.header,
+          ...(isCompactDashboard ? styles.headerCompact : {}),
+        }}
+      >
+        <div style={styles.headerContent}>
           <p style={styles.eyebrow}>Admin overview</p>
-          <h2 style={styles.title}>Dashboard</h2>
+          <h2
+            style={{
+              ...styles.title,
+              ...(isNarrowDashboard ? styles.titleNarrow : {}),
+            }}
+          >
+            Dashboard
+          </h2>
           <p style={styles.subtitle}>
             Monitor contact enquiries, live chat conversations, and follow-up
             activity from one place.
@@ -99,7 +170,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           type="button"
-          style={styles.refreshButton}
+          style={{
+            ...styles.refreshButton,
+            ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
+          }}
           onClick={loadDashboard}
           disabled={isLoading}
         >
@@ -109,7 +183,13 @@ export const AdminDashboard: React.FC = () => {
 
       {error && <p style={styles.error}>{error}</p>}
 
-      <div style={styles.statsGrid}>
+      <div
+        style={{
+          ...styles.statsGrid,
+          ...(isCompactDashboard ? styles.statsGridCompact : {}),
+          ...(isNarrowDashboard ? styles.statsGridNarrow : {}),
+        }}
+      >
         <div style={styles.statCard}>
           <p style={styles.statLabel}>Contact submissions</p>
           <h3 style={styles.statValue}>{stats.totalSubmissions}</h3>
@@ -135,9 +215,19 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div style={styles.contentGrid}>
+      <div
+        style={{
+          ...styles.contentGrid,
+          ...(isCompactDashboard ? styles.contentGridCompact : {}),
+        }}
+      >
         <section style={styles.panel}>
-          <div style={styles.panelHeader}>
+          <div
+            style={{
+              ...styles.panelHeader,
+              ...(isNarrowDashboard ? styles.panelHeaderNarrow : {}),
+            }}
+          >
             <div>
               <h3 style={styles.panelTitle}>Recent contact enquiries</h3>
               <p style={styles.panelSubtitle}>
@@ -180,7 +270,12 @@ export const AdminDashboard: React.FC = () => {
         </section>
 
         <section style={styles.panel}>
-          <div style={styles.panelHeader}>
+          <div
+            style={{
+              ...styles.panelHeader,
+              ...(isNarrowDashboard ? styles.panelHeaderNarrow : {}),
+            }}
+          >
             <div>
               <h3 style={styles.panelTitle}>Recent live chats</h3>
               <p style={styles.panelSubtitle}>
@@ -237,20 +332,42 @@ export const AdminDashboard: React.FC = () => {
         </section>
       </div>
 
-      <section style={styles.quickActions}>
-        <div>
+      <section
+        style={{
+          ...styles.quickActions,
+          ...(isCompactDashboard ? styles.quickActionsCompact : {}),
+        }}
+      >
+        <div style={styles.quickActionsContent}>
           <h3 style={styles.panelTitle}>Quick actions</h3>
           <p style={styles.panelSubtitle}>
             Jump directly to the admin tools you use most.
           </p>
         </div>
 
-        <div style={styles.actionLinks}>
-          <Link to="/admin/chat" style={styles.actionLink}>
+        <div
+          style={{
+            ...styles.actionLinks,
+            ...(isNarrowDashboard ? styles.actionLinksNarrow : {}),
+          }}
+        >
+          <Link
+            to="/admin/chat"
+            style={{
+              ...styles.actionLink,
+              ...(isNarrowDashboard ? styles.actionLinkNarrow : {}),
+            }}
+          >
             Open chat inbox
           </Link>
 
-          <Link to="/admin/contacts" style={styles.actionLinkSecondary}>
+          <Link
+            to="/admin/contacts"
+            style={{
+              ...styles.actionLinkSecondary,
+              ...(isNarrowDashboard ? styles.actionLinkNarrow : {}),
+            }}
+          >
             Review contact submissions
           </Link>
         </div>
@@ -273,6 +390,15 @@ const styles = {
     gap: spacing.xl,
   },
 
+  headerCompact: {
+    flexDirection: "column" as const,
+    gap: spacing.md,
+  },
+
+  headerContent: {
+    minWidth: 0,
+  },
+
   eyebrow: {
     color: colors.accent.green,
     fontSize: "12px",
@@ -287,6 +413,10 @@ const styles = {
     fontSize: "32px",
     fontWeight: typography.fontWeight.black,
     margin: 0,
+  },
+
+  titleNarrow: {
+    fontSize: "28px",
   },
 
   subtitle: {
@@ -305,6 +435,11 @@ const styles = {
     padding: `11px ${spacing.lg}`,
     cursor: "pointer",
     fontWeight: typography.fontWeight.bold,
+    flexShrink: 0,
+  },
+
+  refreshButtonNarrow: {
+    width: "100%",
   },
 
   error: {
@@ -319,11 +454,20 @@ const styles = {
     gap: spacing.lg,
   },
 
+  statsGridCompact: {
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  },
+
+  statsGridNarrow: {
+    gridTemplateColumns: "1fr",
+  },
+
   statCard: {
     padding: spacing.xl,
     borderRadius: radius.lg,
     backgroundColor: colors.background.card,
     border: `1px solid ${colors.border.default}`,
+    minWidth: 0,
   },
 
   statLabel: {
@@ -355,11 +499,16 @@ const styles = {
     gap: spacing.lg,
   },
 
+  contentGridCompact: {
+    gridTemplateColumns: "1fr",
+  },
+
   panel: {
     borderRadius: radius.lg,
     backgroundColor: colors.background.card,
     border: `1px solid ${colors.border.default}`,
     overflow: "hidden",
+    minWidth: 0,
   },
 
   panelHeader: {
@@ -369,6 +518,11 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "flex-start",
     gap: spacing.lg,
+  },
+
+  panelHeaderNarrow: {
+    flexDirection: "column" as const,
+    gap: spacing.sm,
   },
 
   panelTitle: {
@@ -403,6 +557,7 @@ const styles = {
     borderBottom: `1px solid ${colors.border.default}`,
     textDecoration: "none",
     display: "block",
+    minWidth: 0,
   },
 
   listTop: {
@@ -420,6 +575,7 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap" as const,
+    minWidth: 0,
   },
 
   itemDate: {
@@ -482,11 +638,25 @@ const styles = {
     gap: spacing.xl,
   },
 
+  quickActionsCompact: {
+    flexDirection: "column" as const,
+    alignItems: "stretch",
+  },
+
+  quickActionsContent: {
+    minWidth: 0,
+  },
+
   actionLinks: {
     display: "flex",
     alignItems: "center",
     gap: spacing.md,
     flexWrap: "wrap" as const,
+  },
+
+  actionLinksNarrow: {
+    flexDirection: "column" as const,
+    alignItems: "stretch",
   },
 
   actionLink: {
@@ -497,6 +667,7 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
     fontWeight: typography.fontWeight.black,
+    textAlign: "center" as const,
   },
 
   actionLinkSecondary: {
@@ -508,5 +679,11 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
     fontWeight: typography.fontWeight.bold,
+    textAlign: "center" as const,
+  },
+
+  actionLinkNarrow: {
+    width: "100%",
+    boxSizing: "border-box" as const,
   },
 };

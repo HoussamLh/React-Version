@@ -4,7 +4,13 @@ import { LogOut } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { signOutAdmin } from "../auth/adminAuth.service";
 
-export const AdminHeader: React.FC = () => {
+type AdminHeaderProps = {
+  isCompactLayout?: boolean;
+};
+
+export const AdminHeader: React.FC<AdminHeaderProps> = ({
+  isCompactLayout = false,
+}) => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -13,15 +19,27 @@ export const AdminHeader: React.FC = () => {
   };
 
   return (
-    <header style={styles.header}>
-      <div>
+    <header
+      style={{
+        ...styles.header,
+        ...(isCompactLayout ? styles.headerCompact : {}),
+      }}
+    >
+      <div style={styles.titleGroup}>
         <p style={styles.eyebrow}>Admin Dashboard</p>
-        <h1 style={styles.title}>Control Center</h1>
+        <h1
+          style={{
+            ...styles.title,
+            ...(isCompactLayout ? styles.titleCompact : {}),
+          }}
+        >
+          Control Center
+        </h1>
       </div>
 
       <button type="button" style={styles.button} onClick={handleSignOut}>
         <LogOut size={17} />
-        <span>Sign out</span>
+        <span>{isCompactLayout ? "Out" : "Sign out"}</span>
       </button>
     </header>
   );
@@ -36,7 +54,18 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: spacing.md,
     boxSizing: "border-box" as const,
+  },
+
+  headerCompact: {
+    height: "auto",
+    minHeight: "70px",
+    padding: spacing.md,
+  },
+
+  titleGroup: {
+    minWidth: 0,
   },
 
   eyebrow: {
@@ -50,6 +79,11 @@ const styles = {
     fontSize: "22px",
     fontWeight: typography.fontWeight.black,
     margin: "4px 0 0 0",
+    whiteSpace: "nowrap" as const,
+  },
+
+  titleCompact: {
+    fontSize: "19px",
   },
 
   button: {
@@ -62,5 +96,6 @@ const styles = {
     gap: spacing.sm,
     padding: "10px 14px",
     cursor: "pointer",
+    flexShrink: 0,
   },
 };

@@ -21,6 +21,8 @@ type ConversationListProps = {
   conversationFilter: AdminConversationFilter;
   filterCounts: Record<AdminConversationFilter, number>;
   hasActiveFilters: boolean;
+  isCompactChat: boolean;
+  isNarrowChat: boolean;
   onSearchChange: (value: string) => void;
   onFilterChange: (filter: AdminConversationFilter) => void;
   onResetFilters: () => void;
@@ -94,6 +96,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   conversationFilter,
   filterCounts,
   hasActiveFilters,
+  isCompactChat,
+  isNarrowChat,
   onSearchChange,
   onFilterChange,
   onResetFilters,
@@ -101,7 +105,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   onSelectConversation,
 }) => {
   return (
-    <aside style={styles.panel}>
+    <aside
+      style={{
+        ...styles.panel,
+        ...(isCompactChat ? styles.panelCompact : {}),
+      }}
+    >
       <div style={styles.header}>
         <div>
           <h2 style={styles.title}>Conversations</h2>
@@ -122,7 +131,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </div>
       </div>
 
-      <div style={styles.searchArea}>
+      <div
+        style={{
+          ...styles.searchArea,
+          ...(isNarrowChat ? styles.searchAreaNarrow : {}),
+        }}
+      >
         <input
           type="search"
           value={searchQuery}
@@ -134,7 +148,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         {hasActiveFilters && (
           <button
             type="button"
-            style={styles.resetButton}
+            style={{
+              ...styles.resetButton,
+              ...(isNarrowChat ? styles.resetButtonNarrow : {}),
+            }}
             onClick={onResetFilters}
           >
             Reset
@@ -181,7 +198,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </div>
       )}
 
-      <div style={styles.list}>
+      <div
+        style={{
+          ...styles.list,
+          ...(isCompactChat ? styles.listCompact : {}),
+        }}
+      >
         {conversations.map((conversation) => {
           const isActive = conversation.id === selectedConversationId;
           const hasUnread = conversation.unreadCount > 0;
@@ -424,7 +446,28 @@ const styles = {
   },
 
   list: {
+    flex: 1,
+    minHeight: 0,
     overflowY: "auto" as const,
+  },
+
+  panelCompact: {
+    width: "100%",
+    minWidth: 0,
+    borderRight: "none",
+    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
+  searchAreaNarrow: {
+    flexDirection: "column" as const,
+  },
+
+  resetButtonNarrow: {
+    padding: "11px 12px",
+  },
+
+  listCompact: {
+    maxHeight: "420px",
   },
 
   item: {

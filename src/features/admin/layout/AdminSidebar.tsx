@@ -5,6 +5,10 @@ import { colors, radius, spacing, typography } from "../../../design-system";
 import { getAdminConversations } from "../chat/adminChat.service";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 
+type AdminSidebarProps = {
+  isCompactLayout?: boolean;
+};
+
 type AdminBadgeCounts = {
   unreadChatMessages: number;
   activeContactSubmissions: number;
@@ -46,7 +50,9 @@ const getBadgeLabel = (value: number) => {
   return String(value);
 };
 
-export const AdminSidebar: React.FC = () => {
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({
+  isCompactLayout = false,
+}) => {
   const location = useLocation();
 
   const [badgeCounts, setBadgeCounts] = useState<AdminBadgeCounts>({
@@ -125,10 +131,27 @@ export const AdminSidebar: React.FC = () => {
   }, [loadBadgeCounts]);
 
   return (
-    <aside style={styles.sidebar}>
-      <div style={styles.brand}>DevBySam</div>
+    <aside
+      style={{
+        ...styles.sidebar,
+        ...(isCompactLayout ? styles.sidebarCompact : {}),
+      }}
+    >
+      <div
+        style={{
+          ...styles.brand,
+          ...(isCompactLayout ? styles.brandCompact : {}),
+        }}
+      >
+        DevBySam
+      </div>
 
-      <nav style={styles.nav}>
+      <nav
+        style={{
+          ...styles.nav,
+          ...(isCompactLayout ? styles.navCompact : {}),
+        }}
+      >
         {navItems.map((item) => {
           const isActive = location.pathname === item.to;
           const badgeValue = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
@@ -140,6 +163,7 @@ export const AdminSidebar: React.FC = () => {
               to={item.to}
               style={{
                 ...styles.link,
+                ...(isCompactLayout ? styles.linkCompact : {}),
                 ...(isActive ? styles.linkActive : {}),
               }}
             >
@@ -174,6 +198,15 @@ const styles = {
     borderRight: `1px solid ${colors.border.default}`,
     padding: spacing.xl,
     boxSizing: "border-box" as const,
+    flexShrink: 0,
+  },
+
+  sidebarCompact: {
+    width: "100%",
+    minHeight: "auto",
+    borderRight: "none",
+    borderBottom: `1px solid ${colors.border.default}`,
+    padding: spacing.md,
   },
 
   brand: {
@@ -183,10 +216,20 @@ const styles = {
     marginBottom: spacing["2xl"],
   },
 
+  brandCompact: {
+    marginBottom: spacing.md,
+  },
+
   nav: {
     display: "flex",
     flexDirection: "column" as const,
     gap: spacing.sm,
+  },
+
+  navCompact: {
+    flexDirection: "row" as const,
+    overflowX: "auto" as const,
+    paddingBottom: "2px",
   },
 
   link: {
@@ -200,6 +243,11 @@ const styles = {
     textDecoration: "none",
     fontSize: "14px",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  linkCompact: {
+    flexShrink: 0,
+    minWidth: "fit-content",
   },
 
   linkActive: {
