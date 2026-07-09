@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   ChevronLeft,
   MoreHorizontal,
@@ -7,55 +7,101 @@ import {
   X,
 } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { liveChatAgent } from "../data/liveChat.data";
-import type { LiveChatMessage } from "../types/liveChat.types";
+import { liveChatAgent, liveChatProfileCapture } from "../data/liveChat.data";
+import type {
+  LiveChatAvailabilityMode,
+  LiveChatExtraChoice,
+  LiveChatMessage,
+  LiveChatProfileStep,
+} from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 
 type LiveChatChatViewProps = {
-  email: string;
   message: string;
+  messagePlaceholder: string;
+  profileStep: LiveChatProfileStep;
+  chatMode: LiveChatAvailabilityMode;
   messages: LiveChatMessage[];
   isLoading: boolean;
   isSending: boolean;
+  isComposerDisabled: boolean;
   error: string | null;
   isOptionsOpen: boolean;
   isExpanded: boolean;
-  isAdminTyping: boolean;
-  isAdminOnline: boolean;
+  isAssistantTyping: boolean;
   onBack: () => void;
   onClose: () => void;
   onToggleOptions: () => void;
   onToggleExpanded: () => void;
   onDownloadTranscript: () => void;
-  onEmailChange: (value: string) => void;
   onMessageChange: (value: string) => void;
+  onMessageBlur: () => void;
+  onServiceSelect: (service: string) => void | Promise<void>;
+  onExtraChoiceSelect: (choice: LiveChatExtraChoice) => void | Promise<void>;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
-  onTypingChange: (isTyping: boolean) => void;
+};
+
+const hasMessageContaining = (messages: LiveChatMessage[], value: string) => {
+  return messages.some((message) => message.body.includes(value));
 };
 
 export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
-  email,
   message,
+  messagePlaceholder,
+  profileStep,
+  chatMode,
   messages,
   isLoading,
   isSending,
+  isComposerDisabled,
   error,
   isOptionsOpen,
   isExpanded,
-  isAdminTyping,
-  isAdminOnline,
+  isAssistantTyping,
   onBack,
   onClose,
   onToggleOptions,
   onToggleExpanded,
   onDownloadTranscript,
-  onEmailChange,
   onMessageChange,
+  onMessageBlur,
+  onServiceSelect,
+  onExtraChoiceSelect,
   onSubmit,
-  onTypingChange,
 }) => {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const hasServicePrompt =
+    hasMessageContaining(messages, "How may I help you today") ||
+    hasMessageContaining(messages, "What service are you contacting");
+
+  const hasExtraChoicePrompt = hasMessageContaining(messages, "anything else");
+
+  const shouldShowServiceOptions =
+    profileStep === "service" && !isAssistantTyping && hasServicePrompt;
+
+  const shouldShowExtraChoiceOptions =
+    profileStep === "extra_choice" &&
+    !isAssistantTyping &&
+    hasExtraChoicePrompt;
+
+  const statusText =
+    chatMode === "online" ? "Online now" : "Offline — leave a message";
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [
+    messages.length,
+    isAssistantTyping,
+    shouldShowServiceOptions,
+    shouldShowExtraChoiceOptions,
+  ]);
+
   return (
     <>
       <div style={styles.chatHeader}>
@@ -73,8 +119,16 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
 
           <div>
             <h3 style={styles.agentName}>{liveChatAgent.name}</h3>
-            <p style={styles.agentStatus}>
-              {isAdminOnline ? "Online" : liveChatAgent.status}
+            <p
+              style={{
+                ...styles.agentStatus,
+                color:
+                  chatMode === "online"
+                    ? colors.accent.green
+                    : colors.text.muted,
+              }}
+            >
+              {statusText}
             </p>
           </div>
         </div>
@@ -113,12 +167,6 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
       <div style={styles.feedbackText}>{liveChatAgent.feedbackText}</div>
 
       <div style={styles.chatBody}>
-        <div style={styles.agentMessage}>{liveChatAgent.greeting}</div>
-
-        <div style={styles.messageMeta}>
-          {liveChatAgent.name} · {liveChatAgent.previewTime}
-        </div>
-
         {isLoading && <p style={styles.stateText}>Connecting live chat...</p>}
 
         {messages.length > 0 && (
@@ -132,38 +180,70 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
           </div>
         )}
 
-        {isAdminTyping && (
+        {isAssistantTyping && (
           <div style={styles.typingIndicator}>
-            <span style={styles.typingDot} />
-            <span style={styles.typingDot} />
+            <span className="typing-dot-delay-1" style={styles.typingDot} />
+            <span className="typing-dot-delay-2" style={styles.typingDot} />
             <span style={styles.typingDot} />
           </div>
         )}
 
+        {shouldShowServiceOptions && (
+          <div style={styles.optionGroup}>
+            {liveChatProfileCapture.serviceOptions.map((service) => (
+              <button
+                key={service}
+                type="button"
+                style={styles.optionButton}
+                onClick={() => onServiceSelect(service)}
+                disabled={isSending}
+              >
+                {service}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {shouldShowExtraChoiceOptions && (
+          <div style={styles.optionGroup}>
+            <button
+              type="button"
+              style={styles.optionButton}
+              onClick={() => onExtraChoiceSelect("yes")}
+              disabled={isSending}
+            >
+              Yes, add more details
+            </button>
+
+            <button
+              type="button"
+              style={styles.optionButton}
+              onClick={() => onExtraChoiceSelect("no")}
+              disabled={isSending}
+            >
+              No, that’s everything
+            </button>
+          </div>
+        )}
+
         {error && <p style={styles.errorText}>{error}</p>}
+
+        <div ref={bottomRef} />
       </div>
 
       <form style={styles.composer} onSubmit={onSubmit}>
-        <input
-          style={styles.emailInput}
-          value={email}
-          onChange={(event) => onEmailChange(event.target.value)}
-          placeholder="email@example.com"
-          type="email"
-        />
-
-        <div style={styles.composerDivider} />
-
         <div style={styles.messageInputRow}>
           <input
+            id="visitor-chat-message"
+            name="visitor-chat-message"
+            aria-label="Message"
+            autoComplete="off"
             style={styles.messageInput}
             value={message}
-            onChange={(event) => {
-              onMessageChange(event.target.value);
-              onTypingChange(Boolean(event.target.value.trim()));
-            }}
-            placeholder="Message..."
-            disabled={isSending}
+            onChange={(event) => onMessageChange(event.target.value)}
+            onBlur={onMessageBlur}
+            placeholder={messagePlaceholder}
+            disabled={isComposerDisabled}
           />
 
           <Smile size={18} color={colors.text.muted} />
@@ -172,9 +252,9 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
             type="submit"
             style={{
               ...styles.roundSendButton,
-              opacity: isSending ? 0.55 : 1,
+              opacity: isSending || isComposerDisabled ? 0.55 : 1,
             }}
-            disabled={isSending}
+            disabled={isComposerDisabled}
           >
             <SendHorizontal size={18} />
           </button>
@@ -256,29 +336,10 @@ const styles = {
     overflowY: "auto" as const,
   },
 
-  agentMessage: {
-    width: "fit-content",
-    maxWidth: "85%",
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderRadius: "18px 18px 18px 6px",
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-    color: colors.text.main,
-    fontSize: "14px",
-    lineHeight: "20px",
-  },
-
-  messageMeta: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    marginTop: "6px",
-  },
-
   messageList: {
     display: "flex",
     flexDirection: "column" as const,
     gap: spacing.md,
-    marginTop: spacing.lg,
   },
 
   stateText: {
@@ -294,29 +355,32 @@ const styles = {
     margin: `${spacing.lg} 0 0 0`,
   },
 
+  optionGroup: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    alignItems: "flex-start",
+  },
+
+  optionButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: `10px ${spacing.md}`,
+    fontSize: "13px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    textAlign: "left" as const,
+  },
+
   composer: {
     margin: spacing.lg,
     border: `2px solid ${colors.accent.pink}`,
     borderRadius: radius.lg,
     backgroundColor: colors.background.card,
     overflow: "hidden",
-  },
-
-  emailInput: {
-    width: "100%",
-    border: "none",
-    backgroundColor: "transparent",
-    color: colors.text.main,
-    padding: `${spacing.md} ${spacing.lg}`,
-    outline: "none",
-    fontSize: "14px",
-    boxSizing: "border-box" as const,
-  },
-
-  composerDivider: {
-    height: "1px",
-    backgroundColor: colors.border.default,
-    margin: `0 ${spacing.lg}`,
   },
 
   messageInputRow: {
@@ -369,5 +433,6 @@ const styles = {
     borderRadius: "50%",
     backgroundColor: colors.text.muted,
     display: "block",
+    animation: "liveChatTypingDot 1.4s infinite ease-in-out both",
   },
 };

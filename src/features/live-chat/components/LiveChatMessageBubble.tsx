@@ -1,5 +1,6 @@
 import React from "react";
 import { colors, spacing } from "../../../design-system";
+import { liveChatAgent } from "../data/liveChat.data";
 import type { LiveChatMessage } from "../types/liveChat.types";
 
 type LiveChatMessageBubbleProps = {
@@ -17,15 +18,7 @@ export const LiveChatMessageBubble: React.FC<LiveChatMessageBubbleProps> = ({
   message,
 }) => {
   const isVisitor = message.senderType === "visitor";
-  const isSystem = message.senderType === "system";
-
-  if (isSystem) {
-    return (
-      <div style={styles.systemRow}>
-        <span style={styles.systemMessage}>{message.body}</span>
-      </div>
-    );
-  }
+  const senderLabel = isVisitor ? "You" : liveChatAgent.name;
 
   return (
     <div
@@ -49,7 +42,7 @@ export const LiveChatMessageBubble: React.FC<LiveChatMessageBubbleProps> = ({
           textAlign: isVisitor ? "right" : "left",
         }}
       >
-        {isVisitor ? "You" : "Sam"} · {formatTime(message.createdAt)}
+        {senderLabel} · {formatTime(message.createdAt)}
       </div>
     </div>
   );
@@ -68,6 +61,9 @@ const styles = {
     padding: `${spacing.sm} ${spacing.md}`,
     fontSize: "14px",
     lineHeight: "20px",
+    whiteSpace: "pre-line" as const,
+    overflowWrap: "anywhere" as const,
+    wordBreak: "break-word" as const,
   },
 
   agentMessage: {
@@ -87,18 +83,5 @@ const styles = {
   messageMeta: {
     color: colors.text.muted,
     fontSize: "12px",
-  },
-
-  systemRow: {
-    display: "flex",
-    justifyContent: "center",
-  },
-
-  systemMessage: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    padding: "6px 10px",
-    borderRadius: "999px",
-    backgroundColor: "rgba(255,255,255,0.04)",
   },
 };
