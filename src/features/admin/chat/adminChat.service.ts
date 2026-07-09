@@ -6,6 +6,7 @@ import type {
   AdminMessage,
   AdminMessageSender,
 } from "./adminChat.types";
+
 type ConversationRow = {
   id: string;
   visitor_id: string;
@@ -34,6 +35,7 @@ type ConversationRow = {
       }[]
     | null;
 };
+
 type MessageRow = {
   id: string;
   conversation_id: string;
@@ -41,24 +43,28 @@ type MessageRow = {
   body: string;
   created_at: string;
 };
+
 type AdminTypingPayload = {
   conversationId: string;
   userId: string;
   role: "admin" | "visitor";
   isTyping: boolean;
 };
+
 const requireSupabase = () => {
   if (!supabase) {
     throw new Error("Supabase is not configured.");
   }
   return supabase;
 };
+
 const getVisitorProfile = (row: ConversationRow) => {
   if (Array.isArray(row.visitor_profiles)) {
     return row.visitor_profiles[0] ?? null;
   }
   return row.visitor_profiles;
 };
+
 const mapConversation = (
   row: ConversationRow,
   lastMessageBody: string | null = null,
@@ -81,6 +87,7 @@ const mapConversation = (
     unreadCount,
   };
 };
+
 const mapMessage = (row: MessageRow): AdminMessage => ({
   id: row.id,
   conversationId: row.conversation_id,
@@ -88,6 +95,7 @@ const mapMessage = (row: MessageRow): AdminMessage => ({
   body: row.body,
   createdAt: row.created_at,
 });
+
 export const getAdminConversations = async (): Promise<AdminConversation[]> => {
   const client = requireSupabase();
   const { data: conversations, error } = await client
@@ -142,6 +150,7 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
     ),
   );
 };
+
 export const getAdminConversationMessages = async (
   conversationId: string,
 ): Promise<AdminMessage[]> => {
@@ -157,6 +166,7 @@ export const getAdminConversationMessages = async (
   }
   return data.map(mapMessage);
 };
+
 export const sendAdminMessage = async ({
   conversationId,
   body,
@@ -175,6 +185,7 @@ export const sendAdminMessage = async ({
   }
   return mapMessage(data);
 };
+
 export const updateConversationStatus = async ({
   conversationId,
   status,
@@ -191,6 +202,7 @@ export const updateConversationStatus = async ({
     throw error;
   }
 };
+
 export const markConversationReadForAdmin = async (conversationId: string) => {
   const client = requireSupabase();
   const { error } = await client.rpc("mark_conversation_read_for_admin", {
@@ -199,7 +211,9 @@ export const markConversationReadForAdmin = async (conversationId: string) => {
   if (error) {
     throw error;
   }
+  window.dispatchEvent(new Event("admin-badges-changed"));
 };
+
 export const subscribeToAdminConversationMessages = ({
   conversationId,
   onMessage,
@@ -227,6 +241,7 @@ export const subscribeToAdminConversationMessages = ({
     client.removeChannel(channel);
   };
 };
+
 export const subscribeToAllAdminMessages = ({
   onMessage,
 }: {
@@ -247,6 +262,7 @@ export const subscribeToAllAdminMessages = ({
     client.removeChannel(channel);
   };
 };
+
 export const createAdminRealtimeChannel = ({
   conversationId,
   adminId,
