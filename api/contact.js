@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { createClient } from "@supabase/supabase-js";
 
 const escapeHtml = (value = "") => {
   return String(value)
@@ -7,6 +8,24 @@ const escapeHtml = (value = "") => {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+};
+
+const createSupabaseAdminClient = () => {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error(
+      "Supabase service is missing: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY",
+    );
+  }
+
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 };
 
 export default async function handler(req, res) {
@@ -34,11 +53,11 @@ export default async function handler(req, res) {
     }
 
     const requiredEnvVars = [
-      "EMAIL_HOST",
-      "EMAIL_PORT",
       "EMAIL_USER",
       "EMAIL_PASS",
       "RECEIVER_EMAIL",
+      "SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
     ];
 
     const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
@@ -46,16 +65,37 @@ export default async function handler(req, res) {
     if (missingEnvVars.length > 0) {
       return res.status(500).json({
         success: false,
-        message: `Email service is missing: ${missingEnvVars.join(", ")}`,
+        message: `Service is missing: ${missingEnvVars.join(", ")}`,
       });
     }
 
-    const emailPort = Number(process.env.EMAIL_PORT);
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    const { error: submissionError } = await supabaseAdmin
+      .from("contact_submissions")
+      .insert({
+        name,
+        email,
+        phone,
+        service,
+        message,
+        status: "new",
+        source: "contact_page",
+      });
+
+    if (submissionError) {
+      console.error("Contact submission save error:", submissionError);
+
+return res.status(500).json({
+  success: false,
+  message: "Failed to send message.",
+  error: error instanceof Error ? error.message : String(error),
+});
+
+    }
 
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: emailPort,
-      secure: emailPort === 465,
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
