@@ -3,7 +3,12 @@ import { createPortal } from "react-dom";
 import { colors, radius } from "../../../design-system";
 import { useLiveChat } from "../hooks/useLiveChat";
 import { liveChatAgent, liveChatTranscript } from "../data/liveChat.data";
-import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
+import type {
+  ChatView,
+  LiveChatExtraChoice,
+  LiveChatMessage,
+  LiveChatProfileStep,
+} from "../types/liveChat.types";
 import { LiveChatChatView } from "./LiveChatChatView";
 import { LiveChatFloatingButton } from "./LiveChatFloatingButton";
 import { LiveChatHomeView } from "./LiveChatHomeView";
@@ -12,6 +17,7 @@ import { LiveChatMessagesView } from "./LiveChatMessagesView";
 const getTranscriptSender = (message: LiveChatMessage) => {
   if (message.senderType === "visitor") return "Visitor";
   if (message.senderType === "admin") return liveChatAgent.name;
+  if (message.senderType === "system") return liveChatAgent.name;
 
   return "System";
 };
@@ -28,32 +34,91 @@ const buildTranscript = (messages: LiveChatMessage[]) => {
   return `
 ${liveChatTranscript.title}
 
-${liveChatAgent.name}:
-${liveChatAgent.greeting}
-
 ${storedMessages}
 `;
+};
+
+const getMessagePlaceholder = (profileStep: LiveChatProfileStep) => {
+  if (
+    profileStep === "welcome" ||
+    profileStep === "privacy" ||
+    profileStep === "offline_notice" ||
+    profileStep === "connecting" ||
+    profileStep === "offline_confirm" ||
+    profileStep === "extra_choice" ||
+    profileStep === "extra_message_prompt" ||
+    profileStep === "extra_received" ||
+    profileStep === "closed"
+  ) {
+    return "Please wait...";
+  }
+
+  if (profileStep === "name") {
+    return "Type your name...";
+  }
+
+  if (profileStep === "email") {
+    return "Type your email...";
+  }
+
+  if (profileStep === "service") {
+    return "Please choose a service...";
+  }
+
+  if (profileStep === "topic") {
+    return "Briefly describe your enquiry...";
+  }
+
+  if (profileStep === "extra_message") {
+    return "Type extra details...";
+  }
+
+  return "Message...";
+};
+
+const isComposerDisabledForStep = (profileStep: LiveChatProfileStep) => {
+  return (
+    profileStep === "welcome" ||
+    profileStep === "privacy" ||
+    profileStep === "offline_notice" ||
+    profileStep === "service" ||
+    profileStep === "connecting" ||
+    profileStep === "offline_confirm" ||
+    profileStep === "extra_choice" ||
+    profileStep === "extra_message_prompt" ||
+    profileStep === "extra_received" ||
+    profileStep === "closed"
+  );
 };
 
 export const LiveChatBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<ChatView>("home");
   const [message, setMessage] = useState("");
-  const [email, setEmail] = useState("");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
+    profileStep,
+    chatMode,
     messages,
     latestMessage,
     isLoading,
     isSending,
     error,
-    isAdminOnline,
     isAdminTyping,
+    isAgentTyping,
     sendMessage,
     sendTypingStatus,
-  } = useLiveChat(isOpen);
+    selectServiceOption,
+    selectExtraChoice,
+  } = useLiveChat(isOpen, isOpen && view === "chat");
+
+  const messagePlaceholder = getMessagePlaceholder(profileStep);
+  const isProfileCaptureActive = profileStep !== "ready";
+
+  const isComposerDisabled =
+    isSending || isAgentTyping || isComposerDisabledForStep(profileStep);
 
   const closeChat = () => {
     setIsOpen(false);
@@ -96,6 +161,28 @@ export const LiveChatBubble: React.FC = () => {
       setMessage("");
       sendTypingStatus(false);
     }
+  };
+
+  const handleMessageChange = (nextMessage: string) => {
+    setMessage(nextMessage);
+
+    if (!isProfileCaptureActive) {
+      sendTypingStatus(Boolean(nextMessage.trim()));
+    }
+  };
+
+  const handleMessageBlur = () => {
+    if (!isProfileCaptureActive) {
+      sendTypingStatus(false);
+    }
+  };
+
+  const handleServiceSelect = async (service: string) => {
+    await selectServiceOption(service);
+  };
+
+  const handleExtraChoiceSelect = async (choice: LiveChatExtraChoice) => {
+    await selectExtraChoice(choice);
   };
 
   const handleDownloadTranscript = () => {
@@ -149,7 +236,7 @@ export const LiveChatBubble: React.FC = () => {
               latestMessage={latestMessage}
               isLoading={isLoading}
               error={error}
-              isAdminOnline={isAdminOnline}
+              isAdminOnline={isAdminTyping || isAgentTyping}
               isAdminTyping={isAdminTyping}
               onClose={closeChat}
               onOpenChat={openChatView}
@@ -159,14 +246,18 @@ export const LiveChatBubble: React.FC = () => {
 
           {view === "chat" && (
             <LiveChatChatView
-              email={email}
               message={message}
+              messagePlaceholder={messagePlaceholder}
+              profileStep={profileStep}
+              chatMode={chatMode}
               messages={messages}
               isLoading={isLoading}
               isSending={isSending}
+              isComposerDisabled={isComposerDisabled}
               error={error}
-              isAdminOnline={isAdminOnline}
-              isAdminTyping={isAdminTyping}
+              isAssistantTyping={
+                isAgentTyping || (!isProfileCaptureActive && isAdminTyping)
+              }
               isOptionsOpen={isOptionsOpen}
               isExpanded={isExpanded}
               onBack={openMessagesView}
@@ -174,9 +265,10 @@ export const LiveChatBubble: React.FC = () => {
               onToggleOptions={() => setIsOptionsOpen((current) => !current)}
               onToggleExpanded={toggleExpanded}
               onDownloadTranscript={handleDownloadTranscript}
-              onEmailChange={setEmail}
-              onMessageChange={setMessage}
-              onTypingChange={sendTypingStatus}
+              onMessageChange={handleMessageChange}
+              onMessageBlur={handleMessageBlur}
+              onServiceSelect={handleServiceSelect}
+              onExtraChoiceSelect={handleExtraChoiceSelect}
               onSubmit={handleSubmit}
             />
           )}

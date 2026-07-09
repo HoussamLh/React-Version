@@ -591,6 +591,31 @@ a {
 }
 
 /* ==========================================
+  LIVE CHAT TYPING ANIMATION 
+========================================== */
+@keyframes liveChatTypingDot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.45);
+    opacity: 0.45;
+  }
+
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.typing-dot-delay-1 {
+  animation-delay: -0.32s;
+}
+
+.typing-dot-delay-2 {
+  animation-delay: -0.16s;
+}
+
+/* ==========================================
   NAVIGATION UTILITIES
 ========================================== */
 
