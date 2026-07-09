@@ -252,6 +252,14 @@ export const ContactSubmissionsPage: React.FC = () => {
     submissionId: string,
     status: ContactSubmissionStatus,
   ) => {
+    if (status === "closed") {
+      const confirmed = window.confirm(
+        "Are you sure you want to close this contact submission?",
+      );
+
+      if (!confirmed) return;
+    }
+
     setIsUpdatingStatus(true);
     setError("");
 

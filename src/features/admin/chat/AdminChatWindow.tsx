@@ -224,6 +224,14 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   const handleStatusChange = async (status: AdminConversationStatus) => {
     if (!conversationId || conversationStatus === status) return;
 
+    if (status === "closed") {
+      const confirmed = window.confirm(
+        "Are you sure you want to close this live chat conversation?",
+      );
+
+      if (!confirmed) return;
+    }
+
     setIsUpdatingStatus(true);
     setError("");
 
