@@ -75,4 +75,6 @@ export const updateContactSubmissionStatus = async ({
   if (error) {
     throw error;
   }
+
+  window.dispatchEvent(new Event("admin-badges-changed"));
 };

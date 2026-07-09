@@ -1,19 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MessageSquare, PanelTop, Users } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import {
-  getAdminConversations,
-  subscribeToAllAdminMessages,
-} from "../chat/adminChat.service";
+import { getAdminConversations } from "../chat/adminChat.service";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 
 type AdminBadgeCounts = {
   unreadChatMessages: number;
-  newContactSubmissions: number;
+  activeContactSubmissions: number;
 };
 
-const navItems = [
+type BadgeKey = keyof AdminBadgeCounts;
+
+type NavItem = {
+  label: string;
+  to: string;
+  icon: React.ReactNode;
+  badgeKey: BadgeKey | null;
+};
+
+const navItems: NavItem[] = [
   {
     label: "Dashboard",
     to: "/admin/dashboard",
@@ -24,13 +30,13 @@ const navItems = [
     label: "Chat",
     to: "/admin/chat",
     icon: <MessageSquare size={18} />,
-    badgeKey: "unreadChatMessages" as const,
+    badgeKey: "unreadChatMessages",
   },
   {
     label: "Contacts",
     to: "/admin/contacts",
     icon: <Users size={18} />,
-    badgeKey: "newContactSubmissions" as const,
+    badgeKey: "activeContactSubmissions",
   },
 ];
 
@@ -45,7 +51,7 @@ export const AdminSidebar: React.FC = () => {
 
   const [badgeCounts, setBadgeCounts] = useState<AdminBadgeCounts>({
     unreadChatMessages: 0,
-    newContactSubmissions: 0,
+    activeContactSubmissions: 0,
   });
 
   const loadBadgeCounts = useCallback(async () => {
@@ -60,68 +66,73 @@ export const AdminSidebar: React.FC = () => {
         0,
       );
 
-      const newContactSubmissions = submissions.filter(
-        (submission) => submission.status === "new",
+      const activeContactSubmissions = submissions.filter(
+        (submission) => submission.status !== "closed",
       ).length;
 
       setBadgeCounts({
         unreadChatMessages,
-        newContactSubmissions,
+        activeContactSubmissions,
       });
-    } catch {
+    } catch (error) {
+      console.error("Failed to load admin sidebar badge counts:", error);
+
       setBadgeCounts({
         unreadChatMessages: 0,
-        newContactSubmissions: 0,
+        activeContactSubmissions: 0,
       });
     }
   }, []);
 
   useEffect(() => {
-    void loadBadgeCounts();
+    let isMounted = true;
+
+    const safeLoadBadgeCounts = () => {
+      window.setTimeout(() => {
+        if (!isMounted) return;
+        void loadBadgeCounts();
+      }, 0);
+    };
+
+    safeLoadBadgeCounts();
 
     const refreshIntervalId = window.setInterval(() => {
-      void loadBadgeCounts();
+      safeLoadBadgeCounts();
     }, 30000);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        void loadBadgeCounts();
+        safeLoadBadgeCounts();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const handleAdminBadgesChanged = () => {
+      safeLoadBadgeCounts();
+    };
 
-    const unsubscribeFromMessages = subscribeToAllAdminMessages({
-      onMessage: () => {
-        void loadBadgeCounts();
-      },
-    });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("admin-badges-changed", handleAdminBadgesChanged);
 
     return () => {
+      isMounted = false;
       window.clearInterval(refreshIntervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      unsubscribeFromMessages();
+      window.removeEventListener(
+        "admin-badges-changed",
+        handleAdminBadgesChanged,
+      );
     };
   }, [loadBadgeCounts]);
-
-  const enrichedNavItems = useMemo(() => {
-    return navItems.map((item) => {
-      const badgeValue = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
-
-      return {
-        ...item,
-        badgeLabel: getBadgeLabel(badgeValue),
-      };
-    });
-  }, [badgeCounts]);
 
   return (
     <aside style={styles.sidebar}>
       <div style={styles.brand}>DevBySam</div>
 
       <nav style={styles.nav}>
-        {enrichedNavItems.map((item) => {
+        {navItems.map((item) => {
           const isActive = location.pathname === item.to;
+          const badgeValue = item.badgeKey ? badgeCounts[item.badgeKey] : 0;
+          const badgeLabel = getBadgeLabel(badgeValue);
 
           return (
             <Link
@@ -137,14 +148,14 @@ export const AdminSidebar: React.FC = () => {
                 <span>{item.label}</span>
               </span>
 
-              {item.badgeLabel && (
+              {badgeLabel && (
                 <span
                   style={{
                     ...styles.badge,
                     ...(isActive ? styles.badgeActive : {}),
                   }}
                 >
-                  {item.badgeLabel}
+                  {badgeLabel}
                 </span>
               )}
             </Link>
