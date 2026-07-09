@@ -323,7 +323,18 @@ export const ContactSubmissionsPage: React.FC = () => {
             </p>
           </div>
 
-          <span style={styles.count}>{filteredSubmissions.length}</span>
+          <div style={styles.headerActions}>
+            <span style={styles.count}>{filteredSubmissions.length}</span>
+
+            <button
+              type="button"
+              style={styles.refreshButton}
+              onClick={loadSubmissions}
+              disabled={isLoading}
+            >
+              {isLoading ? "..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         <div
@@ -763,6 +774,23 @@ const styles = {
     fontSize: "13px",
     fontWeight: typography.fontWeight.black,
     flexShrink: 0,
+  },
+
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexShrink: 0,
+  },
+
+  refreshButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.text.muted,
+    padding: "6px 10px",
+    fontSize: "11px",
+    cursor: "pointer",
   },
 
   searchArea: {
