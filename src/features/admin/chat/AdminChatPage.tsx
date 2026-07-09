@@ -85,6 +85,7 @@ export const AdminChatPage: React.FC = () => {
     useState<AdminConversationFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
   const [error, setError] = useState("");
 
   const selectedConversationId = selectedConversation?.id ?? null;
@@ -141,6 +142,8 @@ export const AdminChatPage: React.FC = () => {
     };
   }, [conversations]);
 
+  const hasUnreadConversations = filterCounts.unread > 0;
+
   const filteredConversations = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
@@ -168,6 +171,32 @@ export const AdminChatPage: React.FC = () => {
 
   const hasActiveFilters =
     conversationFilter !== "all" || searchQuery.trim().length > 0;
+
+  const handleMarkAllRead = async () => {
+    const unreadConversationIds = conversations
+      .filter((conversation) => conversation.unreadCount > 0)
+      .map((conversation) => conversation.id);
+
+    if (unreadConversationIds.length === 0) return;
+
+    setIsMarkingAllRead(true);
+    setError("");
+
+    try {
+      await Promise.all(
+        unreadConversationIds.map((conversationId) =>
+          markConversationReadForAdmin(conversationId),
+        ),
+      );
+
+      await loadConversations();
+      window.dispatchEvent(new Event("admin-badges-changed"));
+    } catch {
+      setError("Could not mark conversations as read.");
+    } finally {
+      setIsMarkingAllRead(false);
+    }
+  };
 
   const handleResetFilters = () => {
     setConversationFilter("all");
@@ -235,9 +264,12 @@ export const AdminChatPage: React.FC = () => {
         conversationFilter={conversationFilter}
         filterCounts={filterCounts}
         hasActiveFilters={hasActiveFilters}
+        hasUnreadConversations={hasUnreadConversations}
         isCompactChat={isCompactChat}
         isNarrowChat={isNarrowChat}
+        isMarkingAllRead={isMarkingAllRead}
         onSearchChange={setSearchQuery}
+        onMarkAllRead={handleMarkAllRead}
         onFilterChange={setConversationFilter}
         onResetFilters={handleResetFilters}
         onRefresh={loadConversations}
