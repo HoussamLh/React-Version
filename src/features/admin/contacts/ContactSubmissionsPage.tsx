@@ -328,7 +328,10 @@ export const ContactSubmissionsPage: React.FC = () => {
 
             <button
               type="button"
-              style={styles.refreshButton}
+              style={{
+                ...styles.refreshButton,
+                ...(isLoading ? styles.disabledAction : {}),
+              }}
               onClick={loadSubmissions}
               disabled={isLoading}
             >
@@ -503,6 +506,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                   style={{
                     ...styles.statusSelect,
                     ...(isNarrowContacts ? styles.statusSelectNarrow : {}),
+                    ...(isUpdatingStatus ? styles.disabledAction : {}),
                   }}
                   onChange={(event) =>
                     handleStatusChange(
@@ -537,6 +541,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -555,6 +560,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -573,6 +579,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -791,6 +798,11 @@ const styles = {
     padding: "6px 10px",
     fontSize: "11px",
     cursor: "pointer",
+  },
+
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
   searchArea: {

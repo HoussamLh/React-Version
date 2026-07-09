@@ -372,6 +372,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             style={{
               ...styles.statusSelect,
               ...(isNarrowChat ? styles.statusSelectNarrow : {}),
+              ...(isUpdatingStatus ? styles.disabledAction : {}),
             }}
             onChange={(event) =>
               handleStatusChange(event.target.value as AdminConversationStatus)
@@ -397,6 +398,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 style={{
                   ...styles.primaryAction,
                   ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                  ...(isUpdatingStatus ? styles.disabledAction : {}),
                 }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("open")}
@@ -411,6 +413,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 style={{
                   ...styles.secondaryAction,
                   ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                  ...(isUpdatingStatus ? styles.disabledAction : {}),
                 }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("pending")}
@@ -600,6 +603,11 @@ const styles = {
     cursor: "pointer",
   },
 
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
+  },
+  
   body: {
     flex: 1,
     overflowY: "auto" as const,
