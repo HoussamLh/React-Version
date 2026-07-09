@@ -9,7 +9,20 @@ import type {
   ContactSubmissionStatus,
 } from "./contactSubmissions.types";
 
+type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
+
 const statusOptions: ContactSubmissionStatus[] = ["new", "contacted", "closed"];
+
+const filterOptions: {
+  label: string;
+  value: SubmissionFilter;
+}[] = [
+  { label: "All", value: "all" },
+  { label: "Active", value: "active" },
+  { label: "New", value: "new" },
+  { label: "Contacted", value: "contacted" },
+  { label: "Closed", value: "closed" },
+];
 
 const statusMeta: Record<
   ContactSubmissionStatus,
@@ -72,13 +85,27 @@ const getMailtoHref = (submission: ContactSubmission) => {
   )}&body=${encodeURIComponent(body)}`;
 };
 
+const getSearchableText = (submission: ContactSubmission) => {
+  return [
+    submission.name,
+    submission.email,
+    submission.phone,
+    submission.service,
+    submission.message,
+    submission.status,
+    submission.source,
+  ]
+    .join(" ")
+    .toLowerCase();
+};
+
 export const ContactSubmissionsPage: React.FC = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
     useState<ContactSubmission | null>(null);
-  const [statusFilter, setStatusFilter] = useState<
-    ContactSubmissionStatus | "all"
-  >("all");
+  const [submissionFilter, setSubmissionFilter] =
+    useState<SubmissionFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
@@ -86,18 +113,8 @@ export const ContactSubmissionsPage: React.FC = () => {
     null,
   );
 
-  const filteredSubmissions = useMemo(() => {
-    if (statusFilter === "all") {
-      return submissions;
-    }
-
-    return submissions.filter(
-      (submission) => submission.status === statusFilter,
-    );
-  }, [statusFilter, submissions]);
-
-  const statusCounts = useMemo(() => {
-    return statusOptions.reduce(
+  const filterCounts = useMemo(() => {
+    const statusCounts = statusOptions.reduce(
       (counts, status) => ({
         ...counts,
         [status]: submissions.filter(
@@ -106,7 +123,38 @@ export const ContactSubmissionsPage: React.FC = () => {
       }),
       {} as Record<ContactSubmissionStatus, number>,
     );
+
+    return {
+      all: submissions.length,
+      active: submissions.filter((submission) => submission.status !== "closed")
+        .length,
+      ...statusCounts,
+    };
   }, [submissions]);
+
+  const filteredSubmissions = useMemo(() => {
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    return submissions.filter((submission) => {
+      const matchesFilter =
+        submissionFilter === "all" ||
+        (submissionFilter === "active" && submission.status !== "closed") ||
+        submission.status === submissionFilter;
+
+      if (!matchesFilter) {
+        return false;
+      }
+
+      if (!normalizedSearchQuery) {
+        return true;
+      }
+
+      return getSearchableText(submission).includes(normalizedSearchQuery);
+    });
+  }, [searchQuery, submissionFilter, submissions]);
+
+  const hasActiveFilters =
+    submissionFilter !== "all" || searchQuery.trim().length > 0;
 
   const loadSubmissions = useCallback(async () => {
     setIsLoading(true);
@@ -186,6 +234,11 @@ export const ContactSubmissionsPage: React.FC = () => {
     }
   };
 
+  const handleResetFilters = () => {
+    setSubmissionFilter("all");
+    setSearchQuery("");
+  };
+
   return (
     <section style={styles.shell}>
       <aside style={styles.listPanel}>
@@ -200,34 +253,53 @@ export const ContactSubmissionsPage: React.FC = () => {
           <span style={styles.count}>{filteredSubmissions.length}</span>
         </div>
 
-        <div style={styles.filters}>
-          <button
-            type="button"
-            style={{
-              ...styles.filterButton,
-              ...(statusFilter === "all" ? styles.filterButtonActive : {}),
-            }}
-            onClick={() => setStatusFilter("all")}
-          >
-            All
-            <span style={styles.filterCount}>{submissions.length}</span>
-          </button>
+        <div style={styles.searchArea}>
+          <input
+            type="search"
+            value={searchQuery}
+            placeholder="Search name, email, phone, service..."
+            style={styles.searchInput}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
 
-          {statusOptions.map((status) => (
+          {hasActiveFilters && (
             <button
-              key={status}
+              type="button"
+              style={styles.resetButton}
+              onClick={handleResetFilters}
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        <div style={styles.filters}>
+          {filterOptions.map((filter) => (
+            <button
+              key={filter.value}
               type="button"
               style={{
                 ...styles.filterButton,
-                ...(statusFilter === status ? styles.filterButtonActive : {}),
+                ...(submissionFilter === filter.value
+                  ? styles.filterButtonActive
+                  : {}),
               }}
-              onClick={() => setStatusFilter(status)}
+              onClick={() => setSubmissionFilter(filter.value)}
             >
-              {statusMeta[status].label}
-              <span style={styles.filterCount}>{statusCounts[status]}</span>
+              {filter.label}
+              <span style={styles.filterCount}>
+                {filterCounts[filter.value]}
+              </span>
             </button>
           ))}
         </div>
+
+        {hasActiveFilters && (
+          <p style={styles.activeFilterText}>
+            Showing {filteredSubmissions.length} of {submissions.length}{" "}
+            submissions.
+          </p>
+        )}
 
         {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
 
@@ -235,7 +307,7 @@ export const ContactSubmissionsPage: React.FC = () => {
           <div style={styles.listEmptyState}>
             <h3 style={styles.listEmptyTitle}>No submissions found</h3>
             <p style={styles.listEmptyText}>
-              Try another status filter or wait for new contact enquiries.
+              Try another search term or reset the filters.
             </p>
           </div>
         )}
@@ -527,6 +599,36 @@ const styles = {
     flexShrink: 0,
   },
 
+  searchArea: {
+    padding: spacing.md,
+    borderBottom: `1px solid ${colors.border.default}`,
+    display: "flex",
+    gap: spacing.sm,
+  },
+
+  searchInput: {
+    width: "100%",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.dark,
+    color: colors.text.main,
+    padding: "11px 12px",
+    fontSize: "13px",
+    outline: "none",
+  },
+
+  resetButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: "0 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
+  },
+
   filters: {
     padding: spacing.md,
     borderBottom: `1px solid ${colors.border.default}`,
@@ -564,6 +666,15 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "10px",
+  },
+
+  activeFilterText: {
+    color: colors.text.muted,
+    fontSize: "12px",
+    lineHeight: "18px",
+    margin: 0,
+    padding: `${spacing.sm} ${spacing.md}`,
+    borderBottom: `1px solid ${colors.border.default}`,
   },
 
   stateText: {
