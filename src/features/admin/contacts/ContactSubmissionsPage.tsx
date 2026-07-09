@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getContactSubmissions,
@@ -11,6 +11,43 @@ import type {
 
 const statusOptions: ContactSubmissionStatus[] = ["new", "contacted", "closed"];
 
+const statusMeta: Record<
+  ContactSubmissionStatus,
+  {
+    label: string;
+    description: string;
+    badgeStyle: React.CSSProperties;
+  }
+> = {
+  new: {
+    label: "New",
+    description: "Needs first response",
+    badgeStyle: {
+      color: colors.accent.green,
+      borderColor: "rgba(147, 220, 92, 0.45)",
+      backgroundColor: "rgba(147, 220, 92, 0.1)",
+    },
+  },
+  contacted: {
+    label: "Contacted",
+    description: "Follow-up in progress",
+    badgeStyle: {
+      color: "#93b5ff",
+      borderColor: "rgba(147, 181, 255, 0.45)",
+      backgroundColor: "rgba(147, 181, 255, 0.1)",
+    },
+  },
+  closed: {
+    label: "Closed",
+    description: "No further action needed",
+    badgeStyle: {
+      color: colors.text.muted,
+      borderColor: colors.border.default,
+      backgroundColor: "rgba(255,255,255,0.04)",
+    },
+  },
+};
+
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -19,6 +56,20 @@ const formatDate = (value: string) => {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+};
+
+const getStatusBadgeStyle = (status: ContactSubmissionStatus) => ({
+  ...styles.statusBadge,
+  ...statusMeta[status].badgeStyle,
+});
+
+const getMailtoHref = (submission: ContactSubmission) => {
+  const subject = `DevBySam enquiry: ${submission.service}`;
+  const body = `Hi ${submission.name},\n\nThank you for contacting DevBySam about ${submission.service}.\n\n`;
+
+  return `mailto:${submission.email}?subject=${encodeURIComponent(
+    subject,
+  )}&body=${encodeURIComponent(body)}`;
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
@@ -31,6 +82,9 @@ export const ContactSubmissionsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
+  const [copiedField, setCopiedField] = useState<"email" | "phone" | null>(
+    null,
+  );
 
   const filteredSubmissions = useMemo(() => {
     if (statusFilter === "all") {
@@ -42,7 +96,19 @@ export const ContactSubmissionsPage: React.FC = () => {
     );
   }, [statusFilter, submissions]);
 
-  const loadSubmissions = async () => {
+  const statusCounts = useMemo(() => {
+    return statusOptions.reduce(
+      (counts, status) => ({
+        ...counts,
+        [status]: submissions.filter(
+          (submission) => submission.status === status,
+        ).length,
+      }),
+      {} as Record<ContactSubmissionStatus, number>,
+    );
+  }, [submissions]);
+
+  const loadSubmissions = useCallback(async () => {
     setIsLoading(true);
     setError("");
 
@@ -69,11 +135,20 @@ export const ContactSubmissionsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    void loadSubmissions();
-  }, []);
+    let isMounted = true;
+
+    window.setTimeout(() => {
+      if (!isMounted) return;
+      void loadSubmissions();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadSubmissions]);
 
   const handleStatusChange = async (
     submissionId: string,
@@ -93,6 +168,21 @@ export const ContactSubmissionsPage: React.FC = () => {
       setError("Could not update submission status.");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleCopy = async (value: string, field: "email" | "phone") => {
+    setError("");
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(field);
+
+      window.setTimeout(() => {
+        setCopiedField(null);
+      }, 1600);
+    } catch {
+      setError("Could not copy to clipboard.");
     }
   };
 
@@ -120,6 +210,7 @@ export const ContactSubmissionsPage: React.FC = () => {
             onClick={() => setStatusFilter("all")}
           >
             All
+            <span style={styles.filterCount}>{submissions.length}</span>
           </button>
 
           {statusOptions.map((status) => (
@@ -132,7 +223,8 @@ export const ContactSubmissionsPage: React.FC = () => {
               }}
               onClick={() => setStatusFilter(status)}
             >
-              {status}
+              {statusMeta[status].label}
+              <span style={styles.filterCount}>{statusCounts[status]}</span>
             </button>
           ))}
         </div>
@@ -140,7 +232,12 @@ export const ContactSubmissionsPage: React.FC = () => {
         {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
 
         {!isLoading && filteredSubmissions.length === 0 && (
-          <p style={styles.stateText}>No submissions found.</p>
+          <div style={styles.listEmptyState}>
+            <h3 style={styles.listEmptyTitle}>No submissions found</h3>
+            <p style={styles.listEmptyText}>
+              Try another status filter or wait for new contact enquiries.
+            </p>
+          </div>
         )}
 
         <div style={styles.list}>
@@ -168,7 +265,9 @@ export const ContactSubmissionsPage: React.FC = () => {
 
                 <div style={styles.itemFooter}>
                   <span style={styles.serviceBadge}>{submission.service}</span>
-                  <span style={styles.statusBadge}>{submission.status}</span>
+                  <span style={getStatusBadgeStyle(submission.status)}>
+                    {statusMeta[submission.status].label}
+                  </span>
                 </div>
               </button>
             );
@@ -189,9 +288,9 @@ export const ContactSubmissionsPage: React.FC = () => {
         {selectedSubmission && (
           <>
             <header style={styles.detailHeader}>
-              <div>
-                <span style={styles.detailBadge}>
-                  {selectedSubmission.status}
+              <div style={styles.detailHeaderContent}>
+                <span style={getStatusBadgeStyle(selectedSubmission.status)}>
+                  {statusMeta[selectedSubmission.status].label}
                 </span>
 
                 <h3 style={styles.detailTitle}>{selectedSubmission.name}</h3>
@@ -199,45 +298,142 @@ export const ContactSubmissionsPage: React.FC = () => {
                 <p style={styles.detailMeta}>
                   Submitted {formatDate(selectedSubmission.createdAt)}
                 </p>
+
+                <p style={styles.statusDescription}>
+                  {statusMeta[selectedSubmission.status].description}
+                </p>
               </div>
 
-              <select
-                value={selectedSubmission.status}
-                disabled={isUpdatingStatus}
-                style={styles.statusSelect}
-                onChange={(event) =>
-                  handleStatusChange(
-                    selectedSubmission.id,
-                    event.target.value as ContactSubmissionStatus,
-                  )
-                }
-              >
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <div style={styles.statusControls}>
+                <select
+                  value={selectedSubmission.status}
+                  disabled={isUpdatingStatus}
+                  style={styles.statusSelect}
+                  onChange={(event) =>
+                    handleStatusChange(
+                      selectedSubmission.id,
+                      event.target.value as ContactSubmissionStatus,
+                    )
+                  }
+                >
+                  {statusOptions.map((status) => (
+                    <option key={status} value={status}>
+                      {statusMeta[status].label}
+                    </option>
+                  ))}
+                </select>
+
+                <div style={styles.quickStatusActions}>
+                  {selectedSubmission.status !== "contacted" && (
+                    <button
+                      type="button"
+                      style={styles.quickStatusButton}
+                      disabled={isUpdatingStatus}
+                      onClick={() =>
+                        handleStatusChange(selectedSubmission.id, "contacted")
+                      }
+                    >
+                      Mark contacted
+                    </button>
+                  )}
+
+                  {selectedSubmission.status !== "closed" && (
+                    <button
+                      type="button"
+                      style={styles.quickStatusButtonSecondary}
+                      disabled={isUpdatingStatus}
+                      onClick={() =>
+                        handleStatusChange(selectedSubmission.id, "closed")
+                      }
+                    >
+                      Close
+                    </button>
+                  )}
+
+                  {selectedSubmission.status !== "new" && (
+                    <button
+                      type="button"
+                      style={styles.quickStatusButtonSecondary}
+                      disabled={isUpdatingStatus}
+                      onClick={() =>
+                        handleStatusChange(selectedSubmission.id, "new")
+                      }
+                    >
+                      Reopen
+                    </button>
+                  )}
+                </div>
+              </div>
             </header>
 
             <div style={styles.infoGrid}>
               <div style={styles.infoCard}>
-                <span style={styles.infoLabel}>Email</span>
+                <div style={styles.infoCardHeader}>
+                  <span style={styles.infoLabel}>Email</span>
+
+                  <button
+                    type="button"
+                    style={{
+                      ...styles.copyButton,
+                      ...(copiedField === "email"
+                        ? styles.copyButtonSuccess
+                        : {}),
+                    }}
+                    onClick={() =>
+                      handleCopy(selectedSubmission.email, "email")
+                    }
+                  >
+                    {copiedField === "email" ? "Copied" : "Copy"}
+                  </button>
+                </div>
+
                 <a
-                  href={`mailto:${selectedSubmission.email}`}
+                  href={getMailtoHref(selectedSubmission)}
                   style={styles.infoValue}
                 >
                   {selectedSubmission.email}
                 </a>
+
+                <a
+                  href={getMailtoHref(selectedSubmission)}
+                  style={styles.contactActionLink}
+                >
+                  Send email
+                </a>
               </div>
 
               <div style={styles.infoCard}>
-                <span style={styles.infoLabel}>Phone</span>
+                <div style={styles.infoCardHeader}>
+                  <span style={styles.infoLabel}>Phone</span>
+
+                  <button
+                    type="button"
+                    style={{
+                      ...styles.copyButton,
+                      ...(copiedField === "phone"
+                        ? styles.copyButtonSuccess
+                        : {}),
+                    }}
+                    onClick={() =>
+                      handleCopy(selectedSubmission.phone, "phone")
+                    }
+                  >
+                    {copiedField === "phone" ? "Copied" : "Copy"}
+                  </button>
+                </div>
+
                 <a
                   href={`tel:${selectedSubmission.phone}`}
                   style={styles.infoValue}
                 >
                   {selectedSubmission.phone}
+                </a>
+
+                <a
+                  href={`tel:${selectedSubmission.phone}`}
+                  style={styles.contactActionLink}
+                >
+                  Call number
                 </a>
               </div>
 
@@ -257,7 +453,13 @@ export const ContactSubmissionsPage: React.FC = () => {
             </div>
 
             <article style={styles.messageCard}>
-              <span style={styles.infoLabel}>Message</span>
+              <div style={styles.messageHeader}>
+                <span style={styles.infoLabel}>Message</span>
+                <span style={styles.messageDate}>
+                  {formatDate(selectedSubmission.createdAt)}
+                </span>
+              </div>
+
               <p style={styles.messageText}>{selectedSubmission.message}</p>
             </article>
           </>
@@ -342,6 +544,9 @@ const styles = {
     fontSize: "12px",
     textTransform: "capitalize" as const,
     cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
   },
 
   filterButtonActive: {
@@ -350,11 +555,40 @@ const styles = {
     color: colors.accent.green,
   },
 
+  filterCount: {
+    minWidth: "18px",
+    height: "18px",
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "10px",
+  },
+
   stateText: {
     color: colors.text.muted,
     fontSize: "14px",
     margin: 0,
     padding: spacing.lg,
+  },
+
+  listEmptyState: {
+    padding: spacing.xl,
+    textAlign: "center" as const,
+  },
+
+  listEmptyTitle: {
+    color: colors.text.main,
+    fontSize: "16px",
+    margin: `0 0 ${spacing.sm} 0`,
+  },
+
+  listEmptyText: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: 0,
   },
 
   list: {
@@ -425,12 +659,13 @@ const styles = {
   },
 
   statusBadge: {
-    color: colors.accent.green,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
+    border: "1px solid",
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
     textTransform: "capitalize" as const,
+    display: "inline-flex",
+    alignItems: "center",
   },
 
   detailPanel: {
@@ -449,28 +684,36 @@ const styles = {
     marginBottom: spacing.xl,
   },
 
-  detailBadge: {
-    display: "inline-flex",
-    color: colors.accent.green,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    borderRadius: radius.pill,
-    padding: "6px 10px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
-    marginBottom: spacing.md,
+  detailHeaderContent: {
+    minWidth: 0,
   },
 
   detailTitle: {
     color: colors.text.main,
     fontSize: "28px",
     fontWeight: typography.fontWeight.black,
-    margin: 0,
+    margin: `${spacing.md} 0 0 0`,
   },
 
   detailMeta: {
     color: colors.text.muted,
     fontSize: "13px",
     margin: `${spacing.sm} 0 0 0`,
+  },
+
+  statusDescription: {
+    color: colors.text.muted,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: `${spacing.sm} 0 0 0`,
+  },
+
+  statusControls: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "flex-end",
+    gap: spacing.sm,
+    flexShrink: 0,
   },
 
   statusSelect: {
@@ -481,6 +724,36 @@ const styles = {
     padding: `10px ${spacing.md}`,
     textTransform: "capitalize" as const,
     outline: "none",
+  },
+
+  quickStatusActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexWrap: "wrap" as const,
+    justifyContent: "flex-end",
+  },
+
+  quickStatusButton: {
+    border: "none",
+    borderRadius: radius.md,
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
+    padding: "9px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.black,
+    cursor: "pointer",
+  },
+
+  quickStatusButtonSecondary: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: "9px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
   },
 
   infoGrid: {
@@ -498,11 +771,18 @@ const styles = {
     minWidth: 0,
   },
 
+  infoCardHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+    marginBottom: spacing.sm,
+  },
+
   infoLabel: {
     display: "block",
     color: colors.text.muted,
     fontSize: "12px",
-    marginBottom: spacing.sm,
   },
 
   infoValue: {
@@ -511,6 +791,32 @@ const styles = {
     lineHeight: "22px",
     textDecoration: "none",
     overflowWrap: "anywhere" as const,
+    display: "block",
+  },
+
+  copyButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.text.muted,
+    padding: "5px 9px",
+    fontSize: "11px",
+    cursor: "pointer",
+  },
+
+  copyButtonSuccess: {
+    borderColor: colors.accent.green,
+    color: colors.accent.green,
+    backgroundColor: "rgba(147, 220, 92, 0.1)",
+  },
+
+  contactActionLink: {
+    display: "inline-flex",
+    marginTop: spacing.md,
+    color: colors.accent.green,
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
   },
 
   messageCard: {
@@ -520,12 +826,26 @@ const styles = {
     padding: spacing.lg,
   },
 
+  messageHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+
+  messageDate: {
+    color: colors.text.muted,
+    fontSize: "11px",
+    flexShrink: 0,
+  },
+
   messageText: {
     color: colors.text.main,
     fontSize: "15px",
     lineHeight: "24px",
     margin: 0,
     whiteSpace: "pre-line" as const,
+    overflowWrap: "anywhere" as const,
   },
 
   emptyState: {
