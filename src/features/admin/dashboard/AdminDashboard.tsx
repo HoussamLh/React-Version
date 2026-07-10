@@ -1,48 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
-
-const subscribeToCompactDashboard = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 900px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactDashboardSnapshot = () => {
-  return window.matchMedia("(max-width: 900px)").matches;
-};
-
-const getServerCompactDashboardSnapshot = () => false;
-
-const subscribeToNarrowDashboard = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 640px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getNarrowDashboardSnapshot = () => {
-  return window.matchMedia("(max-width: 640px)").matches;
-};
-
-const getServerNarrowDashboardSnapshot = () => false;
 
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {
@@ -62,17 +25,8 @@ const getVisitorLabel = (conversation: AdminConversation) => {
 };
 
 export const AdminDashboard: React.FC = () => {
-  const isCompactDashboard = useSyncExternalStore(
-    subscribeToCompactDashboard,
-    getCompactDashboardSnapshot,
-    getServerCompactDashboardSnapshot,
-  );
-
-  const isNarrowDashboard = useSyncExternalStore(
-    subscribeToNarrowDashboard,
-    getNarrowDashboardSnapshot,
-    getServerNarrowDashboardSnapshot,
-  );
+  const isCompactDashboard = useMediaQuery("(max-width: 900px)");
+  const isNarrowDashboard = useMediaQuery("(max-width: 640px)");
 
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
@@ -472,6 +426,12 @@ const styles = {
     width: "100%",
   },
 
+  error: {
+    color: colors.accent.yellow,
+    fontSize: "14px",
+    margin: 0,
+  },
+
   loadingText: {
     color: colors.text.muted,
     fontSize: "14px",
@@ -482,12 +442,6 @@ const styles = {
   disabledAction: {
     opacity: 0.55,
     cursor: "not-allowed",
-  },
-
-  error: {
-    color: colors.accent.yellow,
-    fontSize: "14px",
-    margin: 0,
   },
 
   statsGrid: {
@@ -659,14 +613,6 @@ const styles = {
     padding: "5px 9px",
     fontSize: "11px",
     textTransform: "capitalize" as const,
-  },
-
-  emptyText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    padding: spacing.lg,
   },
 
   listEmptyState: {
