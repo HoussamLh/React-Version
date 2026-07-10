@@ -7,7 +7,8 @@ import {
   AdminSearchInput,
   AdminStatusBadge,
   AdminFilterButton,
-  AdminResetButton
+  AdminResetButton,
+  AdminCountBadge
 } from "../components";
 import type {
   AdminConversation,
@@ -107,7 +108,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </div>
 
         <div style={styles.headerActions}>
-          <span style={styles.count}>{conversations.length}</span>
+          <AdminCountBadge count={conversations.length} />
 
           {hasUnreadConversations && (
             <AdminActionButton
@@ -144,10 +145,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         />
 
         {hasActiveFilters && (
-          <AdminResetButton 
-          isNarrow={isNarrowChat} 
-          onClick={onResetFilters} 
-          />
+          <AdminResetButton isNarrow={isNarrowChat} onClick={onResetFilters} />
         )}
       </div>
 
@@ -312,15 +310,6 @@ const styles = {
     gap: spacing.sm,
     flexWrap: "wrap" as const,
     flexShrink: 0,
-  },
-
-  count: {
-    color: colors.background.dark,
-    backgroundColor: colors.accent.green,
-    borderRadius: radius.pill,
-    padding: "4px 9px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
   },
 
   searchArea: {

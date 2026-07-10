@@ -19,7 +19,8 @@ import {
   AdminStatusBadge,
   AdminPanel,
   AdminFilterButton,
-  AdminResetButton
+  AdminResetButton,
+  AdminCountBadge
 } from "../components";
 import {
   getContactSubmissions,
@@ -305,7 +306,10 @@ export const ContactSubmissionsPage: React.FC = () => {
           </div>
 
           <div style={styles.headerActions}>
-            <span style={styles.count}>{filteredSubmissions.length}</span>
+            <AdminCountBadge
+              count={filteredSubmissions.length}
+              variant="circle"
+            />
 
             <AdminActionButton
               variant="ghost"
@@ -716,20 +720,6 @@ const styles = {
     fontSize: "13px",
     lineHeight: "20px",
     margin: `${spacing.xs} 0 0 0`,
-  },
-
-  count: {
-    minWidth: "28px",
-    height: "28px",
-    borderRadius: radius.pill,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "13px",
-    fontWeight: typography.fontWeight.black,
-    flexShrink: 0,
   },
 
   headerActions: {
