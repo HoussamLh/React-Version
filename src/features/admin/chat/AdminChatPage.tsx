@@ -4,8 +4,9 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { colors, radius } from "../../../design-system";
+import { colors } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
+import { AdminPanel } from "../components";
 import {
   getAdminConversations,
   markConversationReadForAdmin,
@@ -206,52 +207,49 @@ const isNarrowChat = useMediaQuery("(max-width: 640px)");
     loadConversations,
   ]);
 
-  return (
-    <section
-      style={{
-        ...styles.shell,
-        ...(isCompactChat ? styles.shellCompact : {}),
-      }}
-    >
-      <ConversationList
-        conversations={filteredConversations}
-        totalConversationCount={conversations.length}
-        selectedConversationId={selectedConversationId}
-        isLoading={isLoading}
-        error={error}
-        searchQuery={searchQuery}
-        conversationFilter={conversationFilter}
-        filterCounts={filterCounts}
-        hasActiveFilters={hasActiveFilters}
-        hasUnreadConversations={hasUnreadConversations}
-        isCompactChat={isCompactChat}
-        isNarrowChat={isNarrowChat}
-        isMarkingAllRead={isMarkingAllRead}
-        onSearchChange={setSearchQuery}
-        onMarkAllRead={handleMarkAllRead}
-        onFilterChange={setConversationFilter}
-        onResetFilters={handleResetFilters}
-        onRefresh={loadConversations}
-        onSelectConversation={setSelectedConversation}
-      />
+return (
+  <AdminPanel
+    style={{
+      ...styles.shell,
+      ...(isCompactChat ? styles.shellCompact : {}),
+    }}
+  >
+    <ConversationList
+      conversations={filteredConversations}
+      totalConversationCount={conversations.length}
+      selectedConversationId={selectedConversationId}
+      isLoading={isLoading}
+      error={error}
+      searchQuery={searchQuery}
+      conversationFilter={conversationFilter}
+      filterCounts={filterCounts}
+      hasActiveFilters={hasActiveFilters}
+      hasUnreadConversations={hasUnreadConversations}
+      isCompactChat={isCompactChat}
+      isNarrowChat={isNarrowChat}
+      isMarkingAllRead={isMarkingAllRead}
+      onSearchChange={setSearchQuery}
+      onMarkAllRead={handleMarkAllRead}
+      onFilterChange={setConversationFilter}
+      onResetFilters={handleResetFilters}
+      onRefresh={loadConversations}
+      onSelectConversation={setSelectedConversation}
+    />
 
-      <AdminChatWindow
-        conversation={selectedConversation}
-        isCompactChat={isCompactChat}
-        isNarrowChat={isNarrowChat}
-        onConversationUpdated={loadConversations}
-      />
-    </section>
-  );
+    <AdminChatWindow
+      conversation={selectedConversation}
+      isCompactChat={isCompactChat}
+      isNarrowChat={isNarrowChat}
+      onConversationUpdated={loadConversations}
+    />
+  </AdminPanel>
+);
 };
 
 const styles = {
   shell: {
     height: "calc(100vh - 146px)",
     minHeight: "620px",
-    borderRadius: radius.lg,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
     display: "flex",
     backgroundColor: colors.background.dark,
   },
