@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
+import { AdminStatusBadge } from "../components";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
@@ -235,7 +236,7 @@ export const AdminDashboard: React.FC = () => {
 
                 <div style={styles.itemFooter}>
                   <span style={styles.serviceBadge}>{submission.service}</span>
-                  <span style={styles.statusBadge}>{submission.status}</span>
+                  <AdminStatusBadge>{submission.status}</AdminStatusBadge>
                 </div>
               </Link>
             ))}
@@ -304,11 +305,11 @@ export const AdminDashboard: React.FC = () => {
                       : "Live chat"}
                   </span>
 
-                  <span style={styles.statusBadge}>
+                  <AdminStatusBadge>
                     {conversation.unreadCount > 0
                       ? `${conversation.unreadCount} unread`
                       : conversation.status}
-                  </span>
+                  </AdminStatusBadge>
                 </div>
               </Link>
             ))}
@@ -604,15 +605,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  statusBadge: {
-    color: colors.accent.green,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
   },
 
   listEmptyState: {
