@@ -18,6 +18,7 @@ import {
   AdminSearchInput,
   AdminStatusBadge,
   AdminPanel,
+  AdminFilterButton
 } from "../components";
 import {
   getContactSubmissions,
@@ -344,22 +345,13 @@ export const ContactSubmissionsPage: React.FC = () => {
 
         <div style={styles.filters}>
           {filterOptions.map((filter) => (
-            <button
+            <AdminFilterButton
               key={filter.value}
-              type="button"
-              style={{
-                ...styles.filterButton,
-                ...(submissionFilter === filter.value
-                  ? styles.filterButtonActive
-                  : {}),
-              }}
+              label={filter.label}
+              count={filterCounts[filter.value]}
+              isActive={submissionFilter === filter.value}
               onClick={() => setSubmissionFilter(filter.value)}
-            >
-              {filter.label}
-              <span style={styles.filterCount}>
-                {filterCounts[filter.value]}
-              </span>
-            </button>
+            />
           ))}
         </div>
 
@@ -790,37 +782,6 @@ const styles = {
     display: "flex",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
-  },
-
-  filterButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "7px 12px",
-    fontSize: "12px",
-    textTransform: "capitalize" as const,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-
-  filterButtonActive: {
-    backgroundColor: "rgba(147, 220, 92, 0.12)",
-    borderColor: colors.accent.green,
-    color: colors.accent.green,
-  },
-
-  filterCount: {
-    minWidth: "18px",
-    height: "18px",
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
   },
 
   activeFilterText: {
