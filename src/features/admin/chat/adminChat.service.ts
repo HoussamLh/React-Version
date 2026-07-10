@@ -195,10 +195,10 @@ export const updateConversationStatus = async ({
 }) => {
   const client = requireSupabase();
 
-  const { error } = await client
-    .from("conversations")
-    .update({ status })
-    .eq("id", conversationId);
+  const { error } = await client.rpc("update_admin_conversation_status", {
+    target_conversation_id: conversationId,
+    next_status: status,
+  });
 
   if (error) {
     throw error;

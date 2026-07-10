@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { colors, spacing, typography } from "../../../design-system";
-import { getCurrentAdminProfile } from "./adminAuth.service";
+import {
+  getCurrentAdminProfile,
+  subscribeToAdminAuthChanges,
+} from "./adminAuth.service";
 
 type ProtectedAdminRouteProps = {
   children: React.ReactNode;
@@ -19,6 +22,10 @@ export const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({
     let isMounted = true;
 
     const checkAdmin = async () => {
+      if (!isMounted) return;
+
+      setAuthState("loading");
+
       try {
         const profile = await getCurrentAdminProfile();
 
@@ -32,10 +39,17 @@ export const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({
       }
     };
 
-    checkAdmin();
+    window.setTimeout(() => {
+      void checkAdmin();
+    }, 0);
+
+    const unsubscribe = subscribeToAdminAuthChanges(() => {
+      void checkAdmin();
+    });
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

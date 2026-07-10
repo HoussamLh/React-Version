@@ -1,10 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { signInAdmin } from "./adminAuth.service";
+import {
+  getCurrentAdminProfile,
+  signInAdmin,
+  subscribeToAdminAuthChanges,
+} from "./adminAuth.service";
 
 type LocationState = {
   from?: string;
+};
+
+type LoginAuthState = "checking" | "authorized" | "unauthorized";
+
+const getSafeRedirectPath = (path?: string) => {
+  if (!path) return "/admin/dashboard";
+
+  if (!path.startsWith("/admin")) {
+    return "/admin/dashboard";
+  }
+
+  if (path === "/admin/login") {
+    return "/admin/dashboard";
+  }
+
+  return path;
 };
 
 export const AdminLogin: React.FC = () => {
@@ -12,20 +32,66 @@ export const AdminLogin: React.FC = () => {
   const location = useLocation();
 
   const state = location.state as LocationState | null;
-  const redirectTo = state?.from ?? "/admin/dashboard";
+  const redirectTo = getSafeRedirectPath(state?.from);
 
+  const [authState, setAuthState] = useState<LoginAuthState>("checking");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  if (isLoggedIn) {
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkExistingAdminSession = async () => {
+      if (!isMounted) return;
+
+      setAuthState("checking");
+
+      try {
+        const profile = await getCurrentAdminProfile();
+
+        if (!isMounted) return;
+
+        setAuthState(profile ? "authorized" : "unauthorized");
+      } catch {
+        if (!isMounted) return;
+
+        setAuthState("unauthorized");
+      }
+    };
+
+    window.setTimeout(() => {
+      void checkExistingAdminSession();
+    }, 0);
+
+    const unsubscribe = subscribeToAdminAuthChanges(() => {
+      void checkExistingAdminSession();
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
+
+  if (authState === "checking") {
+    return (
+      <main style={styles.page}>
+        <section style={styles.card}>
+          <p style={styles.checkingText}>Checking admin session...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (authState === "authorized") {
     return <Navigate to={redirectTo} replace />;
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     setIsSubmitting(true);
     setError("");
 
@@ -35,7 +101,6 @@ export const AdminLogin: React.FC = () => {
         password,
       });
 
-      setIsLoggedIn(true);
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const message =
@@ -73,6 +138,7 @@ export const AdminLogin: React.FC = () => {
               placeholder="admin@devbysam.co.uk"
               onChange={(event) => setEmail(event.target.value)}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -85,10 +151,18 @@ export const AdminLogin: React.FC = () => {
               placeholder="••••••••"
               onChange={(event) => setPassword(event.target.value)}
               required
+              autoComplete="current-password"
             />
           </div>
 
-          <button type="submit" style={styles.button} disabled={isSubmitting}>
+          <button
+            type="submit"
+            style={{
+              ...styles.button,
+              ...(isSubmitting ? styles.buttonDisabled : {}),
+            }}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
 
@@ -118,6 +192,14 @@ const styles = {
     backgroundColor: colors.background.card,
     border: `1px solid ${colors.border.default}`,
     boxShadow: "0 24px 70px rgba(0,0,0,0.45)",
+  },
+
+  checkingText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    fontWeight: typography.fontWeight.bold,
+    textAlign: "center" as const,
+    margin: 0,
   },
 
   header: {
@@ -191,6 +273,11 @@ const styles = {
     padding: "14px 18px",
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
+  },
+
+  buttonDisabled: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
   error: {
