@@ -18,7 +18,8 @@ import {
   AdminSearchInput,
   AdminStatusBadge,
   AdminPanel,
-  AdminFilterButton
+  AdminFilterButton,
+  AdminResetButton
 } from "../components";
 import {
   getContactSubmissions,
@@ -330,16 +331,10 @@ export const ContactSubmissionsPage: React.FC = () => {
           />
 
           {hasActiveFilters && (
-            <button
-              type="button"
-              style={{
-                ...styles.resetButton,
-                ...(isNarrowContacts ? styles.resetButtonNarrow : {}),
-              }}
+            <AdminResetButton
+              isNarrow={isNarrowContacts}
               onClick={handleResetFilters}
-            >
-              Reset
-            </button>
+            />
           )}
         </div>
 
@@ -758,22 +753,6 @@ const styles = {
 
   searchAreaNarrow: {
     flexDirection: "column" as const,
-  },
-
-  resetButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "0 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  resetButtonNarrow: {
-    padding: "11px 12px",
   },
 
   filters: {
