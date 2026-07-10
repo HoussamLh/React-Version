@@ -33,6 +33,10 @@ import type {
   ContactSubmission,
   ContactSubmissionStatus,
 } from "./contactSubmissions.types";
+import {
+  getContactSubmissionMailtoHref,
+  getContactSubmissionSearchableText,
+} from "./contactSubmissions.helpers";
 
 type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
 
@@ -83,29 +87,6 @@ const getSubmissionStatusTone = (
   }
 
   return "success";
-};
-
-const getMailtoHref = (submission: ContactSubmission) => {
-  const subject = `DevBySam enquiry: ${submission.service}`;
-  const body = `Hi ${submission.name},\n\nThank you for contacting DevBySam about ${submission.service}.\n\n`;
-
-  return `mailto:${submission.email}?subject=${encodeURIComponent(
-    subject,
-  )}&body=${encodeURIComponent(body)}`;
-};
-
-const getSearchableText = (submission: ContactSubmission) => {
-  return [
-    submission.name,
-    submission.email,
-    submission.phone,
-    submission.service,
-    submission.message,
-    submission.status,
-    submission.source,
-  ]
-    .join(" ")
-    .toLowerCase();
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
@@ -162,7 +143,9 @@ export const ContactSubmissionsPage: React.FC = () => {
         return true;
       }
 
-      return getSearchableText(submission).includes(normalizedSearchQuery);
+      return getContactSubmissionSearchableText(submission).includes(
+        normalizedSearchQuery,
+      );
     });
   }, [searchQuery, submissionFilter, submissions]);
 
@@ -573,14 +556,14 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
                 </div>
 
                 <a
-                  href={getMailtoHref(selectedSubmission)}
+                  href={getContactSubmissionMailtoHref(selectedSubmission)}
                   style={styles.infoValue}
                 >
                   {selectedSubmission.email}
                 </a>
 
                 <a
-                  href={getMailtoHref(selectedSubmission)}
+                  href={getContactSubmissionMailtoHref(selectedSubmission)}
                   style={styles.contactActionLink}
                 >
                   Send email
