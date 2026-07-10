@@ -31,6 +31,7 @@ import { hasLiveChatMessageContaining } from "../utils";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
+import { LiveChatIconButton } from "./LiveChatIconButton";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -118,14 +119,9 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   return (
     <>
       <div style={styles.chatHeader}>
-        <button
-          type="button"
-          aria-label="Back to messages"
-          style={styles.darkIconButton}
-          onClick={onBack}
-        >
+        <LiveChatIconButton ariaLabel="Back to messages" onClick={onBack}>
           <ChevronLeft size={20} />
-        </button>
+        </LiveChatIconButton>
 
         <div style={styles.agentBlock}>
           <LiveChatAgentAvatar />
@@ -148,14 +144,12 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
 
         <div style={styles.chatHeaderActions}>
           <div style={styles.menuWrapper}>
-            <button
-              type="button"
-              aria-label="Open chat options"
-              style={styles.darkIconButton}
+            <LiveChatIconButton
+              ariaLabel="Open chat options"
               onClick={onToggleOptions}
             >
               <MoreHorizontal size={20} />
-            </button>
+            </LiveChatIconButton>
 
             {isOptionsOpen && (
               <LiveChatOptionsMenu
@@ -166,14 +160,9 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
             )}
           </div>
 
-          <button
-            type="button"
-            aria-label="Close live chat"
-            style={styles.darkIconButton}
-            onClick={onClose}
-          >
+          <LiveChatIconButton ariaLabel="Close live chat" onClick={onClose}>
             <X size={18} />
-          </button>
+          </LiveChatIconButton>
         </div>
       </div>
 
@@ -287,19 +276,6 @@ const styles = {
     gap: spacing.sm,
     padding: `0 ${spacing.md}`,
     backgroundColor: colors.background.card,
-  },
-
-  darkIconButton: {
-    width: "34px",
-    height: "34px",
-    borderRadius: radius.md,
-    border: "none",
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
   },
 
   agentBlock: {

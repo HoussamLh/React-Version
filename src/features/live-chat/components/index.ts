@@ -7,3 +7,4 @@ export { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 export { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 export { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 export { LiveChatFloatingButton } from "./LiveChatFloatingButton";
+export { LiveChatIconButton } from "./LiveChatIconButton";

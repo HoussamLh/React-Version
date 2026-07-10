@@ -6,6 +6,7 @@ import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatNav } from "./LiveChatNav";
 import { formatLiveChatTime } from "../utils";
+import { LiveChatIconButton } from "./LiveChatIconButton";
 
 type LiveChatMessagesViewProps = {
   activeView: ChatView;
@@ -47,14 +48,13 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
       <div style={styles.lightHeader}>
         <h3 style={styles.messagesTitle}>Messages</h3>
 
-        <button
-          type="button"
-          aria-label="Close live chat"
-          style={styles.darkIconButton}
+        <LiveChatIconButton
+          ariaLabel="Close live chat"
+          style={styles.closeButton}
           onClick={onClose}
         >
           <X size={18} />
-        </button>
+        </LiveChatIconButton>
       </div>
 
       <div style={styles.messagesBody}>
@@ -126,17 +126,7 @@ const styles = {
     margin: 0,
   },
 
-  darkIconButton: {
-    width: "34px",
-    height: "34px",
-    borderRadius: radius.md,
-    border: "none",
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
+  closeButton: {
     position: "absolute" as const,
     right: spacing.lg,
   },

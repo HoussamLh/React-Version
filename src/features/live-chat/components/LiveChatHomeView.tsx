@@ -11,6 +11,7 @@ import { teamAvatars } from "../data/teamAvatars.data";
 import { liveChatBrand } from "../data/liveChat.data";
 import type { ChatView } from "../types/liveChat.types";
 import { LiveChatNav } from "./LiveChatNav";
+import { LiveChatIconButton } from "./LiveChatIconButton";
 
 type LiveChatHomeViewProps = {
   activeView: ChatView;
@@ -38,14 +39,13 @@ export const LiveChatHomeView: React.FC<LiveChatHomeViewProps> = ({
             overlap={16}
           />
 
-          <button
-            type="button"
-            aria-label="Close live chat"
-            style={styles.iconButton}
+          <LiveChatIconButton
+            ariaLabel="Close live chat"
+            variant="main"
             onClick={onClose}
           >
             <X size={18} />
-          </button>
+          </LiveChatIconButton>
         </div>
 
         <div style={styles.heroCopy}>
@@ -93,19 +93,6 @@ const styles = {
     fontWeight: typography.fontWeight.black,
     fontSize: "15px",
     letterSpacing: "-0.02em",
-  },
-
-  iconButton: {
-    width: "34px",
-    height: "34px",
-    borderRadius: radius.md,
-    border: "none",
-    backgroundColor: "transparent",
-    color: colors.text.main,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
   },
 
   heroCopy: {
