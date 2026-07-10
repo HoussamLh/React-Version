@@ -24,7 +24,7 @@ import {
   AdminLoadingText,
   AdminSuccessMessage,
 } from "../components";
-import { formatAdminDateTime } from "../utils";
+import { copyTextToClipboard, formatAdminDateTime } from "../utils";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -252,20 +252,20 @@ export const ContactSubmissionsPage: React.FC = () => {
     }
   };
 
-  const handleCopy = async (value: string, field: "email" | "phone") => {
-    setError("");
+const handleCopy = async (value: string, field: "email" | "phone") => {
+  setError("");
 
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopiedField(field);
+  try {
+    await copyTextToClipboard(value);
+    setCopiedField(field);
 
-      window.setTimeout(() => {
-        setCopiedField(null);
-      }, 1600);
-    } catch {
-      setError("Could not copy to clipboard.");
-    }
-  };
+    window.setTimeout(() => {
+      setCopiedField(null);
+    }, 1600);
+  } catch {
+    setError("Could not copy to clipboard.");
+  }
+};
 
   const handleResetFilters = () => {
     setSubmissionFilter("all");
