@@ -10,18 +10,11 @@ import {
   AdminPageHeader,
 } from "../components";
 import { formatAdminShortDateTime } from "../utils";
+import { getAdminConversationVisitorLabel } from "../chat/adminChat.helpers";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
-};
 
 export const AdminDashboard: React.FC = () => {
   const isCompactDashboard = useMediaQuery("(max-width: 900px)");
@@ -259,7 +252,7 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div style={styles.listTop}>
                   <span style={styles.itemTitle}>
-                    {getVisitorLabel(conversation)}
+                    {getAdminConversationVisitorLabel(conversation)}
                   </span>
 
                   <span style={styles.itemDate}>

@@ -21,8 +21,8 @@ import {
 } from "./ConversationList";
 
 export const AdminChatPage: React.FC = () => {
-const isCompactChat = useMediaQuery("(max-width: 1250px)");
-const isNarrowChat = useMediaQuery("(max-width: 640px)");
+  const isCompactChat = useMediaQuery("(max-width: 1250px)");
+  const isNarrowChat = useMediaQuery("(max-width: 640px)");
 
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
@@ -109,9 +109,9 @@ const isNarrowChat = useMediaQuery("(max-width: 640px)");
         return true;
       }
 
-    return getAdminConversationSearchableText(conversation).includes(
-       normalizedSearchQuery,
-    );
+      return getAdminConversationSearchableText(conversation).includes(
+        normalizedSearchQuery,
+      );
     });
   }, [conversationFilter, conversations, searchQuery]);
 
@@ -193,43 +193,43 @@ const isNarrowChat = useMediaQuery("(max-width: 640px)");
     loadConversations,
   ]);
 
-return (
-  <AdminPanel
-    style={{
-      ...styles.shell,
-      ...(isCompactChat ? styles.shellCompact : {}),
-    }}
-  >
-    <ConversationList
-      conversations={filteredConversations}
-      totalConversationCount={conversations.length}
-      selectedConversationId={selectedConversationId}
-      isLoading={isLoading}
-      error={error}
-      searchQuery={searchQuery}
-      conversationFilter={conversationFilter}
-      filterCounts={filterCounts}
-      hasActiveFilters={hasActiveFilters}
-      hasUnreadConversations={hasUnreadConversations}
-      isCompactChat={isCompactChat}
-      isNarrowChat={isNarrowChat}
-      isMarkingAllRead={isMarkingAllRead}
-      onSearchChange={setSearchQuery}
-      onMarkAllRead={handleMarkAllRead}
-      onFilterChange={setConversationFilter}
-      onResetFilters={handleResetFilters}
-      onRefresh={loadConversations}
-      onSelectConversation={setSelectedConversation}
-    />
+  return (
+    <AdminPanel
+      style={{
+        ...styles.shell,
+        ...(isCompactChat ? styles.shellCompact : {}),
+      }}
+    >
+      <ConversationList
+        conversations={filteredConversations}
+        totalConversationCount={conversations.length}
+        selectedConversationId={selectedConversationId}
+        isLoading={isLoading}
+        error={error}
+        searchQuery={searchQuery}
+        conversationFilter={conversationFilter}
+        filterCounts={filterCounts}
+        hasActiveFilters={hasActiveFilters}
+        hasUnreadConversations={hasUnreadConversations}
+        isCompactChat={isCompactChat}
+        isNarrowChat={isNarrowChat}
+        isMarkingAllRead={isMarkingAllRead}
+        onSearchChange={setSearchQuery}
+        onMarkAllRead={handleMarkAllRead}
+        onFilterChange={setConversationFilter}
+        onResetFilters={handleResetFilters}
+        onRefresh={loadConversations}
+        onSelectConversation={setSelectedConversation}
+      />
 
-    <AdminChatWindow
-      conversation={selectedConversation}
-      isCompactChat={isCompactChat}
-      isNarrowChat={isNarrowChat}
-      onConversationUpdated={loadConversations}
-    />
-  </AdminPanel>
-);
+      <AdminChatWindow
+        conversation={selectedConversation}
+        isCompactChat={isCompactChat}
+        isNarrowChat={isNarrowChat}
+        onConversationUpdated={loadConversations}
+      />
+    </AdminPanel>
+  );
 };
 
 const styles = {
