@@ -19,6 +19,7 @@ import {
   AdminSuccessMessage,
   AdminMetaChip,
 } from "../components";
+import { formatAdminDateTime } from "../utils";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
 import { getConversationStatusTone } from "./adminChat.helpers";
@@ -45,16 +46,6 @@ const appendUniqueMessage = (
   }
 
   return [...currentMessages, nextMessage];
-};
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 };
 
 const getVisitorLabel = (conversation: AdminConversation) => {
@@ -342,7 +333,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             <AdminMetaChip>Source: {conversation.source}</AdminMetaChip>
             <AdminMetaChip>
               {" "}
-              Last message: {formatDate(conversation.lastMessageAt)}
+              Last message: {formatAdminDateTime(conversation.lastMessageAt)}
             </AdminMetaChip>
             <AdminMetaChip>
               Visitor ID: {conversation.visitorId.slice(0, 8)}

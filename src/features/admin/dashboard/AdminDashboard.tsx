@@ -8,19 +8,11 @@ import {
   AdminPanel,
   AdminLoadingText
 } from "../components";
+import { formatAdminShortDateTime } from "../utils";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
 
 const getVisitorLabel = (conversation: AdminConversation) => {
   return (
@@ -228,7 +220,7 @@ export const AdminDashboard: React.FC = () => {
                 <div style={styles.listTop}>
                   <span style={styles.itemTitle}>{submission.name}</span>
                   <span style={styles.itemDate}>
-                    {formatDate(submission.createdAt)}
+                    {formatAdminShortDateTime(submission.createdAt)}
                   </span>
                 </div>
 
@@ -284,7 +276,7 @@ export const AdminDashboard: React.FC = () => {
                   </span>
 
                   <span style={styles.itemDate}>
-                    {formatDate(conversation.lastMessageAt)}
+                    {formatAdminShortDateTime(conversation.lastMessageAt)}
                   </span>
                 </div>
 

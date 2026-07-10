@@ -11,6 +11,7 @@ import {
   AdminCountBadge,
   AdminLoadingText,
 } from "../components";
+import { formatAdminTimeWithDate } from "../utils";
 import type {
   AdminConversation,
   AdminConversationStatus,
@@ -56,15 +57,6 @@ const filterOptions: {
   { label: "Unread", value: "unread" },
   { label: "Offline", value: "offline" },
 ];
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
-};
 
 const getVisitorLabel = (conversation: AdminConversation) => {
   return (
@@ -230,7 +222,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   )}
 
                   <span style={styles.time}>
-                    {formatDate(conversation.lastMessageAt)}
+                    {formatAdminTimeWithDate(conversation.lastMessageAt)}
                   </span>
                 </div>
               </div>

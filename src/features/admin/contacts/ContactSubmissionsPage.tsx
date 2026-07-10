@@ -24,6 +24,7 @@ import {
   AdminLoadingText,
   AdminSuccessMessage,
 } from "../components";
+import { formatAdminDateTime } from "../utils";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -68,16 +69,6 @@ const statusMeta: Record<
     label: "Closed",
     description: "No further action needed",
   },
-};
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 };
 
 const getSubmissionStatusTone = (
@@ -404,7 +395,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                 <div style={styles.itemTop}>
                   <span style={styles.name}>{submission.name}</span>
                   <span style={styles.date}>
-                    {formatDate(submission.createdAt)}
+                    {formatAdminDateTime(submission.createdAt)}
                   </span>
                 </div>
 
@@ -465,7 +456,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                 </h3>
 
                 <p style={styles.detailMeta}>
-                  Submitted {formatDate(selectedSubmission.createdAt)}
+                  Submitted {formatAdminDateTime(selectedSubmission.createdAt)}
                 </p>
 
                 <p style={styles.statusDescription}>
@@ -655,7 +646,7 @@ export const ContactSubmissionsPage: React.FC = () => {
               >
                 <span style={styles.infoLabel}>Message</span>
                 <span style={styles.messageDate}>
-                  {formatDate(selectedSubmission.createdAt)}
+                  {formatAdminDateTime(selectedSubmission.createdAt)}
                 </span>
               </div>
 
