@@ -10,6 +10,7 @@ import {
   AdminResetButton,
   AdminCountBadge,
   AdminLoadingText,
+  AdminPanelHeader,
 } from "../components";
 import { formatAdminTimeWithDate } from "../utils";
 import type {
@@ -89,37 +90,35 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         ...(isCompactChat ? styles.panelCompact : {}),
       }}
     >
-      <div style={styles.header}>
-        <div>
-          <h2 style={styles.title}>Conversations</h2>
-          <p style={styles.subtitle}>Live chat inbox</p>
-        </div>
+      <AdminPanelHeader
+        title="Conversations"
+        subtitle="Live chat inbox"
+        actions={
+          <div style={styles.headerActions}>
+            <AdminCountBadge count={conversations.length} />
 
-        <div style={styles.headerActions}>
-          <AdminCountBadge count={conversations.length} />
+            {hasUnreadConversations && (
+              <AdminActionButton
+                variant="successGhost"
+                size="sm"
+                disabled={isMarkingAllRead || isLoading}
+                onClick={onMarkAllRead}
+              >
+                {isMarkingAllRead ? "Marking..." : "Mark all read"}
+              </AdminActionButton>
+            )}
 
-          {hasUnreadConversations && (
             <AdminActionButton
-              variant="successGhost"
+              variant="ghost"
               size="sm"
-              disabled={isMarkingAllRead || isLoading}
-              onClick={onMarkAllRead}
+              disabled={isLoading}
+              onClick={onRefresh}
             >
-              {isMarkingAllRead ? "Marking..." : "Mark all read"}
+              {isLoading ? "..." : "Refresh"}
             </AdminActionButton>
-          )}
-
-          <AdminActionButton
-            variant="ghost"
-            size="sm"
-            disabled={isLoading}
-            onClick={onRefresh}
-          >
-            {isLoading ? "..." : "Refresh"}
-          </AdminActionButton>
-        </div>
-      </div>
-
+          </div>
+        }
+      />
       <div
         style={{
           ...styles.searchArea,
@@ -267,30 +266,6 @@ const styles = {
     minWidth: 0,
     borderRight: "none",
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  header: {
-    minHeight: "72px",
-    padding: spacing.lg,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "18px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    lineHeight: "18px",
-    margin: "4px 0 0 0",
   },
 
   headerActions: {

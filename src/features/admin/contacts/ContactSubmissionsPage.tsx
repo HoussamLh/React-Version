@@ -23,6 +23,7 @@ import {
   AdminCountBadge,
   AdminLoadingText,
   AdminSuccessMessage,
+  AdminPanelHeader,
 } from "../components";
 import { copyTextToClipboard, formatAdminDateTime } from "../utils";
 import {
@@ -268,35 +269,28 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
           ...(isCompactContacts ? styles.listPanelCompact : {}),
         }}
       >
-        <div
-          style={{
-            ...styles.listHeader,
-            ...(isNarrowContacts ? styles.listHeaderNarrow : {}),
-          }}
-        >
-          <div>
-            <h2 style={styles.title}>Contact Submissions</h2>
-            <p style={styles.subtitle}>
-              Review website enquiries from the contact form.
-            </p>
-          </div>
+        <AdminPanelHeader
+          title="Contact Submissions"
+          subtitle="Review website enquiries from the contact form."
+          isNarrow={isNarrowContacts}
+          actions={
+            <div style={styles.headerActions}>
+              <AdminCountBadge
+                count={filteredSubmissions.length}
+                variant="circle"
+              />
 
-          <div style={styles.headerActions}>
-            <AdminCountBadge
-              count={filteredSubmissions.length}
-              variant="circle"
-            />
-
-            <AdminActionButton
-              variant="ghost"
-              size="sm"
-              disabled={isLoading}
-              onClick={loadSubmissions}
-            >
-              {isLoading ? "..." : "Refresh"}
-            </AdminActionButton>
-          </div>
-        </div>
+              <AdminActionButton
+                variant="ghost"
+                size="sm"
+                disabled={isLoading}
+                onClick={loadSubmissions}
+              >
+                {isLoading ? "..." : "Refresh"}
+              </AdminActionButton>
+            </div>
+          }
+        />
 
         <div
           style={{
@@ -674,32 +668,6 @@ const styles = {
     minWidth: 0,
     borderRight: "none",
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  listHeader: {
-    padding: spacing.lg,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  listHeaderNarrow: {
-    alignItems: "flex-start",
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "20px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `${spacing.xs} 0 0 0`,
   },
 
   headerActions: {
