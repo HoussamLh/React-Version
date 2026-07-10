@@ -6,3 +6,4 @@ export { AdminSearchInput } from "./AdminSearchInput";
 export { AdminPanel } from "./AdminPanel";
 export { AdminFilterButton } from "./AdminFilterButton";
 export { AdminResetButton } from "./AdminResetButton";
+export { AdminCountBadge } from "./AdminCountBadge";
