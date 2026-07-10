@@ -159,6 +159,7 @@ export const ContactSubmissionsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [copiedField, setCopiedField] = useState<"email" | "phone" | null>(
     null,
   );
@@ -248,12 +249,29 @@ export const ContactSubmissionsPage: React.FC = () => {
     };
   }, [loadSubmissions]);
 
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+
+    window.setTimeout(() => {
+      setSuccessMessage("");
+    }, 2200);
+  };
+
   const handleStatusChange = async (
     submissionId: string,
     status: ContactSubmissionStatus,
   ) => {
+    if (status === "closed") {
+      const confirmed = window.confirm(
+        "Are you sure you want to close this contact submission?",
+      );
+
+      if (!confirmed) return;
+    }
+
     setIsUpdatingStatus(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       await updateContactSubmissionStatus({
@@ -262,6 +280,9 @@ export const ContactSubmissionsPage: React.FC = () => {
       });
 
       await loadSubmissions();
+      showSuccessMessage(
+        `Submission marked as ${statusMeta[status].label.toLowerCase()}.`,
+      );
     } catch {
       setError("Could not update submission status.");
     } finally {
@@ -315,7 +336,21 @@ export const ContactSubmissionsPage: React.FC = () => {
             </p>
           </div>
 
-          <span style={styles.count}>{filteredSubmissions.length}</span>
+          <div style={styles.headerActions}>
+            <span style={styles.count}>{filteredSubmissions.length}</span>
+
+            <button
+              type="button"
+              style={{
+                ...styles.refreshButton,
+                ...(isLoading ? styles.disabledAction : {}),
+              }}
+              onClick={loadSubmissions}
+              disabled={isLoading}
+            >
+              {isLoading ? "..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         <div
@@ -374,9 +409,24 @@ export const ContactSubmissionsPage: React.FC = () => {
           </p>
         )}
 
+        {error && (
+          <div style={styles.errorRecovery}>
+            <p style={styles.errorRecoveryText}>{error}</p>
+
+            <button
+              type="button"
+              style={styles.errorRecoveryButton}
+              onClick={loadSubmissions}
+              disabled={isLoading}
+            >
+              {isLoading ? "Retrying..." : "Retry"}
+            </button>
+          </div>
+        )}
+
         {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
 
-        {!isLoading && filteredSubmissions.length === 0 && (
+        {!isLoading && !error && filteredSubmissions.length === 0 && (
           <div style={styles.listEmptyState}>
             <h3 style={styles.listEmptyTitle}>No submissions found</h3>
             <p style={styles.listEmptyText}>
@@ -484,6 +534,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                   style={{
                     ...styles.statusSelect,
                     ...(isNarrowContacts ? styles.statusSelectNarrow : {}),
+                    ...(isUpdatingStatus ? styles.disabledAction : {}),
                   }}
                   onChange={(event) =>
                     handleStatusChange(
@@ -518,6 +569,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -536,6 +588,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -554,6 +607,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                         ...(isNarrowContacts
                           ? styles.quickStatusButtonNarrow
                           : {}),
+                        ...(isUpdatingStatus ? styles.disabledAction : {}),
                       }}
                       disabled={isUpdatingStatus}
                       onClick={() =>
@@ -676,8 +730,7 @@ export const ContactSubmissionsPage: React.FC = () => {
             </article>
           </>
         )}
-
-        {error && <p style={styles.error}>{error}</p>}
+        {successMessage && <p style={styles.successText}>{successMessage}</p>}
       </main>
     </section>
   );
@@ -755,6 +808,29 @@ const styles = {
     fontSize: "13px",
     fontWeight: typography.fontWeight.black,
     flexShrink: 0,
+  },
+
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexShrink: 0,
+  },
+
+  refreshButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.text.muted,
+    padding: "6px 10px",
+    fontSize: "11px",
+    cursor: "pointer",
+    boxSizing: "border-box" as const,
+  },
+
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
   searchArea: {
@@ -849,6 +925,17 @@ const styles = {
     fontSize: "14px",
     margin: 0,
     padding: spacing.lg,
+  },
+
+  successText: {
+    color: colors.accent.green,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: `${spacing.lg} 0 0 0`,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(147, 220, 92, 0.35)`,
+    backgroundColor: "rgba(147, 220, 92, 0.08)",
   },
 
   listEmptyState: {
@@ -1065,6 +1152,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   quickStatusButtonSecondary: {
@@ -1076,6 +1164,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   quickStatusButtonNarrow: {
@@ -1210,9 +1299,34 @@ const styles = {
     margin: 0,
   },
 
-  error: {
+  errorRecovery: {
+    margin: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(255, 210, 122, 0.35)`,
+    backgroundColor: "rgba(255, 210, 122, 0.08)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+
+  errorRecoveryText: {
     color: colors.accent.yellow,
     fontSize: "13px",
-    margin: `${spacing.lg} 0 0 0`,
+    lineHeight: "20px",
+    margin: 0,
+  },
+
+  errorRecoveryButton: {
+    border: `1px solid rgba(255, 210, 122, 0.45)`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.accent.yellow,
+    padding: "7px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
   },
 };

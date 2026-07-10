@@ -97,6 +97,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   const [isSending, setIsSending] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isVisitorOnline, setIsVisitorOnline] = useState(false);
   const [isVisitorTyping, setIsVisitorTyping] = useState(false);
 
@@ -221,11 +222,28 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
     }, 1500);
   };
 
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+
+    window.setTimeout(() => {
+      setSuccessMessage("");
+    }, 2200);
+  };
+
   const handleStatusChange = async (status: AdminConversationStatus) => {
     if (!conversationId || conversationStatus === status) return;
 
+    if (status === "closed") {
+      const confirmed = window.confirm(
+        "Are you sure you want to close this live chat conversation?",
+      );
+
+      if (!confirmed) return;
+    }
+
     setIsUpdatingStatus(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       await updateConversationStatus({
@@ -234,6 +252,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
       });
 
       onConversationUpdated();
+      showSuccessMessage(`Conversation marked as ${status}.`);
     } catch {
       setError("Could not update conversation status.");
     } finally {
@@ -364,6 +383,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             style={{
               ...styles.statusSelect,
               ...(isNarrowChat ? styles.statusSelectNarrow : {}),
+              ...(isUpdatingStatus ? styles.disabledAction : {}),
             }}
             onChange={(event) =>
               handleStatusChange(event.target.value as AdminConversationStatus)
@@ -389,6 +409,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 style={{
                   ...styles.primaryAction,
                   ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                  ...(isUpdatingStatus ? styles.disabledAction : {}),
                 }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("open")}
@@ -403,6 +424,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 style={{
                   ...styles.secondaryAction,
                   ...(isNarrowChat ? styles.actionButtonNarrow : {}),
+                  ...(isUpdatingStatus ? styles.disabledAction : {}),
                 }}
                 disabled={isUpdatingStatus}
                 onClick={() => handleStatusChange("pending")}
@@ -453,6 +475,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         )}
 
         {error && <p style={styles.error}>{error}</p>}
+        {successMessage && <p style={styles.successText}>{successMessage}</p>}
 
         <div ref={bottomRef} />
       </div>
@@ -560,6 +583,7 @@ const styles = {
     padding: `10px ${spacing.md}`,
     textTransform: "capitalize" as const,
     outline: "none",
+    boxSizing: "border-box" as const,
   },
 
   quickActions: {
@@ -579,6 +603,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   secondaryAction: {
@@ -590,6 +615,12 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
+  },
+
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
   body: {
@@ -604,6 +635,13 @@ const styles = {
   stateText: {
     color: colors.text.muted,
     fontSize: "14px",
+    margin: 0,
+  },
+
+  successText: {
+    color: colors.accent.green,
+    fontSize: "13px",
+    lineHeight: "20px",
     margin: 0,
   },
 

@@ -21,9 +21,12 @@ type ConversationListProps = {
   conversationFilter: AdminConversationFilter;
   filterCounts: Record<AdminConversationFilter, number>;
   hasActiveFilters: boolean;
+  hasUnreadConversations: boolean;
   isCompactChat: boolean;
   isNarrowChat: boolean;
+  isMarkingAllRead: boolean;
   onSearchChange: (value: string) => void;
+  onMarkAllRead: () => void;
   onFilterChange: (filter: AdminConversationFilter) => void;
   onResetFilters: () => void;
   onRefresh: () => void;
@@ -96,9 +99,12 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   conversationFilter,
   filterCounts,
   hasActiveFilters,
+  hasUnreadConversations,
   isCompactChat,
   isNarrowChat,
+  isMarkingAllRead,
   onSearchChange,
+  onMarkAllRead,
   onFilterChange,
   onResetFilters,
   onRefresh,
@@ -120,9 +126,26 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         <div style={styles.headerActions}>
           <span style={styles.count}>{conversations.length}</span>
 
+          {hasUnreadConversations && (
+            <button
+              type="button"
+              style={{
+                ...styles.markReadButton,
+                ...(isMarkingAllRead || isLoading ? styles.disabledAction : {}),
+              }}
+              onClick={onMarkAllRead}
+              disabled={isMarkingAllRead || isLoading}
+            >
+              {isMarkingAllRead ? "Marking..." : "Mark all read"}
+            </button>
+          )}
+
           <button
             type="button"
-            style={styles.refreshButton}
+            style={{
+              ...styles.refreshButton,
+              ...(isLoading ? styles.disabledAction : {}),
+            }}
             onClick={onRefresh}
             disabled={isLoading}
           >
@@ -185,11 +208,24 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         </p>
       )}
 
-      {error && <p style={styles.errorText}>{error}</p>}
+      {error && (
+        <div style={styles.errorRecovery}>
+          <p style={styles.errorRecoveryText}>{error}</p>
+
+          <button
+            type="button"
+            style={styles.errorRecoveryButton}
+            onClick={onRefresh}
+            disabled={isLoading}
+          >
+            {isLoading ? "Retrying..." : "Retry"}
+          </button>
+        </div>
+      )}
 
       {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
 
-      {!isLoading && conversations.length === 0 && (
+      {!isLoading && !error && conversations.length === 0 && (
         <div style={styles.emptyState}>
           <h3 style={styles.emptyTitle}>No conversations found</h3>
           <p style={styles.emptyText}>
@@ -283,6 +319,13 @@ const styles = {
     flexDirection: "column" as const,
   },
 
+  panelCompact: {
+    width: "100%",
+    minWidth: 0,
+    borderRight: "none",
+    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
   header: {
     minHeight: "72px",
     padding: spacing.lg,
@@ -310,7 +353,9 @@ const styles = {
   headerActions: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "flex-end",
     gap: spacing.sm,
+    flexWrap: "wrap" as const,
     flexShrink: 0,
   },
 
@@ -323,6 +368,17 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
   },
 
+  markReadButton: {
+    border: `1px solid rgba(147, 220, 92, 0.35)`,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(147, 220, 92, 0.08)",
+    color: colors.accent.green,
+    padding: "6px 10px",
+    fontSize: "11px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+  },
+
   refreshButton: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.pill,
@@ -333,11 +389,20 @@ const styles = {
     cursor: "pointer",
   },
 
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
+  },
+
   searchArea: {
     padding: spacing.md,
     borderBottom: `1px solid ${colors.border.default}`,
     display: "flex",
     gap: spacing.sm,
+  },
+
+  searchAreaNarrow: {
+    flexDirection: "column" as const,
   },
 
   searchInput: {
@@ -349,6 +414,7 @@ const styles = {
     padding: "11px 12px",
     fontSize: "13px",
     outline: "none",
+    boxSizing: "border-box" as const,
   },
 
   resetButton: {
@@ -361,6 +427,10 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
     flexShrink: 0,
+  },
+
+  resetButtonNarrow: {
+    padding: "11px 12px",
   },
 
   filters: {
@@ -410,13 +480,35 @@ const styles = {
     borderBottom: `1px solid ${colors.border.default}`,
   },
 
-  errorText: {
+  errorRecovery: {
+    margin: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(255, 210, 122, 0.35)`,
+    backgroundColor: "rgba(255, 210, 122, 0.08)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+
+  errorRecoveryText: {
     color: colors.accent.yellow,
     fontSize: "13px",
     lineHeight: "20px",
     margin: 0,
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
+  },
+
+  errorRecoveryButton: {
+    border: `1px solid rgba(255, 210, 122, 0.45)`,
+    borderRadius: radius.pill,
+    backgroundColor: "transparent",
+    color: colors.accent.yellow,
+    padding: "7px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    cursor: "pointer",
+    flexShrink: 0,
   },
 
   stateText: {
@@ -451,21 +543,6 @@ const styles = {
     overflowY: "auto" as const,
   },
 
-  panelCompact: {
-    width: "100%",
-    minWidth: 0,
-    borderRight: "none",
-    borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  searchAreaNarrow: {
-    flexDirection: "column" as const,
-  },
-
-  resetButtonNarrow: {
-    padding: "11px 12px",
-  },
-
   listCompact: {
     maxHeight: "420px",
   },
@@ -478,6 +555,7 @@ const styles = {
     textAlign: "left" as const,
     padding: spacing.lg,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   itemActive: {
@@ -503,6 +581,7 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap" as const,
+    minWidth: 0,
   },
 
   visitorNameUnread: {
