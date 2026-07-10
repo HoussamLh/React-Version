@@ -11,7 +11,11 @@ import {
   typography 
 } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import { AdminActionButton , AdminErrorRecovery } from "../components";
+import {
+  AdminActionButton,
+  AdminErrorRecovery,
+  AdminStatusBadge,
+} from "../components";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -37,41 +41,24 @@ const filterOptions: {
 ];
 
 
-
 const statusMeta: Record<
   ContactSubmissionStatus,
   {
     label: string;
     description: string;
-    badgeStyle: React.CSSProperties;
   }
 > = {
   new: {
     label: "New",
     description: "Needs first response",
-    badgeStyle: {
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.45)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    },
   },
   contacted: {
     label: "Contacted",
     description: "Follow-up in progress",
-    badgeStyle: {
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.45)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    },
   },
   closed: {
     label: "Closed",
     description: "No further action needed",
-    badgeStyle: {
-      color: colors.text.muted,
-      borderColor: colors.border.default,
-      backgroundColor: "rgba(255,255,255,0.04)",
-    },
   },
 };
 
@@ -85,10 +72,19 @@ const formatDate = (value: string) => {
   }).format(new Date(value));
 };
 
-const getStatusBadgeStyle = (status: ContactSubmissionStatus) => ({
-  ...styles.statusBadge,
-  ...statusMeta[status].badgeStyle,
-});
+const getSubmissionStatusTone = (
+  status: ContactSubmission["status"],
+): "success" | "warning" | "muted" => {
+  if (status === "new") {
+    return "warning";
+  }
+
+  if (status === "closed") {
+    return "muted";
+  }
+
+  return "success";
+};
 
 const getMailtoHref = (submission: ContactSubmission) => {
   const subject = `DevBySam enquiry: ${submission.service}`;
@@ -114,8 +110,8 @@ const getSearchableText = (submission: ContactSubmission) => {
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
-const isCompactContacts = useMediaQuery("(max-width: 1250px)");
-const isNarrowContacts = useMediaQuery("(max-width: 640px)");
+  const isCompactContacts = useMediaQuery("(max-width: 1250px)");
+  const isNarrowContacts = useMediaQuery("(max-width: 640px)");
 
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
@@ -422,9 +418,11 @@ const isNarrowContacts = useMediaQuery("(max-width: 640px)");
 
                 <div style={styles.itemFooter}>
                   <span style={styles.serviceBadge}>{submission.service}</span>
-                  <span style={getStatusBadgeStyle(submission.status)}>
-                    {statusMeta[submission.status].label}
-                  </span>
+                  <AdminStatusBadge
+                    tone={getSubmissionStatusTone(submission.status)}
+                  >
+                    {submission.status}
+                  </AdminStatusBadge>
                 </div>
               </button>
             );
@@ -457,9 +455,11 @@ const isNarrowContacts = useMediaQuery("(max-width: 640px)");
               }}
             >
               <div style={styles.detailHeaderContent}>
-                <span style={getStatusBadgeStyle(selectedSubmission.status)}>
-                  {statusMeta[selectedSubmission.status].label}
-                </span>
+                <AdminStatusBadge
+                  tone={getSubmissionStatusTone(selectedSubmission.status)}
+                  >
+                  {selectedSubmission.status}
+                </AdminStatusBadge>
 
                 <h3
                   style={{
@@ -957,16 +957,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  statusBadge: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
-    display: "inline-flex",
-    alignItems: "center",
   },
 
   detailPanel: {
