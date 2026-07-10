@@ -1,31 +1,12 @@
-import React, { useSyncExternalStore } from "react";
+import React from "react";
 import { Outlet } from "react-router-dom";
 import { colors } from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
 import { AdminHeader } from "./AdminHeader";
 import { AdminSidebar } from "./AdminSidebar";
 
-const subscribeToCompactLayout = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 900px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactLayoutSnapshot = () => {
-  return window.matchMedia("(max-width: 900px)").matches;
-};
-
-const getServerCompactLayoutSnapshot = () => false;
-
 export const AdminLayout: React.FC = () => {
-  const isCompactLayout = useSyncExternalStore(
-    subscribeToCompactLayout,
-    getCompactLayoutSnapshot,
-    getServerCompactLayoutSnapshot,
-  );
+  const isCompactLayout = useMediaQuery("(max-width: 900px)");
 
   return (
     <div
