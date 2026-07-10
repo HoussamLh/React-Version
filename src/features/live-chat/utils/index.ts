@@ -12,3 +12,5 @@ export {
   getLiveChatTranscriptSender,
   isLiveChatComposerDisabledForStep,
 } from "./liveChatBubble.helpers";
+
+export { formatLiveChatTime } from "./liveChatDate.helpers";

@@ -5,6 +5,7 @@ import { liveChatAgent } from "../data/liveChat.data";
 import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatNav } from "./LiveChatNav";
+import { formatLiveChatTime } from "../utils";
 
 type LiveChatMessagesViewProps = {
   activeView: ChatView;
@@ -16,13 +17,6 @@ type LiveChatMessagesViewProps = {
   onClose: () => void;
   onOpenChat: () => void;
   onChangeView: (view: ChatView) => void;
-};
-
-const formatTime = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 };
 
 export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
@@ -45,7 +39,7 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
       : liveChatAgent.greeting;
 
   const previewTime = latestMessage
-    ? formatTime(latestMessage.createdAt)
+    ? formatLiveChatTime(latestMessage.createdAt)
     : liveChatAgent.previewTime;
 
   return (
