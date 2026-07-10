@@ -1,9 +1,8 @@
 import React from "react";
-import { SendHorizontal, X } from "lucide-react";
+import { X } from "lucide-react";
 import {
   TeamAvatars,
   colors,
-  radius,
   spacing,
   typography,
 } from "../../../design-system";
@@ -12,6 +11,7 @@ import { liveChatBrand } from "../data/liveChat.data";
 import type { ChatView } from "../types/liveChat.types";
 import { LiveChatNav } from "./LiveChatNav";
 import { LiveChatIconButton } from "./LiveChatIconButton";
+import { LiveChatPrimaryButton } from "./LiveChatPrimaryButton";
 
 type LiveChatHomeViewProps = {
   activeView: ChatView;
@@ -56,14 +56,9 @@ export const LiveChatHomeView: React.FC<LiveChatHomeViewProps> = ({
           </h3>
         </div>
 
-        <button
-          type="button"
-          style={styles.sendMessageCard}
-          onClick={onStartChat}
-        >
-          <span>Send a message</span>
-          <SendHorizontal size={18} />
-        </button>
+        <LiveChatPrimaryButton variant="card" onClick={onStartChat}>
+          Send a message
+        </LiveChatPrimaryButton>
       </div>
 
       <div style={styles.emptyBody} />
@@ -106,22 +101,6 @@ const styles = {
     margin: 0,
     fontWeight: typography.fontWeight.black,
     letterSpacing: "-0.03em",
-  },
-
-  sendMessageCard: {
-    width: "100%",
-    minHeight: "54px",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.lg,
-    backgroundColor: colors.text.main,
-    color: colors.background.dark,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: `0 ${spacing.lg}`,
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.25)",
   },
 
   emptyBody: {

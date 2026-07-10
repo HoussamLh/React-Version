@@ -1,6 +1,6 @@
 import React from "react";
-import { SendHorizontal, X } from "lucide-react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { X } from "lucide-react";
+import { colors, spacing, typography } from "../../../design-system";
 import { liveChatAgent } from "../data/liveChat.data";
 import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
@@ -8,6 +8,7 @@ import { LiveChatNav } from "./LiveChatNav";
 import { formatLiveChatTime } from "../utils";
 import { LiveChatIconButton } from "./LiveChatIconButton";
 import { LiveChatStateText } from "./LiveChatStateText";
+import { LiveChatPrimaryButton } from "./LiveChatPrimaryButton";
 
 type LiveChatMessagesViewProps = {
   activeView: ChatView;
@@ -96,14 +97,9 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
           </div>
         </button>
 
-        <button
-          type="button"
-          style={styles.primaryMessageButton}
-          onClick={onOpenChat}
-        >
-          <span>Send us a message</span>
-          <SendHorizontal size={18} />
-        </button>
+        <LiveChatPrimaryButton variant="pill" onClick={onOpenChat}>
+          Send us a message
+        </LiveChatPrimaryButton>
       </div>
 
       <LiveChatNav activeView={activeView} onChangeView={onChangeView} />
@@ -196,22 +192,5 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap" as const,
-  },
-
-  primaryMessageButton: {
-    marginTop: "auto",
-    marginLeft: "auto",
-    marginRight: "auto",
-    marginBottom: spacing.xl,
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.pink,
-    color: colors.text.main,
-    padding: "13px 22px",
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.md,
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
   },
 };
