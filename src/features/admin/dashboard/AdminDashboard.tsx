@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import { AdminStatusBadge } from "../components";
+import { AdminEmptyState, AdminStatusBadge } from "../components";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
@@ -206,17 +206,12 @@ export const AdminDashboard: React.FC = () => {
 
           <div style={styles.list}>
             {!isLoading && recentSubmissions.length === 0 && (
-              <div style={styles.listEmptyState}>
-                <h4 style={styles.listEmptyTitle}>
-                  No contact submissions yet
-                </h4>
-                <p style={styles.listEmptyText}>
-                  New website contact form enquiries will appear here.
-                </p>
-                <Link to="/admin/contacts" style={styles.listEmptyLink}>
-                  Open contacts
-                </Link>
-              </div>
+              <AdminEmptyState
+                title="No contact submissions yet"
+                text="New website contact form enquiries will appear here."
+                actionLabel="Open contacts"
+                actionTo="/admin/contacts"
+              />
             )}
 
             {recentSubmissions.map((submission) => (
@@ -264,18 +259,12 @@ export const AdminDashboard: React.FC = () => {
 
           <div style={styles.list}>
             {!isLoading && recentConversations.length === 0 && (
-              <div style={styles.listEmptyState}>
-                <h4 style={styles.listEmptyTitle}>
-                  No live chat conversations yet
-                </h4>
-                <p style={styles.listEmptyText}>
-                  New visitor conversations will appear here after someone
-                  starts a chat.
-                </p>
-                <Link to="/admin/chat" style={styles.listEmptyLink}>
-                  Open chat inbox
-                </Link>
-              </div>
+              <AdminEmptyState
+                title="No live chat conversations yet"
+                text="New visitor conversations will appear here after someone starts a chat."
+                actionLabel="Open chat inbox"
+                actionTo="/admin/chat"
+              />
             )}
 
             {recentConversations.map((conversation) => (
@@ -605,32 +594,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  listEmptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  listEmptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    fontWeight: typography.fontWeight.black,
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  listEmptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `0 0 ${spacing.md} 0`,
-  },
-
-  listEmptyLink: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
   },
 
   quickActions: {
