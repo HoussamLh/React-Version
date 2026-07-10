@@ -17,6 +17,7 @@ import {
   AdminErrorRecovery,
   AdminSearchInput,
   AdminStatusBadge,
+  AdminPanel,
 } from "../components";
 import {
   getContactSubmissions,
@@ -276,7 +277,7 @@ export const ContactSubmissionsPage: React.FC = () => {
   };
 
   return (
-    <section
+    <AdminPanel
       style={{
         ...styles.shell,
         ...(isCompactContacts ? styles.shellCompact : {}),
@@ -669,7 +670,7 @@ export const ContactSubmissionsPage: React.FC = () => {
         )}
         {successMessage && <p style={styles.successText}>{successMessage}</p>}
       </main>
-    </section>
+    </AdminPanel>
   );
 };
 
@@ -677,9 +678,6 @@ const styles = {
   shell: {
     height: "calc(100vh - 146px)",
     minHeight: "620px",
-    borderRadius: radius.lg,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
     display: "flex",
     backgroundColor: colors.background.dark,
   },
@@ -851,7 +849,7 @@ const styles = {
     border: `1px solid rgba(147, 220, 92, 0.35)`,
     backgroundColor: "rgba(147, 220, 92, 0.08)",
   },
-  
+
   list: {
     flex: 1,
     minHeight: 0,
