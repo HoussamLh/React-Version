@@ -13,6 +13,7 @@ import type {
   AdminConversationStatus,
   AdminMessage,
 } from "./adminChat.types";
+import { AdminActionButton } from "../components";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
 
@@ -404,47 +405,36 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             }}
           >
             {conversation.status !== "open" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.primaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                  ...(isUpdatingStatus ? styles.disabledAction : {}),
-                }}
+              <AdminActionButton
+                variant="primary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("open")}
               >
                 Open
-              </button>
+              </AdminActionButton>
             )}
 
             {conversation.status !== "pending" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.secondaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                  ...(isUpdatingStatus ? styles.disabledAction : {}),
-                }}
+              <AdminActionButton
+                variant="secondary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("pending")}
               >
                 Pending
-              </button>
+              </AdminActionButton>
             )}
 
             {conversation.status !== "closed" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.secondaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                }}
+              <AdminActionButton
+                variant="secondary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("closed")}
               >
                 Close
-              </button>
+              </AdminActionButton>
             )}
           </div>
         </div>
@@ -594,30 +584,6 @@ const styles = {
     flexWrap: "wrap" as const,
   },
 
-  primaryAction: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.black,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  secondaryAction: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
   disabledAction: {
     opacity: 0.55,
     cursor: "not-allowed",
@@ -724,10 +690,6 @@ const styles = {
     width: "100%",
     flexDirection: "column" as const,
     alignItems: "stretch",
-  },
-
-  actionButtonNarrow: {
-    width: "100%",
   },
 
   bodyCompact: {
