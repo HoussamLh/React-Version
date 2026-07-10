@@ -6,7 +6,8 @@ import {
   AdminErrorRecovery,
   AdminSearchInput,
   AdminStatusBadge,
-  AdminFilterButton
+  AdminFilterButton,
+  AdminResetButton
 } from "../components";
 import type {
   AdminConversation,
@@ -143,16 +144,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         />
 
         {hasActiveFilters && (
-          <button
-            type="button"
-            style={{
-              ...styles.resetButton,
-              ...(isNarrowChat ? styles.resetButtonNarrow : {}),
-            }}
-            onClick={onResetFilters}
-          >
-            Reset
-          </button>
+          <AdminResetButton 
+          isNarrow={isNarrowChat} 
+          onClick={onResetFilters} 
+          />
         )}
       </div>
 
@@ -337,22 +332,6 @@ const styles = {
 
   searchAreaNarrow: {
     flexDirection: "column" as const,
-  },
-
-  resetButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "0 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  resetButtonNarrow: {
-    padding: "11px 12px",
   },
 
   filters: {
