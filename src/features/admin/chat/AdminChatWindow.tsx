@@ -583,6 +583,7 @@ const styles = {
     padding: `10px ${spacing.md}`,
     textTransform: "capitalize" as const,
     outline: "none",
+    boxSizing: "border-box" as const,
   },
 
   quickActions: {
@@ -602,6 +603,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   secondaryAction: {
@@ -613,6 +615,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   disabledAction: {
@@ -638,6 +641,7 @@ const styles = {
   successText: {
     color: colors.accent.green,
     fontSize: "13px",
+    lineHeight: "20px",
     margin: 0,
   },
 

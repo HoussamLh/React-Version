@@ -414,6 +414,7 @@ const styles = {
     padding: "11px 12px",
     fontSize: "13px",
     outline: "none",
+    boxSizing: "border-box" as const,
   },
 
   resetButton: {
@@ -554,6 +555,7 @@ const styles = {
     textAlign: "left" as const,
     padding: spacing.lg,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   itemActive: {
@@ -579,6 +581,7 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap" as const,
+    minWidth: 0,
   },
 
   visitorNameUnread: {

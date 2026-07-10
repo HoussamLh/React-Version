@@ -825,6 +825,7 @@ const styles = {
     padding: "6px 10px",
     fontSize: "11px",
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   disabledAction: {
@@ -931,6 +932,10 @@ const styles = {
     fontSize: "13px",
     lineHeight: "20px",
     margin: `${spacing.lg} 0 0 0`,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    border: `1px solid rgba(147, 220, 92, 0.35)`,
+    backgroundColor: "rgba(147, 220, 92, 0.08)",
   },
 
   listEmptyState: {
@@ -1147,6 +1152,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   quickStatusButtonSecondary: {
@@ -1158,6 +1164,7 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
     cursor: "pointer",
+    boxSizing: "border-box" as const,
   },
 
   quickStatusButtonNarrow: {
