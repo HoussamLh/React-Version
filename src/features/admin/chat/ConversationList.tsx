@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { AdminErrorRecovery } from "../components";
+import { AdminActionButton, AdminErrorRecovery } from "../components";
 import type {
   AdminConversation,
   AdminConversationStatus,
@@ -128,30 +128,24 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           <span style={styles.count}>{conversations.length}</span>
 
           {hasUnreadConversations && (
-            <button
-              type="button"
-              style={{
-                ...styles.markReadButton,
-                ...(isMarkingAllRead || isLoading ? styles.disabledAction : {}),
-              }}
-              onClick={onMarkAllRead}
+            <AdminActionButton
+              variant="successGhost"
+              size="sm"
               disabled={isMarkingAllRead || isLoading}
+              onClick={onMarkAllRead}
             >
               {isMarkingAllRead ? "Marking..." : "Mark all read"}
-            </button>
+            </AdminActionButton>
           )}
 
-          <button
-            type="button"
-            style={{
-              ...styles.refreshButton,
-              ...(isLoading ? styles.disabledAction : {}),
-            }}
-            onClick={onRefresh}
+          <AdminActionButton
+            variant="ghost"
+            size="sm"
             disabled={isLoading}
+            onClick={onRefresh}
           >
             {isLoading ? "..." : "Refresh"}
-          </button>
+          </AdminActionButton>
         </div>
       </div>
 
@@ -360,32 +354,6 @@ const styles = {
     padding: "4px 9px",
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
-  },
-
-  markReadButton: {
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(147, 220, 92, 0.08)",
-    color: colors.accent.green,
-    padding: "6px 10px",
-    fontSize: "11px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-  },
-
-  refreshButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "6px 10px",
-    fontSize: "11px",
-    cursor: "pointer",
-  },
-
-  disabledAction: {
-    opacity: 0.55,
-    cursor: "not-allowed",
   },
 
   searchArea: {
