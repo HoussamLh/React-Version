@@ -9,3 +9,4 @@ export { AdminResetButton } from "./AdminResetButton";
 export { AdminCountBadge } from "./AdminCountBadge";
 export { AdminLoadingText } from "./AdminLoadingText";
 export { AdminSuccessMessage } from "./AdminSuccessMessage"; 
+export { AdminMetaChip } from "./AdminMetaChip";

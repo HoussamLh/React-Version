@@ -17,6 +17,7 @@ import {
   AdminActionButton,
   AdminStatusBadge,
   AdminSuccessMessage,
+  AdminMetaChip,
 } from "../components";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
@@ -333,22 +334,19 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 {conversation.visitorEmail}
               </a>
             )}
-
-            <span style={styles.metaChip}>
+            <AdminMetaChip>
               {conversation.chatMode === "offline"
                 ? "Offline enquiry"
                 : "Live chat"}
-            </span>
-
-            <span style={styles.metaChip}>Source: {conversation.source}</span>
-
-            <span style={styles.metaChip}>
+            </AdminMetaChip>
+            <AdminMetaChip>Source: {conversation.source}</AdminMetaChip>
+            <AdminMetaChip>
+              {" "}
               Last message: {formatDate(conversation.lastMessageAt)}
-            </span>
-
-            <span style={styles.metaChip}>
+            </AdminMetaChip>
+            <AdminMetaChip>
               Visitor ID: {conversation.visitorId.slice(0, 8)}
-            </span>
+            </AdminMetaChip>
           </div>
         </div>
 
@@ -520,15 +518,6 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
     textDecoration: "none",
     overflowWrap: "anywhere" as const,
-  },
-
-  metaChip: {
-    color: colors.text.muted,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
   },
 
   headerActions: {
