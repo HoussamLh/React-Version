@@ -27,6 +27,8 @@ import {
   getAdminConversationVisitorLabel,
 } from "./adminChat.helpers";
 
+import { TypingIndicator } from "../../../shared/components";
+
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
   isCompactChat: boolean;
@@ -420,13 +422,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           <AdminMessageBubble key={message.id} message={message} />
         ))}
 
-        {isVisitorTyping && (
-          <div style={styles.typingIndicator}>
-            <span className="typing-dot-delay-1" style={styles.typingDot} />
-            <span className="typing-dot-delay-2" style={styles.typingDot} />
-            <span style={styles.typingDot} />
-          </div>
-        )}
+        {isVisitorTyping && <TypingIndicator label="Visitor is typing" />}
 
         {error && <p style={styles.error}>{error}</p>}
         {successMessage && (
@@ -557,26 +553,6 @@ const styles = {
     color: colors.accent.yellow,
     fontSize: "13px",
     margin: 0,
-  },
-
-  typingIndicator: {
-    width: "fit-content",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderRadius: "18px 18px 18px 6px",
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-  },
-
-  typingDot: {
-    width: "5px",
-    height: "5px",
-    borderRadius: "50%",
-    backgroundColor: colors.text.muted,
-    display: "block",
-    animation: "liveChatTypingDot 1.4s infinite ease-in-out both",
   },
 
   emptyState: {

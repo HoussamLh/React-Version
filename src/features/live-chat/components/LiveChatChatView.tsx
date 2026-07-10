@@ -33,6 +33,7 @@ import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 import { LiveChatIconButton } from "./LiveChatIconButton";
 import { LiveChatStateText } from "./LiveChatStateText";
+import { LiveChatTypingIndicator } from "./LiveChatTypingIndicator";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -187,13 +188,7 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
           </div>
         )}
 
-        {isAssistantTyping && (
-          <div style={styles.typingIndicator}>
-            <span className="typing-dot-delay-1" style={styles.typingDot} />
-            <span className="typing-dot-delay-2" style={styles.typingDot} />
-            <span style={styles.typingDot} />
-          </div>
-        )}
+        {isAssistantTyping && <LiveChatTypingIndicator />}
 
         {shouldShowServiceOptions && (
           <div style={styles.optionGroup}>
@@ -398,26 +393,5 @@ const styles = {
     justifyContent: "center",
     cursor: "pointer",
     flexShrink: 0,
-  },
-
-  typingIndicator: {
-    width: "fit-content",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    marginTop: spacing.lg,
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderRadius: "18px 18px 18px 6px",
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-  },
-
-  typingDot: {
-    width: "5px",
-    height: "5px",
-    borderRadius: "50%",
-    backgroundColor: colors.text.muted,
-    display: "block",
-    animation: "liveChatTypingDot 1.4s infinite ease-in-out both",
   },
 };
