@@ -13,7 +13,11 @@ import type {
   AdminConversationStatus,
   AdminMessage,
 } from "./adminChat.types";
-import { AdminActionButton, AdminStatusBadge } from "../components";
+import {
+  AdminActionButton,
+  AdminStatusBadge,
+  AdminSuccessMessage,
+} from "../components";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
 import { getConversationStatusTone } from "./adminChat.helpers";
@@ -441,7 +445,9 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         )}
 
         {error && <p style={styles.error}>{error}</p>}
-        {successMessage && <p style={styles.successText}>{successMessage}</p>}
+        {successMessage && (
+          <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
+        )}
 
         <div ref={bottomRef} />
       </div>
@@ -569,13 +575,6 @@ const styles = {
   stateText: {
     color: colors.text.muted,
     fontSize: "14px",
-    margin: 0,
-  },
-
-  successText: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    lineHeight: "20px",
     margin: 0,
   },
 

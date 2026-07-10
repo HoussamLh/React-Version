@@ -22,6 +22,7 @@ import {
   AdminResetButton,
   AdminCountBadge,
   AdminLoadingText,
+  AdminSuccessMessage,
 } from "../components";
 import {
   getContactSubmissions,
@@ -662,7 +663,9 @@ export const ContactSubmissionsPage: React.FC = () => {
             </article>
           </>
         )}
-        {successMessage && <p style={styles.successText}>{successMessage}</p>}
+        {successMessage && (
+          <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
+        )}
       </main>
     </AdminPanel>
   );
@@ -763,17 +766,6 @@ const styles = {
     margin: 0,
     padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  successText: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `${spacing.lg} 0 0 0`,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    backgroundColor: "rgba(147, 220, 92, 0.08)",
   },
 
   list: {
