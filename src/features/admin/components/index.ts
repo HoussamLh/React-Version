@@ -7,3 +7,4 @@ export { AdminPanel } from "./AdminPanel";
 export { AdminFilterButton } from "./AdminFilterButton";
 export { AdminResetButton } from "./AdminResetButton";
 export { AdminCountBadge } from "./AdminCountBadge";
+export { AdminLoadingText } from "./AdminLoadingText";

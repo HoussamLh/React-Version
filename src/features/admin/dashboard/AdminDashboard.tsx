@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import { AdminEmptyState, AdminStatusBadge, AdminPanel } from "../components";
+import {
+  AdminEmptyState,
+  AdminStatusBadge,
+  AdminPanel,
+  AdminLoadingText
+} from "../components";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
@@ -140,11 +145,11 @@ export const AdminDashboard: React.FC = () => {
       {error && <p style={styles.error}>{error}</p>}
 
       {isLoading && (
-        <p style={styles.loadingText}>
+        <AdminLoadingText>
           {submissions.length === 0 && conversations.length === 0
             ? "Loading dashboard overview..."
             : "Refreshing dashboard overview..."}
-        </p>
+        </AdminLoadingText>
       )}
 
       <div
@@ -419,13 +424,6 @@ const styles = {
   error: {
     color: colors.accent.yellow,
     fontSize: "14px",
-    margin: 0,
-  },
-
-  loadingText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
     margin: 0,
   },
 

@@ -8,7 +8,8 @@ import {
   AdminStatusBadge,
   AdminFilterButton,
   AdminResetButton,
-  AdminCountBadge
+  AdminCountBadge,
+  AdminLoadingText,
 } from "../components";
 import type {
   AdminConversation,
@@ -176,7 +177,9 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         />
       )}
 
-      {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
+      {isLoading && (
+        <AdminLoadingText padded>Loading conversations...</AdminLoadingText>
+      )}
 
       {!isLoading && !error && conversations.length === 0 && (
         <AdminEmptyState
@@ -338,14 +341,6 @@ const styles = {
     margin: 0,
     padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    padding: spacing.lg,
   },
 
   list: {

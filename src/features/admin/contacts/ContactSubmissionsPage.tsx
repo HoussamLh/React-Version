@@ -20,7 +20,8 @@ import {
   AdminPanel,
   AdminFilterButton,
   AdminResetButton,
-  AdminCountBadge
+  AdminCountBadge,
+  AdminLoadingText,
 } from "../components";
 import {
   getContactSubmissions,
@@ -369,7 +370,9 @@ export const ContactSubmissionsPage: React.FC = () => {
           />
         )}
 
-        {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
+        {isLoading && (
+          <AdminLoadingText padded>Loading submissions...</AdminLoadingText>
+        )}
 
         {!isLoading && !error && filteredSubmissions.length === 0 && (
           <AdminEmptyState
@@ -760,13 +763,6 @@ const styles = {
     margin: 0,
     padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: 0,
-    padding: spacing.lg,
   },
 
   successText: {
