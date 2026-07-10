@@ -22,7 +22,10 @@ import {
 import { formatAdminDateTime } from "../utils";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
-import { getConversationStatusTone } from "./adminChat.helpers";
+import {
+  getConversationStatusTone,
+  getAdminConversationVisitorLabel,
+} from "./adminChat.helpers";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
@@ -46,14 +49,6 @@ const appendUniqueMessage = (
   }
 
   return [...currentMessages, nextMessage];
-};
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
 };
 
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
@@ -284,7 +279,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
     );
   }
 
-  const visitorLabel = getVisitorLabel(conversation);
+  const visitorLabel = getAdminConversationVisitorLabel(conversation);
   const hasVisitorEmail = Boolean(conversation.visitorEmail);
 
   return (
