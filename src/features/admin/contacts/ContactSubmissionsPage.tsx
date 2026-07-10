@@ -159,6 +159,7 @@ export const ContactSubmissionsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [copiedField, setCopiedField] = useState<"email" | "phone" | null>(
     null,
   );
@@ -248,6 +249,14 @@ export const ContactSubmissionsPage: React.FC = () => {
     };
   }, [loadSubmissions]);
 
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message);
+
+    window.setTimeout(() => {
+      setSuccessMessage("");
+    }, 2200);
+  };
+
   const handleStatusChange = async (
     submissionId: string,
     status: ContactSubmissionStatus,
@@ -262,6 +271,7 @@ export const ContactSubmissionsPage: React.FC = () => {
 
     setIsUpdatingStatus(true);
     setError("");
+    setSuccessMessage("");
 
     try {
       await updateContactSubmissionStatus({
@@ -270,6 +280,9 @@ export const ContactSubmissionsPage: React.FC = () => {
       });
 
       await loadSubmissions();
+      showSuccessMessage(
+        `Submission marked as ${statusMeta[status].label.toLowerCase()}.`,
+      );
     } catch {
       setError("Could not update submission status.");
     } finally {
@@ -717,6 +730,7 @@ export const ContactSubmissionsPage: React.FC = () => {
             </article>
           </>
         )}
+        {successMessage && <p style={styles.successText}>{successMessage}</p>}
       </main>
     </section>
   );
@@ -910,6 +924,13 @@ const styles = {
     fontSize: "14px",
     margin: 0,
     padding: spacing.lg,
+  },
+
+  successText: {
+    color: colors.accent.green,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: `${spacing.lg} 0 0 0`,
   },
 
   listEmptyState: {
