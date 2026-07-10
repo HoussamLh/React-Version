@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { colors, spacing, typography } from "../../../design-system";
 import { liveChatAgent } from "../data/liveChat.data";
 import type { ChatView, LiveChatMessage } from "../types/liveChat.types";
-import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
+import { LiveChatMessagePreviewCard } from "./LiveChatMessagePreviewCard";
 import { LiveChatNav } from "./LiveChatNav";
 import { formatLiveChatTime } from "../utils";
 import { LiveChatIconButton } from "./LiveChatIconButton";
@@ -66,36 +66,12 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
 
         {error && <LiveChatStateText tone="warning">{error}</LiveChatStateText>}
 
-        <button
-          type="button"
-          style={styles.messagePreview}
+        <LiveChatMessagePreviewCard
+          previewText={previewText}
+          previewTime={previewTime}
+          isAdminOnline={isAdminOnline}
           onClick={onOpenChat}
-        >
-          <LiveChatAgentAvatar />
-
-          <div style={styles.previewContent}>
-            <div style={styles.previewTopRow}>
-              <div style={styles.agentInfo}>
-                <span style={styles.previewName}>{liveChatAgent.name}</span>
-
-                <span
-                  style={{
-                    ...styles.onlineStatus,
-                    color: isAdminOnline
-                      ? colors.accent.green
-                      : colors.text.muted,
-                  }}
-                >
-                  {isAdminOnline ? "Online" : "Offline"}
-                </span>
-              </div>
-
-              <span style={styles.previewTime}>{previewTime}</span>
-            </div>
-
-            <p style={styles.previewText}>{previewText}</p>
-          </div>
-        </button>
+        />
 
         <LiveChatPrimaryButton variant="pill" onClick={onOpenChat}>
           Send us a message
@@ -136,61 +112,5 @@ const styles = {
     backgroundColor: colors.background.dark,
     display: "flex",
     flexDirection: "column" as const,
-  },
-
-  messagePreview: {
-    width: "100%",
-    border: "none",
-    backgroundColor: "transparent",
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.md,
-    padding: `${spacing.md} 0`,
-    borderBottom: `1px solid ${colors.border.default}`,
-    cursor: "pointer",
-    textAlign: "left" as const,
-  },
-
-  previewContent: {
-    flex: 1,
-    minWidth: 0,
-  },
-
-  previewTopRow: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  agentInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    minWidth: 0,
-  },
-
-  previewName: {
-    color: colors.text.main,
-    fontSize: "14px",
-    fontWeight: typography.fontWeight.bold,
-  },
-
-  onlineStatus: {
-    fontSize: "11px",
-  },
-
-  previewTime: {
-    color: colors.text.muted,
-    fontSize: "12px",
-  },
-
-  previewText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: "4px 0 0 0",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap" as const,
   },
 };
