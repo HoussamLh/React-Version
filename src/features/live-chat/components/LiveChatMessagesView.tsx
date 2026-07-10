@@ -7,6 +7,7 @@ import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatNav } from "./LiveChatNav";
 import { formatLiveChatTime } from "../utils";
 import { LiveChatIconButton } from "./LiveChatIconButton";
+import { LiveChatStateText } from "./LiveChatStateText";
 
 type LiveChatMessagesViewProps = {
   activeView: ChatView;
@@ -58,9 +59,11 @@ export const LiveChatMessagesView: React.FC<LiveChatMessagesViewProps> = ({
       </div>
 
       <div style={styles.messagesBody}>
-        {isLoading && <p style={styles.stateText}>Connecting live chat...</p>}
+        {isLoading && (
+          <LiveChatStateText>Connecting live chat...</LiveChatStateText>
+        )}
 
-        {error && <p style={styles.errorText}>{error}</p>}
+        {error && <LiveChatStateText tone="warning">{error}</LiveChatStateText>}
 
         <button
           type="button"
@@ -137,19 +140,6 @@ const styles = {
     backgroundColor: colors.background.dark,
     display: "flex",
     flexDirection: "column" as const,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  errorText: {
-    color: colors.accent.yellow,
-    fontSize: "13px",
-    lineHeight: "18px",
-    margin: `0 0 ${spacing.sm} 0`,
   },
 
   messagePreview: {

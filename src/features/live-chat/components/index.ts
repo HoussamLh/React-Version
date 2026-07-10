@@ -8,3 +8,4 @@ export { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 export { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 export { LiveChatFloatingButton } from "./LiveChatFloatingButton";
 export { LiveChatIconButton } from "./LiveChatIconButton";
+export { LiveChatStateText } from "./LiveChatStateText";

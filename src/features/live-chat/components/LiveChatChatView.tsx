@@ -32,6 +32,7 @@ import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 import { LiveChatIconButton } from "./LiveChatIconButton";
+import { LiveChatStateText } from "./LiveChatStateText";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -169,7 +170,11 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
       <div style={styles.feedbackText}>{liveChatAgent.feedbackText}</div>
 
       <div style={styles.chatBody}>
-        {isLoading && <p style={styles.stateText}>Connecting live chat...</p>}
+        {isLoading && (
+          <LiveChatStateText marginTop>
+            Connecting live chat...
+          </LiveChatStateText>
+        )}
 
         {messages.length > 0 && (
           <div style={styles.messageList}>
@@ -228,7 +233,11 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
           </div>
         )}
 
-        {error && <p style={styles.errorText}>{error}</p>}
+        {error && (
+          <LiveChatStateText tone="warning" marginTop>
+            {error}
+          </LiveChatStateText>
+        )}
 
         <div ref={bottomRef} />
       </div>
@@ -329,19 +338,6 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: spacing.md,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    margin: `${spacing.lg} 0 0 0`,
-  },
-
-  errorText: {
-    color: colors.accent.yellow,
-    fontSize: "13px",
-    lineHeight: "18px",
-    margin: `${spacing.lg} 0 0 0`,
   },
 
   optionGroup: {
