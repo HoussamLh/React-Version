@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import { AdminEmptyState, AdminStatusBadge } from "../components";
+import { AdminEmptyState, AdminStatusBadge, AdminPanel } from "../components";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
@@ -185,7 +185,7 @@ export const AdminDashboard: React.FC = () => {
           ...(isCompactDashboard ? styles.contentGridCompact : {}),
         }}
       >
-        <section style={styles.panel}>
+        <AdminPanel>
           <div
             style={{
               ...styles.panelHeader,
@@ -236,9 +236,9 @@ export const AdminDashboard: React.FC = () => {
               </Link>
             ))}
           </div>
-        </section>
+        </AdminPanel>
 
-        <section style={styles.panel}>
+        <AdminPanel>
           <div
             style={{
               ...styles.panelHeader,
@@ -303,7 +303,7 @@ export const AdminDashboard: React.FC = () => {
               </Link>
             ))}
           </div>
-        </section>
+        </AdminPanel>
       </div>
 
       <section
@@ -487,14 +487,6 @@ const styles = {
 
   contentGridCompact: {
     gridTemplateColumns: "1fr",
-  },
-
-  panel: {
-    borderRadius: radius.lg,
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
-    minWidth: 0,
   },
 
   panelHeader: {
