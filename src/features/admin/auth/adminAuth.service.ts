@@ -59,6 +59,20 @@ export const getCurrentAdminProfile =
     return data ? mapAdminProfile(data) : null;
   };
 
+export const subscribeToAdminAuthChanges = (callback: () => void) => {
+  const client = requireSupabase();
+
+  const { data } = client.auth.onAuthStateChange(() => {
+    window.setTimeout(() => {
+      callback();
+    }, 0);
+  });
+
+  return () => {
+    data.subscription.unsubscribe();
+  };
+};
+
 export const signInAdmin = async ({
   email,
   password,
