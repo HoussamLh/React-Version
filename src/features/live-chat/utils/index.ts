@@ -5,3 +5,10 @@ export {
   isValidLiveChatEmail,
   wait,
 } from "./liveChat.helpers";
+
+export {
+  buildLiveChatTranscript,
+  getLiveChatMessagePlaceholder,
+  getLiveChatTranscriptSender,
+  isLiveChatComposerDisabledForStep,
+} from "./liveChatBubble.helpers";
