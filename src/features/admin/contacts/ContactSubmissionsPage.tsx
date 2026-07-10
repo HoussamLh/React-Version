@@ -1,11 +1,16 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
+import React, { 
+  useCallback, 
+  useEffect, 
+  useMemo, 
+  useState 
 } from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography 
+} from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -30,37 +35,7 @@ const filterOptions: {
   { label: "Closed", value: "closed" },
 ];
 
-const subscribeToCompactContacts = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 1250px)");
 
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactContactsSnapshot = () => {
-  return window.matchMedia("(max-width: 1250px)").matches;
-};
-
-const getServerCompactContactsSnapshot = () => false;
-
-const subscribeToNarrowContacts = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 640px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getNarrowContactsSnapshot = () => {
-  return window.matchMedia("(max-width: 640px)").matches;
-};
-
-const getServerNarrowContactsSnapshot = () => false;
 
 const statusMeta: Record<
   ContactSubmissionStatus,
@@ -138,17 +113,8 @@ const getSearchableText = (submission: ContactSubmission) => {
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
-  const isCompactContacts = useSyncExternalStore(
-    subscribeToCompactContacts,
-    getCompactContactsSnapshot,
-    getServerCompactContactsSnapshot,
-  );
-
-  const isNarrowContacts = useSyncExternalStore(
-    subscribeToNarrowContacts,
-    getNarrowContactsSnapshot,
-    getServerNarrowContactsSnapshot,
-  );
+const isCompactContacts = useMediaQuery("(max-width: 1250px)");
+const isNarrowContacts = useMediaQuery("(max-width: 640px)");
 
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
