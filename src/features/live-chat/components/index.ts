@@ -10,3 +10,4 @@ export { LiveChatFloatingButton } from "./LiveChatFloatingButton";
 export { LiveChatIconButton } from "./LiveChatIconButton";
 export { LiveChatStateText } from "./LiveChatStateText";
 export { LiveChatTypingIndicator } from "./LiveChatTypingIndicator";
+export { LiveChatOptionButton } from "./LiveChatOptionButton";

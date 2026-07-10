@@ -34,6 +34,7 @@ import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
 import { LiveChatIconButton } from "./LiveChatIconButton";
 import { LiveChatStateText } from "./LiveChatStateText";
 import { LiveChatTypingIndicator } from "./LiveChatTypingIndicator";
+import { LiveChatOptionButton } from "./LiveChatOptionButton";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -193,38 +194,32 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
         {shouldShowServiceOptions && (
           <div style={styles.optionGroup}>
             {liveChatProfileCapture.serviceOptions.map((service) => (
-              <button
+              <LiveChatOptionButton
                 key={service}
-                type="button"
-                style={styles.optionButton}
-                onClick={() => onServiceSelect(service)}
                 disabled={isSending}
+                onClick={() => onServiceSelect(service)}
               >
                 {service}
-              </button>
+              </LiveChatOptionButton>
             ))}
           </div>
         )}
 
         {shouldShowExtraChoiceOptions && (
           <div style={styles.optionGroup}>
-            <button
-              type="button"
-              style={styles.optionButton}
-              onClick={() => onExtraChoiceSelect("yes")}
+            <LiveChatOptionButton
               disabled={isSending}
+              onClick={() => onExtraChoiceSelect("yes")}
             >
               Yes, add more details
-            </button>
+            </LiveChatOptionButton>
 
-            <button
-              type="button"
-              style={styles.optionButton}
-              onClick={() => onExtraChoiceSelect("no")}
+            <LiveChatOptionButton
               disabled={isSending}
+              onClick={() => onExtraChoiceSelect("no")}
             >
               No, that’s everything
-            </button>
+            </LiveChatOptionButton>
           </div>
         )}
 
@@ -341,18 +336,6 @@ const styles = {
     gap: spacing.sm,
     marginTop: spacing.lg,
     alignItems: "flex-start",
-  },
-
-  optionButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: `10px ${spacing.md}`,
-    fontSize: "13px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    textAlign: "left" as const,
   },
 
   composer: {
