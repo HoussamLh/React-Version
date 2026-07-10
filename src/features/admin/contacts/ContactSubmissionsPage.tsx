@@ -15,6 +15,7 @@ import {
   AdminActionButton,
   AdminEmptyState,
   AdminErrorRecovery,
+  AdminSearchInput,
   AdminStatusBadge,
 } from "../components";
 import {
@@ -320,12 +321,10 @@ export const ContactSubmissionsPage: React.FC = () => {
             ...(isNarrowContacts ? styles.searchAreaNarrow : {}),
           }}
         >
-          <input
-            type="search"
+          <AdminSearchInput
             value={searchQuery}
             placeholder="Search name, email, phone, service..."
-            style={styles.searchInput}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={setSearchQuery}
           />
 
           {hasActiveFilters && (
@@ -769,18 +768,6 @@ const styles = {
 
   searchAreaNarrow: {
     flexDirection: "column" as const,
-  },
-
-  searchInput: {
-    width: "100%",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "11px 12px",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box" as const,
   },
 
   resetButton: {

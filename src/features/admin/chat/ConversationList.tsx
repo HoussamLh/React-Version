@@ -4,6 +4,7 @@ import {
   AdminActionButton,
   AdminEmptyState,
   AdminErrorRecovery,
+  AdminSearchInput,
   AdminStatusBadge,
 } from "../components";
 import type {
@@ -134,12 +135,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
           ...(isNarrowChat ? styles.searchAreaNarrow : {}),
         }}
       >
-        <input
-          type="search"
+        <AdminSearchInput
           value={searchQuery}
-          placeholder="Search visitor, email, message..."
-          style={styles.searchInput}
-          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search by name, email or phone number..."
+          onChange={onSearchChange}
         />
 
         {hasActiveFilters && (
@@ -344,18 +343,6 @@ const styles = {
 
   searchAreaNarrow: {
     flexDirection: "column" as const,
-  },
-
-  searchInput: {
-    width: "100%",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "11px 12px",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box" as const,
   },
 
   resetButton: {
