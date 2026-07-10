@@ -1,10 +1,15 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { AdminActionButton, AdminErrorRecovery } from "../components";
+import {
+  AdminActionButton,
+  AdminErrorRecovery,
+  AdminStatusBadge,
+} from "../components";
 import type {
   AdminConversation,
   AdminConversationStatus,
 } from "./adminChat.types";
+import { getConversationStatusTone } from "./adminChat.helpers";
 
 export type AdminConversationFilter =
   | "all"
@@ -61,33 +66,6 @@ const getVisitorLabel = (conversation: AdminConversation) => {
     conversation.visitorEmail ??
     `Visitor ${conversation.visitorId.slice(0, 8)}`
   );
-};
-
-const getStatusStyle = (status: AdminConversationStatus) => {
-  if (status === "open") {
-    return {
-      ...styles.status,
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.4)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    };
-  }
-
-  if (status === "pending") {
-    return {
-      ...styles.status,
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.4)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    };
-  }
-
-  return {
-    ...styles.status,
-    color: colors.text.muted,
-    borderColor: colors.border.default,
-    backgroundColor: "rgba(255,255,255,0.04)",
-  };
 };
 
 export const ConversationList: React.FC<ConversationListProps> = ({
@@ -279,9 +257,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               </p>
 
               <div style={styles.itemFooter}>
-                <span style={getStatusStyle(conversation.status)}>
+                <AdminStatusBadge
+                  tone={getConversationStatusTone(conversation.status)}
+                >
                   {conversation.status}
-                </span>
+                </AdminStatusBadge>
 
                 <span style={styles.modeBadge}>
                   {conversation.chatMode === "offline"
@@ -566,14 +546,6 @@ const styles = {
     alignItems: "center",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
-  },
-
-  status: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
   },
 
   modeBadge: {

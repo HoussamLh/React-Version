@@ -13,9 +13,10 @@ import type {
   AdminConversationStatus,
   AdminMessage,
 } from "./adminChat.types";
-import { AdminActionButton } from "../components";
+import { AdminActionButton, AdminStatusBadge } from "../components";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
+import { getConversationStatusTone } from "./adminChat.helpers";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
@@ -57,33 +58,6 @@ const getVisitorLabel = (conversation: AdminConversation) => {
     conversation.visitorEmail ??
     `Visitor ${conversation.visitorId.slice(0, 8)}`
   );
-};
-
-const getStatusBadgeStyle = (status: AdminConversationStatus) => {
-  if (status === "open") {
-    return {
-      ...styles.badge,
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.45)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    };
-  }
-
-  if (status === "pending") {
-    return {
-      ...styles.badge,
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.45)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    };
-  }
-
-  return {
-    ...styles.badge,
-    color: colors.text.muted,
-    borderColor: colors.border.default,
-    backgroundColor: "rgba(255,255,255,0.04)",
-  };
 };
 
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
@@ -334,9 +308,11 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           <div style={styles.headerTitleRow}>
             <h2 style={styles.title}>{visitorLabel}</h2>
 
-            <span style={getStatusBadgeStyle(conversation.status)}>
+            <AdminStatusBadge
+              tone={getConversationStatusTone(conversation.status)}
+            >
               {conversation.status}
-            </span>
+            </AdminStatusBadge>
           </div>
 
           <p style={styles.status}>
@@ -547,14 +523,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  badge: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "6px 10px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
   },
 
   headerActions: {

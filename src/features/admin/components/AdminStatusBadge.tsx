@@ -1,7 +1,7 @@
 import React from "react";
 import { colors, radius } from "../../../design-system";
 
-type AdminStatusBadgeTone = "success" | "warning" | "muted";
+type AdminStatusBadgeTone = "success" | "warning" | "info" | "muted";
 
 type AdminStatusBadgeProps = {
   children: React.ReactNode;
@@ -9,16 +9,20 @@ type AdminStatusBadgeProps = {
 };
 
 const getToneStyle = (tone: AdminStatusBadgeTone) => {
-  if (tone === "warning") {
-    return styles.warning;
-  }
+if (tone === "warning") {
+  return styles.warning;
+}
 
-  if (tone === "muted") {
-    return styles.muted;
-  }
+if (tone === "info") {
+  return styles.info;
+}
 
-  return styles.success;
-};
+if (tone === "muted") {
+  return styles.muted;
+}
+
+return styles.success;
+}
 
 export const AdminStatusBadge: React.FC<AdminStatusBadgeProps> = ({
   children,
@@ -58,6 +62,12 @@ const styles = {
     color: colors.accent.yellow,
     border: `1px solid rgba(255, 210, 122, 0.35)`,
     backgroundColor: "rgba(255, 210, 122, 0.08)",
+  },
+
+  info: {
+    color: "#93b5ff",
+    border: `1px solid rgba(147, 181, 255, 0.45)`,
+    backgroundColor: "rgba(147, 181, 255, 0.1)",
   },
 
   muted: {
