@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSupabaseConfigured } from "../../../lib/supabase";
 import { liveChatProfileCapture } from "../data/liveChat.data";
+
 import {
   createLiveChatRealtimeChannel,
   ensureAnonymousVisitor,
@@ -13,52 +14,23 @@ import {
   updateVisitorProfile,
   upsertVisitorProfile,
 } from "../services/liveChat.service";
+
 import type {
-  LiveChatAvailabilityMode,
   LiveChatConversation,
   LiveChatExtraChoice,
   LiveChatMessage,
   LiveChatPresenceState,
   LiveChatVisitorProfile,
 } from "../types/liveChat.types";
-const wait = (duration: number) => {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, duration);
-  });
-};
-const appendUniqueMessage = (
-  currentMessages: LiveChatMessage[],
-  nextMessage: LiveChatMessage,
-) => {
-  const exists = currentMessages.some(
-    (message) => message.id === nextMessage.id,
-  );
-  if (exists) {
-    return currentMessages;
-  }
-  return [...currentMessages, nextMessage];
-};
-const hasMessageContaining = (messages: LiveChatMessage[], value: string) => {
-  return messages.some((message) => message.body.includes(value));
-};
-const isValidEmail = (value: string) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-};
-const getUkBusinessAvailability = (): LiveChatAvailabilityMode => {
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/London",
-    weekday: "short",
-    hour: "2-digit",
-    hour12: false,
-  });
-  const parts = formatter.formatToParts(new Date());
-  const weekday = parts.find((part) => part.type === "weekday")?.value;
-  const hourValue = parts.find((part) => part.type === "hour")?.value ?? "0";
-  const hour = Number(hourValue === "24" ? "0" : hourValue);
-  const isWeekend = weekday === "Sat" || weekday === "Sun";
-  const isWorkingHour = hour >= 9 && hour < 18;
-  return !isWeekend && isWorkingHour ? "online" : "offline";
-};
+
+import {
+  appendUniqueLiveChatMessage,
+  getUkBusinessAvailability,
+  hasLiveChatMessageContaining,
+  isValidLiveChatEmail,
+  wait,
+} from "../utils";
+
 const initialVisitorProfile: LiveChatVisitorProfile = {
   displayName: null,
   email: null,
@@ -68,6 +40,7 @@ const initialVisitorProfile: LiveChatVisitorProfile = {
   chatMode: null,
   onboardingStep: "welcome",
 };
+
 export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [visitorProfile, setVisitorProfile] = useState<LiveChatVisitorProfile>(
@@ -94,6 +67,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
   const profileStep = visitorProfile.onboardingStep;
   const chatMode = visitorProfile.chatMode ?? getUkBusinessAvailability();
   const isOfflineMode = chatMode === "offline";
+
   const updateLocalProfile = useCallback(
     (nextValues: Partial<LiveChatVisitorProfile>) => {
       setVisitorProfile((currentProfile) => ({
@@ -103,6 +77,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     },
     [],
   );
+
   const sendPromptWithTyping = useCallback(
     async (body: string) => {
       if (!conversationId) return;
@@ -110,12 +85,13 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
       await wait(liveChatProfileCapture.typingDelayMs);
       const nextMessage = await sendSystemMessage({ conversationId, body });
       setMessages((currentMessages) =>
-        appendUniqueMessage(currentMessages, nextMessage),
+        appendUniqueLiveChatMessage(currentMessages, nextMessage),
       );
       setIsAgentTyping(false);
     },
     [conversationId],
   );
+
   const saveOnboardingStep = useCallback(
     async (nextStep: LiveChatVisitorProfile["onboardingStep"]) => {
       if (!visitorId) return;
@@ -124,6 +100,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     },
     [updateLocalProfile, visitorId],
   );
+
   useEffect(() => {
     if (!enabled || conversationId) return;
     let isMounted = true;
@@ -161,18 +138,20 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
       isMounted = false;
     };
   }, [enabled, conversationId]);
+
   useEffect(() => {
     if (!enabled || !conversationId) return;
     const unsubscribe = subscribeToConversationMessages({
       conversationId,
       onMessage: (nextMessage) => {
         setMessages((currentMessages) =>
-          appendUniqueMessage(currentMessages, nextMessage),
+          appendUniqueLiveChatMessage(currentMessages, nextMessage),
         );
       },
     });
     return unsubscribe;
   }, [enabled, conversationId]);
+
   useEffect(() => {
     if (!enabled || !conversationId || !visitorId) return;
     const realtime = createLiveChatRealtimeChannel({
@@ -206,6 +185,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
       setIsAdminTyping(false);
     };
   }, [enabled, conversationId, visitorId]);
+
   useEffect(() => {
     if (!enabled || !shouldRunOnboarding || !visitorId || !conversationId) {
       return;
@@ -220,38 +200,41 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         if (profileStep === "welcome") {
           const welcomePrompt = liveChatProfileCapture.welcomePrompt();
           if (
-            !hasMessageContaining(messages, "Welcome to DevBySam Live Chat")
+            !hasLiveChatMessageContaining(
+              messages,
+              "Welcome to DevBySam Live Chat",
+            )
           ) {
             await sendPromptWithTyping(welcomePrompt);
           }
           if (!isMounted) return;
           await saveOnboardingStep("privacy");
           await wait(300);
-          if (!hasMessageContaining(messages, "Privacy Statement")) {
+          if (!hasLiveChatMessageContaining(messages, "Privacy Statement")) {
             await sendPromptWithTyping(liveChatProfileCapture.privacyPrompt);
           }
           if (!isMounted) return;
           await saveOnboardingStep("name");
           await wait(300);
-          if (!hasMessageContaining(messages, "what’s your name")) {
+          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
             await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
           }
           return;
         }
         if (profileStep === "privacy") {
-          if (!hasMessageContaining(messages, "Privacy Statement")) {
+          if (!hasLiveChatMessageContaining(messages, "Privacy Statement")) {
             await sendPromptWithTyping(liveChatProfileCapture.privacyPrompt);
           }
           if (!isMounted) return;
           await saveOnboardingStep("name");
           await wait(300);
-          if (!hasMessageContaining(messages, "what’s your name")) {
+          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
             await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
           }
           return;
         }
         if (profileStep === "name") {
-          if (!hasMessageContaining(messages, "what’s your name")) {
+          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
             await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
           }
           return;
@@ -259,7 +242,9 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         if (profileStep === "email") {
           const name = visitorProfile.displayName ?? "there";
           const isEmailRequired = chatMode === "offline";
-          if (!hasMessageContaining(messages, "What email should I use")) {
+          if (
+            !hasLiveChatMessageContaining(messages, "What email should I use")
+          ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.emailPrompt(name, isEmailRequired),
             );
@@ -268,7 +253,9 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         }
         if (profileStep === "offline_notice") {
           const name = visitorProfile.displayName ?? "there";
-          if (!hasMessageContaining(messages, "We are currently offline")) {
+          if (
+            !hasLiveChatMessageContaining(messages, "We are currently offline")
+          ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.offlineNoticePrompt(name),
             );
@@ -281,8 +268,14 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           const name = visitorProfile.displayName ?? "there";
           const isOffline = chatMode === "offline";
           if (
-            !hasMessageContaining(messages, "How may I help you today") &&
-            !hasMessageContaining(messages, "What service are you contacting")
+            !hasLiveChatMessageContaining(
+              messages,
+              "How may I help you today",
+            ) &&
+            !hasLiveChatMessageContaining(
+              messages,
+              "What service are you contacting",
+            )
           ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.servicePrompt(name, isOffline),
@@ -292,7 +285,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         }
         if (profileStep === "topic") {
           const name = visitorProfile.displayName ?? "there";
-          if (!hasMessageContaining(messages, "Briefly describe")) {
+          if (!hasLiveChatMessageContaining(messages, "Briefly describe")) {
             await sendPromptWithTyping(
               liveChatProfileCapture.topicPrompt(name),
             );
@@ -301,7 +294,10 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         }
         if (profileStep === "connecting") {
           if (
-            !hasMessageContaining(messages, "connecting you to one of our team")
+            !hasLiveChatMessageContaining(
+              messages,
+              "connecting you to one of our team",
+            )
           ) {
             await sendPromptWithTyping(liveChatProfileCapture.connectingPrompt);
           }
@@ -311,7 +307,12 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         }
         if (profileStep === "offline_confirm") {
           const name = visitorProfile.displayName ?? "there";
-          if (!hasMessageContaining(messages, "We’ve received your message")) {
+          if (
+            !hasLiveChatMessageContaining(
+              messages,
+              "We’ve received your message",
+            )
+          ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.offlineReceivedPrompt(name),
             );
@@ -319,7 +320,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           if (!isMounted) return;
           await saveOnboardingStep("extra_choice");
           await wait(300);
-          if (!hasMessageContaining(messages, "anything else")) {
+          if (!hasLiveChatMessageContaining(messages, "anything else")) {
             await sendPromptWithTyping(
               liveChatProfileCapture.anythingElsePrompt,
             );
@@ -327,7 +328,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           return;
         }
         if (profileStep === "extra_choice") {
-          if (!hasMessageContaining(messages, "anything else")) {
+          if (!hasLiveChatMessageContaining(messages, "anything else")) {
             await sendPromptWithTyping(
               liveChatProfileCapture.anythingElsePrompt,
             );
@@ -335,7 +336,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           return;
         }
         if (profileStep === "extra_message_prompt") {
-          if (!hasMessageContaining(messages, "extra details")) {
+          if (!hasLiveChatMessageContaining(messages, "extra details")) {
             await sendPromptWithTyping(
               liveChatProfileCapture.extraDetailsPrompt,
             );
@@ -346,7 +347,12 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         }
         if (profileStep === "extra_received") {
           const name = visitorProfile.displayName ?? "there";
-          if (!hasMessageContaining(messages, "added that to your enquiry")) {
+          if (
+            !hasLiveChatMessageContaining(
+              messages,
+              "added that to your enquiry",
+            )
+          ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.extraReceivedPrompt(name),
             );
@@ -360,8 +366,8 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
         if (profileStep === "closed") {
           const name = visitorProfile.displayName ?? "there";
           if (
-            !hasMessageContaining(messages, "Have a lovely day") &&
-            !hasMessageContaining(messages, "Have a good night")
+            !hasLiveChatMessageContaining(messages, "Have a lovely day") &&
+            !hasLiveChatMessageContaining(messages, "Have a good night")
           ) {
             await sendPromptWithTyping(
               liveChatProfileCapture.closingPrompt(name),
@@ -393,6 +399,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     visitorId,
     visitorProfile.displayName,
   ]);
+
   const captureProfileValue = useCallback(
     async (value: string): Promise<boolean> => {
       const trimmedValue = value.trim();
@@ -418,7 +425,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
             );
             return false;
           }
-          if (nextEmail && !isValidEmail(nextEmail)) {
+          if (nextEmail && !isValidLiveChatEmail(nextEmail)) {
             setError("Please enter a valid email address.");
             return false;
           }
@@ -428,7 +435,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           body: trimmedValue,
         });
         setMessages((currentMessages) =>
-          appendUniqueMessage(currentMessages, visitorMessage),
+          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
         );
         if (profileStep === "name") {
           const nextChatMode = getUkBusinessAvailability();
@@ -507,6 +514,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
       visitorProfile.contactExtraDetails,
     ],
   );
+
   const selectServiceOption = useCallback(
     async (service: string): Promise<boolean> => {
       if (!visitorId || !conversationId) {
@@ -524,7 +532,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           body: service,
         });
         setMessages((currentMessages) =>
-          appendUniqueMessage(currentMessages, visitorMessage),
+          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
         );
         await updateVisitorProfile({
           visitorId,
@@ -546,6 +554,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     },
     [conversationId, profileStep, updateLocalProfile, visitorId],
   );
+
   const selectExtraChoice = useCallback(
     async (choice: LiveChatExtraChoice): Promise<boolean> => {
       if (!visitorId || !conversationId) {
@@ -565,7 +574,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           body: choiceText,
         });
         setMessages((currentMessages) =>
-          appendUniqueMessage(currentMessages, visitorMessage),
+          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
         );
         const nextStep = choice === "yes" ? "extra_message_prompt" : "closed";
         await updateVisitorProfile({ visitorId, onboardingStep: nextStep });
@@ -581,6 +590,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     },
     [conversationId, profileStep, updateLocalProfile, visitorId],
   );
+
   const sendMessage = useCallback(
     async (body: string): Promise<boolean> => {
       const trimmedBody = body.trim();
@@ -603,7 +613,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
           body: trimmedBody,
         });
         setMessages((currentMessages) =>
-          appendUniqueMessage(currentMessages, nextMessage),
+          appendUniqueLiveChatMessage(currentMessages, nextMessage),
         );
         return true;
       } catch (error) {
@@ -616,6 +626,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     },
     [captureProfileValue, conversationId, profileStep],
   );
+
   const sendTypingStatus = useCallback(
     (isTyping: boolean) => {
       if (profileStep !== "ready") {
@@ -640,6 +651,7 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
   const isVisitorOnline = Boolean(
     visitorId && presence.some((item) => item.userId === visitorId),
   );
+
   const isAdminOnline = presence.some((item) => item.role === "admin");
   return {
     visitorId,

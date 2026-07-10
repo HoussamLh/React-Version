@@ -6,14 +6,28 @@ import {
   Smile,
   X,
 } from "lucide-react";
-import { colors, radius, spacing, typography } from "../../../design-system";
-import { liveChatAgent, liveChatProfileCapture } from "../data/liveChat.data";
+
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography 
+} from "../../../design-system";
+
+import { 
+  liveChatAgent, 
+  liveChatProfileCapture 
+} from "../data/liveChat.data";
+
 import type {
   LiveChatAvailabilityMode,
   LiveChatExtraChoice,
   LiveChatMessage,
   LiveChatProfileStep,
 } from "../types/liveChat.types";
+
+import { hasLiveChatMessageContaining } from "../utils";
+
 import { LiveChatAgentAvatar } from "./LiveChatAgentAvatar";
 import { LiveChatMessageBubble } from "./LiveChatMessageBubble";
 import { LiveChatOptionsMenu } from "./LiveChatOptionsMenu";
@@ -43,10 +57,6 @@ type LiveChatChatViewProps = {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
 };
 
-const hasMessageContaining = (messages: LiveChatMessage[], value: string) => {
-  return messages.some((message) => message.body.includes(value));
-};
-
 export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   message,
   messagePlaceholder,
@@ -74,10 +84,13 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const hasServicePrompt =
-    hasMessageContaining(messages, "How may I help you today") ||
-    hasMessageContaining(messages, "What service are you contacting");
+    hasLiveChatMessageContaining(messages, "How may I help you today") ||
+    hasLiveChatMessageContaining(messages, "What service are you contacting");
 
-  const hasExtraChoicePrompt = hasMessageContaining(messages, "anything else");
+  const hasExtraChoicePrompt = hasLiveChatMessageContaining(
+    messages,
+    "anything else",
+  );
 
   const shouldShowServiceOptions =
     profileStep === "service" && !isAssistantTyping && hasServicePrompt;
