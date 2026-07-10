@@ -6,7 +6,8 @@ import {
   AdminEmptyState,
   AdminStatusBadge,
   AdminPanel,
-  AdminLoadingText
+  AdminLoadingText,
+  AdminPageHeader,
 } from "../components";
 import { formatAdminShortDateTime } from "../utils";
 import { getAdminConversations } from "../chat/adminChat.service";
@@ -98,41 +99,27 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <section style={styles.page}>
-      <header
-        style={{
-          ...styles.header,
-          ...(isCompactDashboard ? styles.headerCompact : {}),
-        }}
-      >
-        <div style={styles.headerContent}>
-          <p style={styles.eyebrow}>Admin overview</p>
-          <h2
+      <AdminPageHeader
+        eyebrow="Admin overview"
+        title="Dashboard"
+        subtitle="Monitor contact enquiries, live chat conversations, and follow-up activity from one place."
+        isCompact={isCompactDashboard}
+        isNarrow={isNarrowDashboard}
+        actions={
+          <button
+            type="button"
             style={{
-              ...styles.title,
-              ...(isNarrowDashboard ? styles.titleNarrow : {}),
+              ...styles.refreshButton,
+              ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
+              ...(isLoading ? styles.disabledAction : {}),
             }}
+            onClick={loadDashboard}
+            disabled={isLoading}
           >
-            Dashboard
-          </h2>
-          <p style={styles.subtitle}>
-            Monitor contact enquiries, live chat conversations, and follow-up
-            activity from one place.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          style={{
-            ...styles.refreshButton,
-            ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
-            ...(isLoading ? styles.disabledAction : {}),
-          }}
-          onClick={loadDashboard}
-          disabled={isLoading}
-        >
-          {isLoading ? "Refreshing..." : "Refresh"}
-        </button>
-      </header>
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        }
+      />
 
       {error && <p style={styles.error}>{error}</p>}
 
@@ -352,50 +339,6 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: spacing.xl,
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: spacing.xl,
-  },
-
-  headerCompact: {
-    flexDirection: "column" as const,
-    gap: spacing.md,
-  },
-
-  headerContent: {
-    minWidth: 0,
-  },
-
-  eyebrow: {
-    color: colors.accent.green,
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "32px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  titleNarrow: {
-    fontSize: "28px",
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "15px",
-    lineHeight: "24px",
-    maxWidth: "680px",
-    margin: `${spacing.sm} 0 0 0`,
   },
 
   refreshButton: {
