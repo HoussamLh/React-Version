@@ -11,7 +11,7 @@ import {
   typography 
 } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import { AdminErrorRecovery } from "../components";
+import { AdminActionButton , AdminErrorRecovery } from "../components";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -306,17 +306,14 @@ const isNarrowContacts = useMediaQuery("(max-width: 640px)");
           <div style={styles.headerActions}>
             <span style={styles.count}>{filteredSubmissions.length}</span>
 
-            <button
-              type="button"
-              style={{
-                ...styles.refreshButton,
-                ...(isLoading ? styles.disabledAction : {}),
-              }}
-              onClick={loadSubmissions}
+            <AdminActionButton
+              variant="ghost"
+              size="sm"
               disabled={isLoading}
+              onClick={loadSubmissions}
             >
               {isLoading ? "..." : "Refresh"}
-            </button>
+            </AdminActionButton>
           </div>
         </div>
 
@@ -522,60 +519,42 @@ const isNarrowContacts = useMediaQuery("(max-width: 640px)");
                   }}
                 >
                   {selectedSubmission.status !== "contacted" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButton,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="primary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "contacted")
                       }
                     >
                       Mark contacted
-                    </button>
+                    </AdminActionButton>
                   )}
 
                   {selectedSubmission.status !== "closed" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButtonSecondary,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="secondary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "closed")
                       }
                     >
                       Close
-                    </button>
+                    </AdminActionButton>
                   )}
 
                   {selectedSubmission.status !== "new" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButtonSecondary,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="secondary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "new")
                       }
                     >
                       Reopen
-                    </button>
+                    </AdminActionButton>
                   )}
                 </div>
               </div>
@@ -775,17 +754,6 @@ const styles = {
     alignItems: "center",
     gap: spacing.sm,
     flexShrink: 0,
-  },
-
-  refreshButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "6px 10px",
-    fontSize: "11px",
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
   },
 
   disabledAction: {
@@ -1101,34 +1069,6 @@ const styles = {
     width: "100%",
     flexDirection: "column" as const,
     alignItems: "stretch",
-  },
-
-  quickStatusButton: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.black,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  quickStatusButtonSecondary: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  quickStatusButtonNarrow: {
-    width: "100%",
   },
 
   infoGrid: {
