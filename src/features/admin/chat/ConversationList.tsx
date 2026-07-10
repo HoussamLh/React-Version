@@ -2,6 +2,7 @@ import React from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   AdminActionButton,
+  AdminEmptyState,
   AdminErrorRecovery,
   AdminStatusBadge,
 } from "../components";
@@ -192,12 +193,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
 
       {!isLoading && !error && conversations.length === 0 && (
-        <div style={styles.emptyState}>
-          <h3 style={styles.emptyTitle}>No conversations found</h3>
-          <p style={styles.emptyText}>
-            Try another filter, reset search, or wait for new visitor messages.
-          </p>
-        </div>
+        <AdminEmptyState
+          title="No conversations found"
+          text="Try another search term or reset the filters."
+        />
       )}
 
       <div
@@ -428,24 +427,6 @@ const styles = {
     lineHeight: "22px",
     margin: 0,
     padding: spacing.lg,
-  },
-
-  emptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  emptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  emptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
   },
 
   list: {

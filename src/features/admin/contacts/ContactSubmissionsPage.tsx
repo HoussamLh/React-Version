@@ -13,6 +13,7 @@ import {
 import { useMediaQuery } from "../../../shared/hooks";
 import {
   AdminActionButton,
+  AdminEmptyState,
   AdminErrorRecovery,
   AdminStatusBadge,
 } from "../components";
@@ -380,12 +381,10 @@ export const ContactSubmissionsPage: React.FC = () => {
         {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
 
         {!isLoading && !error && filteredSubmissions.length === 0 && (
-          <div style={styles.listEmptyState}>
-            <h3 style={styles.listEmptyTitle}>No submissions found</h3>
-            <p style={styles.listEmptyText}>
-              Try another search term or reset the filters.
-            </p>
-          </div>
+          <AdminEmptyState
+            title="No submissions found"
+            text="Try another search term or reset the filters."
+          />
         )}
 
         <div
@@ -457,7 +456,7 @@ export const ContactSubmissionsPage: React.FC = () => {
               <div style={styles.detailHeaderContent}>
                 <AdminStatusBadge
                   tone={getSubmissionStatusTone(selectedSubmission.status)}
-                  >
+                >
                   {selectedSubmission.status}
                 </AdminStatusBadge>
 
@@ -865,25 +864,7 @@ const styles = {
     border: `1px solid rgba(147, 220, 92, 0.35)`,
     backgroundColor: "rgba(147, 220, 92, 0.08)",
   },
-
-  listEmptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  listEmptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  listEmptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
+  
   list: {
     flex: 1,
     minHeight: 0,
