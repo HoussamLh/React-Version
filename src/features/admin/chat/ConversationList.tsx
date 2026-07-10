@@ -16,7 +16,10 @@ import type {
   AdminConversation,
   AdminConversationStatus,
 } from "./adminChat.types";
-import { getConversationStatusTone } from "./adminChat.helpers";
+import {
+  getConversationStatusTone,
+  getAdminConversationVisitorLabel,
+} from "./adminChat.helpers";
 
 export type AdminConversationFilter =
   | "all"
@@ -57,14 +60,6 @@ const filterOptions: {
   { label: "Unread", value: "unread" },
   { label: "Offline", value: "offline" },
 ];
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
-};
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
@@ -189,7 +184,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         {conversations.map((conversation) => {
           const isActive = conversation.id === selectedConversationId;
           const hasUnread = conversation.unreadCount > 0;
-          const visitorLabel = getVisitorLabel(conversation);
+          const visitorLabel = getAdminConversationVisitorLabel(conversation);
 
           return (
             <button

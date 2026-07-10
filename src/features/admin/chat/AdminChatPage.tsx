@@ -13,26 +13,12 @@ import {
   subscribeToAllAdminMessages,
 } from "./adminChat.service";
 import type { AdminConversation } from "./adminChat.types";
+import { getAdminConversationSearchableText } from "./adminChat.helpers";
 import { AdminChatWindow } from "./AdminChatWindow";
 import {
   ConversationList,
   type AdminConversationFilter,
 } from "./ConversationList";
-
-const getSearchableConversationText = (conversation: AdminConversation) => {
-  return [
-    conversation.visitorName,
-    conversation.visitorEmail,
-    conversation.visitorId,
-    conversation.lastMessageBody,
-    conversation.status,
-    conversation.source,
-    conversation.chatMode,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-};
 
 export const AdminChatPage: React.FC = () => {
 const isCompactChat = useMediaQuery("(max-width: 1250px)");
@@ -123,9 +109,9 @@ const isNarrowChat = useMediaQuery("(max-width: 640px)");
         return true;
       }
 
-      return getSearchableConversationText(conversation).includes(
-        normalizedSearchQuery,
-      );
+    return getAdminConversationSearchableText(conversation).includes(
+       normalizedSearchQuery,
+    );
     });
   }, [conversationFilter, conversations, searchQuery]);
 
