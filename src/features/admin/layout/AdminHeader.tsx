@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
@@ -13,9 +13,23 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [error, setError] = useState("");
+
   const handleSignOut = async () => {
-    await signOutAdmin();
-    navigate("/admin/login", { replace: true });
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+    setError("");
+
+    try {
+      await signOutAdmin();
+      navigate("/admin/login", { replace: true });
+    } catch {
+      setError("Could not sign out. Please try again.");
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -35,11 +49,27 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         >
           Control Center
         </h1>
+
+        {error && <p style={styles.error}>{error}</p>}
       </div>
 
-      <button type="button" style={styles.button} onClick={handleSignOut}>
+      <button
+        type="button"
+        style={{
+          ...styles.button,
+          ...(isSigningOut ? styles.buttonDisabled : {}),
+        }}
+        onClick={handleSignOut}
+        disabled={isSigningOut}
+      >
         <LogOut size={17} />
-        <span>{isCompactLayout ? "Out" : "Sign out"}</span>
+        <span>
+          {isSigningOut
+            ? "Signing out..."
+            : isCompactLayout
+              ? "Out"
+              : "Sign out"}
+        </span>
       </button>
     </header>
   );
@@ -86,6 +116,13 @@ const styles = {
     fontSize: "19px",
   },
 
+  error: {
+    color: colors.accent.yellow,
+    fontSize: "12px",
+    lineHeight: "18px",
+    margin: `${spacing.xs} 0 0 0`,
+  },
+
   button: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -97,5 +134,10 @@ const styles = {
     padding: "10px 14px",
     cursor: "pointer",
     flexShrink: 0,
+  },
+
+  buttonDisabled: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 };
