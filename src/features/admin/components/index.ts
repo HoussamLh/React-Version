@@ -4,3 +4,4 @@ export { AdminStatusBadge } from "./AdminStatusBadge";
 export { AdminEmptyState } from "./AdminEmptyState";
 export { AdminSearchInput } from "./AdminSearchInput";
 export { AdminPanel } from "./AdminPanel";
+export { AdminFilterButton } from "./AdminFilterButton";
