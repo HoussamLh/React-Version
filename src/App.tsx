@@ -19,6 +19,7 @@ import {
   AdminDashboard,
   AdminLayout,
   AdminLogin,
+  AdminProjectsPage,
   ContactSubmissionsPage,
   ProtectedAdminRoute,
 } from "./features/admin";
@@ -103,6 +104,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="chat" element={<AdminChatPage />} />
           <Route path="contacts" element={<ContactSubmissionsPage />} />
+          <Route path="projects" element={<AdminProjectsPage />} />
         </Route>
       </Routes>
 
