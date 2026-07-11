@@ -15,3 +15,11 @@ export const supabase = isSupabaseConfigured
       },
     })
   : null;
+
+export const requireSupabase = () => {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+
+  return supabase;
+};
