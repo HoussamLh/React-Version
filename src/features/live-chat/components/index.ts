@@ -14,3 +14,4 @@ export { LiveChatOptionButton } from "./LiveChatOptionButton";
 export { LiveChatPrimaryButton } from "./LiveChatPrimaryButton";
 export { LiveChatMessagePreviewCard } from "./LiveChatMessagePreviewCard";
 export { LiveChatComposer } from "./LiveChatComposer";
+export { LiveChatChatHeader } from "./LiveChatChatHeader";
