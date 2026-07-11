@@ -16,3 +16,4 @@ export { LiveChatMessagePreviewCard } from "./LiveChatMessagePreviewCard";
 export { LiveChatComposer } from "./LiveChatComposer";
 export { LiveChatChatHeader } from "./LiveChatChatHeader";
 export { LiveChatFeedbackBanner } from "./LiveChatFeedbackBanner";
+export { LiveChatMessageList } from "./LiveChatMessageList";
