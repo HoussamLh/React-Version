@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { colors, radius } from "../../../design-system";
 import { useLiveChat } from "../hooks/useLiveChat";
-import { liveChatTranscript } from "../data/liveChat.data";
 
 import {
-  buildLiveChatTranscript,
   getLiveChatMessagePlaceholder,
   isLiveChatComposerDisabledForStep,
+  downloadLiveChatTranscript,
 } from "../utils";
 
 import type {
@@ -118,20 +117,7 @@ export const LiveChatBubble: React.FC = () => {
   };
 
   const handleDownloadTranscript = () => {
-    const transcript = buildLiveChatTranscript(messages);
-
-    const blob = new Blob([transcript], {
-      type: "text/plain;charset=utf-8",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = liveChatTranscript.fileName;
-    link.click();
-
-    URL.revokeObjectURL(url);
+    downloadLiveChatTranscript(messages);
     setIsOptionsOpen(false);
   };
 

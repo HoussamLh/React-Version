@@ -14,3 +14,5 @@ export {
 } from "./liveChatBubble.helpers";
 
 export { formatLiveChatTime } from "./liveChatDate.helpers";
+
+export { downloadLiveChatTranscript } from "./liveChatDownload.helpers";
