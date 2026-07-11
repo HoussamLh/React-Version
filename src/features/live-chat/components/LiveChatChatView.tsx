@@ -6,11 +6,8 @@ import {
 } from "../../../design-system";
 
 import { 
-  liveChatAgent, 
   liveChatProfileCapture 
 } from "../data/liveChat.data";
-
-import { LiveChatChatHeader } from "./LiveChatChatHeader";
 
 import type {
   LiveChatAvailabilityMode,
@@ -26,6 +23,8 @@ import { LiveChatStateText } from "./LiveChatStateText";
 import { LiveChatTypingIndicator } from "./LiveChatTypingIndicator";
 import { LiveChatOptionButton } from "./LiveChatOptionButton";
 import { LiveChatComposer } from "./LiveChatComposer";
+import { LiveChatChatHeader } from "./LiveChatChatHeader";
+import { LiveChatFeedbackBanner } from "./LiveChatFeedbackBanner";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -120,7 +119,7 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
         onDownloadTranscript={onDownloadTranscript}
       />
 
-      <div style={styles.feedbackText}>{liveChatAgent.feedbackText}</div>
+      <LiveChatFeedbackBanner />
 
       <div style={styles.chatBody}>
         {isLoading && (
@@ -197,14 +196,6 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
 };
 
 const styles = {
-  feedbackText: {
-    textAlign: "center" as const,
-    color: colors.text.muted,
-    fontSize: "13px",
-    padding: `${spacing.md} ${spacing.lg}`,
-    borderBottom: `1px solid rgba(255, 255, 255, 0.03)`,
-  },
-
   chatBody: {
     flex: 1,
     padding: spacing.lg,
