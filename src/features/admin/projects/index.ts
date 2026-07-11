@@ -1,3 +1,5 @@
+export { AdminProjectsPage } from "./AdminProjectsPage";
+
 export type {
   AdminProject,
   AdminProjectFormValues,
