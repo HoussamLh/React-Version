@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { getAdminProjects } from "./projectsCms.service";
+import { AdminProjectForm } from "./AdminProjectForm";
+import { createAdminProject, getAdminProjects } from "./projectsCms.service";
 import type { AdminProject, ProjectStatus } from "./projectsCms.types";
 
 type ProjectFilter = "all" | ProjectStatus;
@@ -25,8 +26,11 @@ export const AdminProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [statusFilter, setStatusFilter] = useState<ProjectFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
@@ -43,15 +47,15 @@ export const AdminProjectsPage: React.FC = () => {
     }
   }, []);
 
-useEffect(() => {
-  const timeoutId = window.setTimeout(() => {
-    void loadProjects();
-  }, 0);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadProjects();
+    }, 0);
 
-  return () => {
-    window.clearTimeout(timeoutId);
-  };
-}, [loadProjects]);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [loadProjects]);
 
   const filteredProjects = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
@@ -80,11 +84,32 @@ useEffect(() => {
       return matchesStatus && matchesSearch;
     });
   }, [projects, searchQuery, statusFilter]);
+
   const hasActiveFilters = statusFilter !== "all" || searchQuery.trim();
 
   const resetFilters = () => {
     setStatusFilter("all");
     setSearchQuery("");
+  };
+
+  const handleCreateProject = async (
+    values: Parameters<typeof createAdminProject>[0],
+  ) => {
+    setIsCreatingProject(true);
+    setCreateError(null);
+
+    try {
+      await createAdminProject(values);
+      setIsCreateFormOpen(false);
+      await loadProjects();
+    } catch (error) {
+      console.error("Could not create project:", error);
+      setCreateError(
+        "Could not create project. Check the slug is unique and all required fields are valid.",
+      );
+    } finally {
+      setIsCreatingProject(false);
+    }
   };
 
   return (
@@ -99,10 +124,53 @@ useEffect(() => {
           </p>
         </div>
 
-        <button type="button" style={styles.refreshButton} onClick={loadProjects}>
-          {isLoading ? "Refreshing..." : "Refresh"}
-        </button>
+        <div style={styles.headerActions}>
+          <button
+            type="button"
+            style={styles.createButton}
+            onClick={() => {
+              setCreateError(null);
+              setIsCreateFormOpen((currentValue) => !currentValue);
+            }}
+          >
+            {isCreateFormOpen ? "Close Form" : "New Project"}
+          </button>
+
+          <button
+            type="button"
+            style={styles.refreshButton}
+            onClick={loadProjects}
+          >
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
       </div>
+
+      {isCreateFormOpen && (
+        <div style={styles.createPanel}>
+          <div style={styles.createPanelHeader}>
+            <div>
+              <h2 style={styles.createPanelTitle}>Create project</h2>
+              <p style={styles.createPanelText}>
+                Add a new project card to the CMS. Draft projects stay hidden
+                from the public projects page.
+              </p>
+            </div>
+          </div>
+
+          {createError && <div style={styles.errorBox}>{createError}</div>}
+
+          <AdminProjectForm
+            submitLabel="Create Project"
+            isSubmitting={isCreatingProject}
+            onCancel={() => {
+              setCreateError(null);
+              setIsCreateFormOpen(false);
+            }}
+            onSubmit={handleCreateProject}
+          />
+        </div>
+      )}
 
       <div style={styles.panel}>
         <div style={styles.toolbar}>
@@ -264,7 +332,9 @@ useEffect(() => {
 
                       <div style={styles.metaItem}>
                         <span style={styles.metaLabel}>Order</span>
-                        <span style={styles.metaValue}>{project.sortOrder}</span>
+                        <span style={styles.metaValue}>
+                          {project.sortOrder}
+                        </span>
                       </div>
                     </div>
 
@@ -300,6 +370,13 @@ const styles = {
     gap: spacing.xl,
   },
 
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexShrink: 0,
+  },
+
   eyebrow: {
     color: colors.accent.green,
     fontSize: "12px",
@@ -325,6 +402,16 @@ const styles = {
     margin: `${spacing.sm} 0 0 0`,
   },
 
+  createButton: {
+    border: "none",
+    borderRadius: radius.md,
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontWeight: typography.fontWeight.bold,
+  },
+
   refreshButton: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -333,6 +420,32 @@ const styles = {
     padding: `${spacing.sm} ${spacing.md}`,
     cursor: "pointer",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  createPanel: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.xl,
+    backgroundColor: colors.background.card,
+    padding: spacing.xl,
+  },
+
+  createPanelHeader: {
+    marginBottom: spacing.lg,
+  },
+
+  createPanelTitle: {
+    color: colors.text.main,
+    fontSize: "22px",
+    lineHeight: "28px",
+    margin: 0,
+    fontWeight: typography.fontWeight.black,
+  },
+
+  createPanelText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: `${spacing.sm} 0 0 0`,
   },
 
   panel: {
@@ -544,7 +657,7 @@ const styles = {
   },
 
   statusBadge: {
-    borderRadius: "50%",
+    borderRadius: "999px",
     padding: "5px 9px",
     fontSize: "11px",
     fontWeight: typography.fontWeight.bold,
