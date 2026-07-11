@@ -3,6 +3,7 @@ import { colors, radius, spacing, typography } from "../../../design-system";
 import { AdminProjectForm } from "./AdminProjectForm";
 import {
   createAdminProject,
+  deleteAdminProject,
   getAdminProjects,
   updateAdminProject,
 } from "./projectsCms.service";
@@ -70,9 +71,13 @@ export const AdminProjectsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [isUpdatingProject, setIsUpdatingProject] = useState(false);
+  const [isDeletingProjectId, setIsDeletingProjectId] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
@@ -176,9 +181,36 @@ export const AdminProjectsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProject = async (project: AdminProject) => {
+    const isConfirmed = window.confirm(
+      `Delete "${project.title}"? This cannot be undone.`,
+    );
+
+    if (!isConfirmed) return;
+
+    setIsDeletingProjectId(project.id);
+    setDeleteError(null);
+
+    try {
+      await deleteAdminProject(project.id);
+
+      if (editingProject?.id === project.id) {
+        setEditingProject(null);
+      }
+
+      await loadProjects();
+    } catch (error) {
+      console.error("Could not delete project:", error);
+      setDeleteError("Could not delete project. Please try again.");
+    } finally {
+      setIsDeletingProjectId(null);
+    }
+  };
+
   const openCreateForm = () => {
     setCreateError(null);
     setUpdateError(null);
+    setDeleteError(null);
     setEditingProject(null);
     setIsCreateFormOpen((currentValue) => !currentValue);
   };
@@ -186,6 +218,7 @@ export const AdminProjectsPage: React.FC = () => {
   const openEditForm = (project: AdminProject) => {
     setCreateError(null);
     setUpdateError(null);
+    setDeleteError(null);
     setIsCreateFormOpen(false);
     setEditingProject(project);
   };
@@ -274,6 +307,8 @@ export const AdminProjectsPage: React.FC = () => {
           />
         </div>
       )}
+
+      {deleteError && <div style={styles.errorBox}>{deleteError}</div>}
 
       <div style={styles.panel}>
         <div style={styles.toolbar}>
@@ -448,7 +483,6 @@ export const AdminProjectsPage: React.FC = () => {
                         </span>
                       ))}
                     </div>
-
                     <div style={styles.cardActions}>
                       <button
                         type="button"
@@ -456,6 +490,22 @@ export const AdminProjectsPage: React.FC = () => {
                         onClick={() => openEditForm(project)}
                       >
                         Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        style={{
+                          ...styles.deleteButton,
+                          ...(isDeletingProjectId === project.id
+                            ? styles.disabledButton
+                            : {}),
+                        }}
+                        disabled={isDeletingProjectId === project.id}
+                        onClick={() => void handleDeleteProject(project)}
+                      >
+                        {isDeletingProjectId === project.id
+                          ? "Deleting..."
+                          : "Delete"}
                       </button>
                     </div>
                   </div>
@@ -839,6 +889,7 @@ const styles = {
   cardActions: {
     display: "flex",
     justifyContent: "flex-end",
+    gap: spacing.sm,
     marginTop: spacing.md,
     paddingTop: spacing.md,
     borderTop: `1px solid ${colors.border.default}`,
@@ -853,5 +904,21 @@ const styles = {
     cursor: "pointer",
     fontSize: "13px",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  deleteButton: {
+    border: `1px solid rgba(255, 90, 90, 0.45)`,
+    borderRadius: radius.md,
+    backgroundColor: "rgba(255, 90, 90, 0.08)",
+    color: "#ff7777",
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: typography.fontWeight.bold,
+  },
+
+  disabledButton: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 };
