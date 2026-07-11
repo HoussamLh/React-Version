@@ -1,4 +1,5 @@
 export { AdminProjectsPage } from "./AdminProjectsPage";
+export { AdminProjectForm } from "./AdminProjectForm";
 
 export type {
   AdminProject,
