@@ -1,11 +1,31 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
+import React, { 
+  useCallback, 
+  useEffect, 
+  useMemo, 
+  useState 
 } from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography 
+} from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
+import {
+  AdminActionButton,
+  AdminEmptyState,
+  AdminErrorRecovery,
+  AdminSearchInput,
+  AdminStatusBadge,
+  AdminPanel,
+  AdminFilterButton,
+  AdminResetButton,
+  AdminCountBadge,
+  AdminLoadingText,
+  AdminSuccessMessage,
+  AdminPanelHeader,
+} from "../components";
+import { copyTextToClipboard, formatAdminDateTime } from "../utils";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
@@ -14,6 +34,10 @@ import type {
   ContactSubmission,
   ContactSubmissionStatus,
 } from "./contactSubmissions.types";
+import {
+  getContactSubmissionMailtoHref,
+  getContactSubmissionSearchableText,
+} from "./contactSubmissions.helpers";
 
 type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
 
@@ -30,125 +54,45 @@ const filterOptions: {
   { label: "Closed", value: "closed" },
 ];
 
-const subscribeToCompactContacts = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 1250px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactContactsSnapshot = () => {
-  return window.matchMedia("(max-width: 1250px)").matches;
-};
-
-const getServerCompactContactsSnapshot = () => false;
-
-const subscribeToNarrowContacts = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 640px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getNarrowContactsSnapshot = () => {
-  return window.matchMedia("(max-width: 640px)").matches;
-};
-
-const getServerNarrowContactsSnapshot = () => false;
 
 const statusMeta: Record<
   ContactSubmissionStatus,
   {
     label: string;
     description: string;
-    badgeStyle: React.CSSProperties;
   }
 > = {
   new: {
     label: "New",
     description: "Needs first response",
-    badgeStyle: {
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.45)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    },
   },
   contacted: {
     label: "Contacted",
     description: "Follow-up in progress",
-    badgeStyle: {
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.45)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    },
   },
   closed: {
     label: "Closed",
     description: "No further action needed",
-    badgeStyle: {
-      color: colors.text.muted,
-      borderColor: colors.border.default,
-      backgroundColor: "rgba(255,255,255,0.04)",
-    },
   },
 };
 
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
+const getSubmissionStatusTone = (
+  status: ContactSubmission["status"],
+): "success" | "warning" | "muted" => {
+  if (status === "new") {
+    return "warning";
+  }
 
-const getStatusBadgeStyle = (status: ContactSubmissionStatus) => ({
-  ...styles.statusBadge,
-  ...statusMeta[status].badgeStyle,
-});
+  if (status === "closed") {
+    return "muted";
+  }
 
-const getMailtoHref = (submission: ContactSubmission) => {
-  const subject = `DevBySam enquiry: ${submission.service}`;
-  const body = `Hi ${submission.name},\n\nThank you for contacting DevBySam about ${submission.service}.\n\n`;
-
-  return `mailto:${submission.email}?subject=${encodeURIComponent(
-    subject,
-  )}&body=${encodeURIComponent(body)}`;
-};
-
-const getSearchableText = (submission: ContactSubmission) => {
-  return [
-    submission.name,
-    submission.email,
-    submission.phone,
-    submission.service,
-    submission.message,
-    submission.status,
-    submission.source,
-  ]
-    .join(" ")
-    .toLowerCase();
+  return "success";
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
-  const isCompactContacts = useSyncExternalStore(
-    subscribeToCompactContacts,
-    getCompactContactsSnapshot,
-    getServerCompactContactsSnapshot,
-  );
-
-  const isNarrowContacts = useSyncExternalStore(
-    subscribeToNarrowContacts,
-    getNarrowContactsSnapshot,
-    getServerNarrowContactsSnapshot,
-  );
+  const isCompactContacts = useMediaQuery("(max-width: 1250px)");
+  const isNarrowContacts = useMediaQuery("(max-width: 640px)");
 
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
@@ -200,7 +144,9 @@ export const ContactSubmissionsPage: React.FC = () => {
         return true;
       }
 
-      return getSearchableText(submission).includes(normalizedSearchQuery);
+      return getContactSubmissionSearchableText(submission).includes(
+        normalizedSearchQuery,
+      );
     });
   }, [searchQuery, submissionFilter, submissions]);
 
@@ -290,20 +236,20 @@ export const ContactSubmissionsPage: React.FC = () => {
     }
   };
 
-  const handleCopy = async (value: string, field: "email" | "phone") => {
-    setError("");
+const handleCopy = async (value: string, field: "email" | "phone") => {
+  setError("");
 
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopiedField(field);
+  try {
+    await copyTextToClipboard(value);
+    setCopiedField(field);
 
-      window.setTimeout(() => {
-        setCopiedField(null);
-      }, 1600);
-    } catch {
-      setError("Could not copy to clipboard.");
-    }
-  };
+    window.setTimeout(() => {
+      setCopiedField(null);
+    }, 1600);
+  } catch {
+    setError("Could not copy to clipboard.");
+  }
+};
 
   const handleResetFilters = () => {
     setSubmissionFilter("all");
@@ -311,7 +257,7 @@ export const ContactSubmissionsPage: React.FC = () => {
   };
 
   return (
-    <section
+    <AdminPanel
       style={{
         ...styles.shell,
         ...(isCompactContacts ? styles.shellCompact : {}),
@@ -323,35 +269,28 @@ export const ContactSubmissionsPage: React.FC = () => {
           ...(isCompactContacts ? styles.listPanelCompact : {}),
         }}
       >
-        <div
-          style={{
-            ...styles.listHeader,
-            ...(isNarrowContacts ? styles.listHeaderNarrow : {}),
-          }}
-        >
-          <div>
-            <h2 style={styles.title}>Contact Submissions</h2>
-            <p style={styles.subtitle}>
-              Review website enquiries from the contact form.
-            </p>
-          </div>
+        <AdminPanelHeader
+          title="Contact Submissions"
+          subtitle="Review website enquiries from the contact form."
+          isNarrow={isNarrowContacts}
+          actions={
+            <div style={styles.headerActions}>
+              <AdminCountBadge
+                count={filteredSubmissions.length}
+                variant="circle"
+              />
 
-          <div style={styles.headerActions}>
-            <span style={styles.count}>{filteredSubmissions.length}</span>
-
-            <button
-              type="button"
-              style={{
-                ...styles.refreshButton,
-                ...(isLoading ? styles.disabledAction : {}),
-              }}
-              onClick={loadSubmissions}
-              disabled={isLoading}
-            >
-              {isLoading ? "..." : "Refresh"}
-            </button>
-          </div>
-        </div>
+              <AdminActionButton
+                variant="ghost"
+                size="sm"
+                disabled={isLoading}
+                onClick={loadSubmissions}
+              >
+                {isLoading ? "..." : "Refresh"}
+              </AdminActionButton>
+            </div>
+          }
+        />
 
         <div
           style={{
@@ -359,46 +298,29 @@ export const ContactSubmissionsPage: React.FC = () => {
             ...(isNarrowContacts ? styles.searchAreaNarrow : {}),
           }}
         >
-          <input
-            type="search"
+          <AdminSearchInput
             value={searchQuery}
             placeholder="Search name, email, phone, service..."
-            style={styles.searchInput}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={setSearchQuery}
           />
 
           {hasActiveFilters && (
-            <button
-              type="button"
-              style={{
-                ...styles.resetButton,
-                ...(isNarrowContacts ? styles.resetButtonNarrow : {}),
-              }}
+            <AdminResetButton
+              isNarrow={isNarrowContacts}
               onClick={handleResetFilters}
-            >
-              Reset
-            </button>
+            />
           )}
         </div>
 
         <div style={styles.filters}>
           {filterOptions.map((filter) => (
-            <button
+            <AdminFilterButton
               key={filter.value}
-              type="button"
-              style={{
-                ...styles.filterButton,
-                ...(submissionFilter === filter.value
-                  ? styles.filterButtonActive
-                  : {}),
-              }}
+              label={filter.label}
+              count={filterCounts[filter.value]}
+              isActive={submissionFilter === filter.value}
               onClick={() => setSubmissionFilter(filter.value)}
-            >
-              {filter.label}
-              <span style={styles.filterCount}>
-                {filterCounts[filter.value]}
-              </span>
-            </button>
+            />
           ))}
         </div>
 
@@ -410,29 +332,22 @@ export const ContactSubmissionsPage: React.FC = () => {
         )}
 
         {error && (
-          <div style={styles.errorRecovery}>
-            <p style={styles.errorRecoveryText}>{error}</p>
-
-            <button
-              type="button"
-              style={styles.errorRecoveryButton}
-              onClick={loadSubmissions}
-              disabled={isLoading}
-            >
-              {isLoading ? "Retrying..." : "Retry"}
-            </button>
-          </div>
+          <AdminErrorRecovery
+            message={error}
+            isLoading={isLoading}
+            onRetry={loadSubmissions}
+          />
         )}
 
-        {isLoading && <p style={styles.stateText}>Loading submissions...</p>}
+        {isLoading && (
+          <AdminLoadingText padded>Loading submissions...</AdminLoadingText>
+        )}
 
         {!isLoading && !error && filteredSubmissions.length === 0 && (
-          <div style={styles.listEmptyState}>
-            <h3 style={styles.listEmptyTitle}>No submissions found</h3>
-            <p style={styles.listEmptyText}>
-              Try another search term or reset the filters.
-            </p>
-          </div>
+          <AdminEmptyState
+            title="No submissions found"
+            text="Try another search term or reset the filters."
+          />
         )}
 
         <div
@@ -457,7 +372,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                 <div style={styles.itemTop}>
                   <span style={styles.name}>{submission.name}</span>
                   <span style={styles.date}>
-                    {formatDate(submission.createdAt)}
+                    {formatAdminDateTime(submission.createdAt)}
                   </span>
                 </div>
 
@@ -465,9 +380,11 @@ export const ContactSubmissionsPage: React.FC = () => {
 
                 <div style={styles.itemFooter}>
                   <span style={styles.serviceBadge}>{submission.service}</span>
-                  <span style={getStatusBadgeStyle(submission.status)}>
-                    {statusMeta[submission.status].label}
-                  </span>
+                  <AdminStatusBadge
+                    tone={getSubmissionStatusTone(submission.status)}
+                  >
+                    {submission.status}
+                  </AdminStatusBadge>
                 </div>
               </button>
             );
@@ -500,9 +417,11 @@ export const ContactSubmissionsPage: React.FC = () => {
               }}
             >
               <div style={styles.detailHeaderContent}>
-                <span style={getStatusBadgeStyle(selectedSubmission.status)}>
-                  {statusMeta[selectedSubmission.status].label}
-                </span>
+                <AdminStatusBadge
+                  tone={getSubmissionStatusTone(selectedSubmission.status)}
+                >
+                  {selectedSubmission.status}
+                </AdminStatusBadge>
 
                 <h3
                   style={{
@@ -514,7 +433,7 @@ export const ContactSubmissionsPage: React.FC = () => {
                 </h3>
 
                 <p style={styles.detailMeta}>
-                  Submitted {formatDate(selectedSubmission.createdAt)}
+                  Submitted {formatAdminDateTime(selectedSubmission.createdAt)}
                 </p>
 
                 <p style={styles.statusDescription}>
@@ -562,60 +481,42 @@ export const ContactSubmissionsPage: React.FC = () => {
                   }}
                 >
                   {selectedSubmission.status !== "contacted" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButton,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="primary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "contacted")
                       }
                     >
                       Mark contacted
-                    </button>
+                    </AdminActionButton>
                   )}
 
                   {selectedSubmission.status !== "closed" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButtonSecondary,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="secondary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "closed")
                       }
                     >
                       Close
-                    </button>
+                    </AdminActionButton>
                   )}
 
                   {selectedSubmission.status !== "new" && (
-                    <button
-                      type="button"
-                      style={{
-                        ...styles.quickStatusButtonSecondary,
-                        ...(isNarrowContacts
-                          ? styles.quickStatusButtonNarrow
-                          : {}),
-                        ...(isUpdatingStatus ? styles.disabledAction : {}),
-                      }}
+                    <AdminActionButton
+                      variant="secondary"
                       disabled={isUpdatingStatus}
+                      fullWidth={isNarrowContacts}
                       onClick={() =>
                         handleStatusChange(selectedSubmission.id, "new")
                       }
                     >
                       Reopen
-                    </button>
+                    </AdminActionButton>
                   )}
                 </div>
               </div>
@@ -649,14 +550,14 @@ export const ContactSubmissionsPage: React.FC = () => {
                 </div>
 
                 <a
-                  href={getMailtoHref(selectedSubmission)}
+                  href={getContactSubmissionMailtoHref(selectedSubmission)}
                   style={styles.infoValue}
                 >
                   {selectedSubmission.email}
                 </a>
 
                 <a
-                  href={getMailtoHref(selectedSubmission)}
+                  href={getContactSubmissionMailtoHref(selectedSubmission)}
                   style={styles.contactActionLink}
                 >
                   Send email
@@ -722,7 +623,7 @@ export const ContactSubmissionsPage: React.FC = () => {
               >
                 <span style={styles.infoLabel}>Message</span>
                 <span style={styles.messageDate}>
-                  {formatDate(selectedSubmission.createdAt)}
+                  {formatAdminDateTime(selectedSubmission.createdAt)}
                 </span>
               </div>
 
@@ -730,9 +631,11 @@ export const ContactSubmissionsPage: React.FC = () => {
             </article>
           </>
         )}
-        {successMessage && <p style={styles.successText}>{successMessage}</p>}
+        {successMessage && (
+          <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
+        )}
       </main>
-    </section>
+    </AdminPanel>
   );
 };
 
@@ -740,9 +643,6 @@ const styles = {
   shell: {
     height: "calc(100vh - 146px)",
     minHeight: "620px",
-    borderRadius: radius.lg,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
     display: "flex",
     backgroundColor: colors.background.dark,
   },
@@ -770,62 +670,11 @@ const styles = {
     borderBottom: `1px solid ${colors.border.default}`,
   },
 
-  listHeader: {
-    padding: spacing.lg,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  listHeaderNarrow: {
-    alignItems: "flex-start",
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "20px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `${spacing.xs} 0 0 0`,
-  },
-
-  count: {
-    minWidth: "28px",
-    height: "28px",
-    borderRadius: radius.pill,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "13px",
-    fontWeight: typography.fontWeight.black,
-    flexShrink: 0,
-  },
-
   headerActions: {
     display: "flex",
     alignItems: "center",
     gap: spacing.sm,
     flexShrink: 0,
-  },
-
-  refreshButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "6px 10px",
-    fontSize: "11px",
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
   },
 
   disabledAction: {
@@ -844,71 +693,12 @@ const styles = {
     flexDirection: "column" as const,
   },
 
-  searchInput: {
-    width: "100%",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "11px 12px",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box" as const,
-  },
-
-  resetButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "0 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  resetButtonNarrow: {
-    padding: "11px 12px",
-  },
-
   filters: {
     padding: spacing.md,
     borderBottom: `1px solid ${colors.border.default}`,
     display: "flex",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
-  },
-
-  filterButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "7px 12px",
-    fontSize: "12px",
-    textTransform: "capitalize" as const,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-
-  filterButtonActive: {
-    backgroundColor: "rgba(147, 220, 92, 0.12)",
-    borderColor: colors.accent.green,
-    color: colors.accent.green,
-  },
-
-  filterCount: {
-    minWidth: "18px",
-    height: "18px",
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
   },
 
   activeFilterText: {
@@ -918,42 +708,6 @@ const styles = {
     margin: 0,
     padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: 0,
-    padding: spacing.lg,
-  },
-
-  successText: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `${spacing.lg} 0 0 0`,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    backgroundColor: "rgba(147, 220, 92, 0.08)",
-  },
-
-  listEmptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  listEmptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  listEmptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
   },
 
   list: {
@@ -1029,16 +783,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  statusBadge: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
-    display: "inline-flex",
-    alignItems: "center",
   },
 
   detailPanel: {
@@ -1141,34 +885,6 @@ const styles = {
     width: "100%",
     flexDirection: "column" as const,
     alignItems: "stretch",
-  },
-
-  quickStatusButton: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.black,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  quickStatusButtonSecondary: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  quickStatusButtonNarrow: {
-    width: "100%",
   },
 
   infoGrid: {
@@ -1297,36 +1013,5 @@ const styles = {
     fontSize: "14px",
     lineHeight: "22px",
     margin: 0,
-  },
-
-  errorRecovery: {
-    margin: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    border: `1px solid rgba(255, 210, 122, 0.35)`,
-    backgroundColor: "rgba(255, 210, 122, 0.08)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  errorRecoveryText: {
-    color: colors.accent.yellow,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
-  errorRecoveryButton: {
-    border: `1px solid rgba(255, 210, 122, 0.45)`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.accent.yellow,
-    padding: "7px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
   },
 };

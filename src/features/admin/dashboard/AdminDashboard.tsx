@@ -1,78 +1,24 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
+import {
+  AdminEmptyState,
+  AdminStatusBadge,
+  AdminPanel,
+  AdminLoadingText,
+  AdminPageHeader,
+} from "../components";
+import { formatAdminShortDateTime } from "../utils";
+import { getAdminConversationVisitorLabel } from "../chat/adminChat.helpers";
 import { getAdminConversations } from "../chat/adminChat.service";
 import type { AdminConversation } from "../chat/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
 
-const subscribeToCompactDashboard = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 900px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactDashboardSnapshot = () => {
-  return window.matchMedia("(max-width: 900px)").matches;
-};
-
-const getServerCompactDashboardSnapshot = () => false;
-
-const subscribeToNarrowDashboard = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 640px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getNarrowDashboardSnapshot = () => {
-  return window.matchMedia("(max-width: 640px)").matches;
-};
-
-const getServerNarrowDashboardSnapshot = () => false;
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
-};
-
 export const AdminDashboard: React.FC = () => {
-  const isCompactDashboard = useSyncExternalStore(
-    subscribeToCompactDashboard,
-    getCompactDashboardSnapshot,
-    getServerCompactDashboardSnapshot,
-  );
-
-  const isNarrowDashboard = useSyncExternalStore(
-    subscribeToNarrowDashboard,
-    getNarrowDashboardSnapshot,
-    getServerNarrowDashboardSnapshot,
-  );
+  const isCompactDashboard = useMediaQuery("(max-width: 900px)");
+  const isNarrowDashboard = useMediaQuery("(max-width: 640px)");
 
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
@@ -146,50 +92,36 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <section style={styles.page}>
-      <header
-        style={{
-          ...styles.header,
-          ...(isCompactDashboard ? styles.headerCompact : {}),
-        }}
-      >
-        <div style={styles.headerContent}>
-          <p style={styles.eyebrow}>Admin overview</p>
-          <h2
+      <AdminPageHeader
+        eyebrow="Admin overview"
+        title="Dashboard"
+        subtitle="Monitor contact enquiries, live chat conversations, and follow-up activity from one place."
+        isCompact={isCompactDashboard}
+        isNarrow={isNarrowDashboard}
+        actions={
+          <button
+            type="button"
             style={{
-              ...styles.title,
-              ...(isNarrowDashboard ? styles.titleNarrow : {}),
+              ...styles.refreshButton,
+              ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
+              ...(isLoading ? styles.disabledAction : {}),
             }}
+            onClick={loadDashboard}
+            disabled={isLoading}
           >
-            Dashboard
-          </h2>
-          <p style={styles.subtitle}>
-            Monitor contact enquiries, live chat conversations, and follow-up
-            activity from one place.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          style={{
-            ...styles.refreshButton,
-            ...(isNarrowDashboard ? styles.refreshButtonNarrow : {}),
-            ...(isLoading ? styles.disabledAction : {}),
-          }}
-          onClick={loadDashboard}
-          disabled={isLoading}
-        >
-          {isLoading ? "Refreshing..." : "Refresh"}
-        </button>
-      </header>
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        }
+      />
 
       {error && <p style={styles.error}>{error}</p>}
 
       {isLoading && (
-        <p style={styles.loadingText}>
+        <AdminLoadingText>
           {submissions.length === 0 && conversations.length === 0
             ? "Loading dashboard overview..."
             : "Refreshing dashboard overview..."}
-        </p>
+        </AdminLoadingText>
       )}
 
       <div
@@ -230,7 +162,7 @@ export const AdminDashboard: React.FC = () => {
           ...(isCompactDashboard ? styles.contentGridCompact : {}),
         }}
       >
-        <section style={styles.panel}>
+        <AdminPanel>
           <div
             style={{
               ...styles.panelHeader,
@@ -251,17 +183,12 @@ export const AdminDashboard: React.FC = () => {
 
           <div style={styles.list}>
             {!isLoading && recentSubmissions.length === 0 && (
-              <div style={styles.listEmptyState}>
-                <h4 style={styles.listEmptyTitle}>
-                  No contact submissions yet
-                </h4>
-                <p style={styles.listEmptyText}>
-                  New website contact form enquiries will appear here.
-                </p>
-                <Link to="/admin/contacts" style={styles.listEmptyLink}>
-                  Open contacts
-                </Link>
-              </div>
+              <AdminEmptyState
+                title="No contact submissions yet"
+                text="New website contact form enquiries will appear here."
+                actionLabel="Open contacts"
+                actionTo="/admin/contacts"
+              />
             )}
 
             {recentSubmissions.map((submission) => (
@@ -273,7 +200,7 @@ export const AdminDashboard: React.FC = () => {
                 <div style={styles.listTop}>
                   <span style={styles.itemTitle}>{submission.name}</span>
                   <span style={styles.itemDate}>
-                    {formatDate(submission.createdAt)}
+                    {formatAdminShortDateTime(submission.createdAt)}
                   </span>
                 </div>
 
@@ -281,14 +208,14 @@ export const AdminDashboard: React.FC = () => {
 
                 <div style={styles.itemFooter}>
                   <span style={styles.serviceBadge}>{submission.service}</span>
-                  <span style={styles.statusBadge}>{submission.status}</span>
+                  <AdminStatusBadge>{submission.status}</AdminStatusBadge>
                 </div>
               </Link>
             ))}
           </div>
-        </section>
+        </AdminPanel>
 
-        <section style={styles.panel}>
+        <AdminPanel>
           <div
             style={{
               ...styles.panelHeader,
@@ -309,18 +236,12 @@ export const AdminDashboard: React.FC = () => {
 
           <div style={styles.list}>
             {!isLoading && recentConversations.length === 0 && (
-              <div style={styles.listEmptyState}>
-                <h4 style={styles.listEmptyTitle}>
-                  No live chat conversations yet
-                </h4>
-                <p style={styles.listEmptyText}>
-                  New visitor conversations will appear here after someone
-                  starts a chat.
-                </p>
-                <Link to="/admin/chat" style={styles.listEmptyLink}>
-                  Open chat inbox
-                </Link>
-              </div>
+              <AdminEmptyState
+                title="No live chat conversations yet"
+                text="New visitor conversations will appear here after someone starts a chat."
+                actionLabel="Open chat inbox"
+                actionTo="/admin/chat"
+              />
             )}
 
             {recentConversations.map((conversation) => (
@@ -331,11 +252,11 @@ export const AdminDashboard: React.FC = () => {
               >
                 <div style={styles.listTop}>
                   <span style={styles.itemTitle}>
-                    {getVisitorLabel(conversation)}
+                    {getAdminConversationVisitorLabel(conversation)}
                   </span>
 
                   <span style={styles.itemDate}>
-                    {formatDate(conversation.lastMessageAt)}
+                    {formatAdminShortDateTime(conversation.lastMessageAt)}
                   </span>
                 </div>
 
@@ -350,16 +271,16 @@ export const AdminDashboard: React.FC = () => {
                       : "Live chat"}
                   </span>
 
-                  <span style={styles.statusBadge}>
+                  <AdminStatusBadge>
                     {conversation.unreadCount > 0
                       ? `${conversation.unreadCount} unread`
                       : conversation.status}
-                  </span>
+                  </AdminStatusBadge>
                 </div>
               </Link>
             ))}
           </div>
-        </section>
+        </AdminPanel>
       </div>
 
       <section
@@ -413,50 +334,6 @@ const styles = {
     gap: spacing.xl,
   },
 
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: spacing.xl,
-  },
-
-  headerCompact: {
-    flexDirection: "column" as const,
-    gap: spacing.md,
-  },
-
-  headerContent: {
-    minWidth: 0,
-  },
-
-  eyebrow: {
-    color: colors.accent.green,
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "32px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  titleNarrow: {
-    fontSize: "28px",
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "15px",
-    lineHeight: "24px",
-    maxWidth: "680px",
-    margin: `${spacing.sm} 0 0 0`,
-  },
-
   refreshButton: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -472,22 +349,15 @@ const styles = {
     width: "100%",
   },
 
-  loadingText: {
-    color: colors.text.muted,
+  error: {
+    color: colors.accent.yellow,
     fontSize: "14px",
-    lineHeight: "22px",
     margin: 0,
   },
 
   disabledAction: {
     opacity: 0.55,
     cursor: "not-allowed",
-  },
-
-  error: {
-    color: colors.accent.yellow,
-    fontSize: "14px",
-    margin: 0,
   },
 
   statsGrid: {
@@ -543,14 +413,6 @@ const styles = {
 
   contentGridCompact: {
     gridTemplateColumns: "1fr",
-  },
-
-  panel: {
-    borderRadius: radius.lg,
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
-    minWidth: 0,
   },
 
   panelHeader: {
@@ -650,49 +512,6 @@ const styles = {
     borderRadius: radius.pill,
     padding: "5px 9px",
     fontSize: "11px",
-  },
-
-  statusBadge: {
-    color: colors.accent.green,
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
-  },
-
-  emptyText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    padding: spacing.lg,
-  },
-
-  listEmptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  listEmptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    fontWeight: typography.fontWeight.black,
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  listEmptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `0 0 ${spacing.md} 0`,
-  },
-
-  listEmptyLink: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
   },
 
   quickActions: {

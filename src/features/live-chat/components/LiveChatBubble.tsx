@@ -2,94 +2,23 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { colors, radius } from "../../../design-system";
 import { useLiveChat } from "../hooks/useLiveChat";
-import { liveChatAgent, liveChatTranscript } from "../data/liveChat.data";
+
+import {
+  getLiveChatMessagePlaceholder,
+  isLiveChatComposerDisabledForStep,
+  downloadLiveChatTranscript,
+} from "../utils";
+
 import type {
   ChatView,
   LiveChatExtraChoice,
-  LiveChatMessage,
-  LiveChatProfileStep,
 } from "../types/liveChat.types";
+
 import { LiveChatChatView } from "./LiveChatChatView";
 import { LiveChatFloatingButton } from "./LiveChatFloatingButton";
 import { LiveChatHomeView } from "./LiveChatHomeView";
 import { LiveChatMessagesView } from "./LiveChatMessagesView";
 
-const getTranscriptSender = (message: LiveChatMessage) => {
-  if (message.senderType === "visitor") return "Visitor";
-  if (message.senderType === "admin") return liveChatAgent.name;
-  if (message.senderType === "system") return liveChatAgent.name;
-
-  return "System";
-};
-
-const buildTranscript = (messages: LiveChatMessage[]) => {
-  const storedMessages = messages.length
-    ? messages
-        .map((chatMessage) => {
-          return `${getTranscriptSender(chatMessage)}:\n${chatMessage.body}`;
-        })
-        .join("\n\n")
-    : "No visitor messages sent yet.";
-
-  return `
-${liveChatTranscript.title}
-
-${storedMessages}
-`;
-};
-
-const getMessagePlaceholder = (profileStep: LiveChatProfileStep) => {
-  if (
-    profileStep === "welcome" ||
-    profileStep === "privacy" ||
-    profileStep === "offline_notice" ||
-    profileStep === "connecting" ||
-    profileStep === "offline_confirm" ||
-    profileStep === "extra_choice" ||
-    profileStep === "extra_message_prompt" ||
-    profileStep === "extra_received" ||
-    profileStep === "closed"
-  ) {
-    return "Please wait...";
-  }
-
-  if (profileStep === "name") {
-    return "Type your name...";
-  }
-
-  if (profileStep === "email") {
-    return "Type your email...";
-  }
-
-  if (profileStep === "service") {
-    return "Please choose a service...";
-  }
-
-  if (profileStep === "topic") {
-    return "Briefly describe your enquiry...";
-  }
-
-  if (profileStep === "extra_message") {
-    return "Type extra details...";
-  }
-
-  return "Message...";
-};
-
-const isComposerDisabledForStep = (profileStep: LiveChatProfileStep) => {
-  return (
-    profileStep === "welcome" ||
-    profileStep === "privacy" ||
-    profileStep === "offline_notice" ||
-    profileStep === "service" ||
-    profileStep === "connecting" ||
-    profileStep === "offline_confirm" ||
-    profileStep === "extra_choice" ||
-    profileStep === "extra_message_prompt" ||
-    profileStep === "extra_received" ||
-    profileStep === "closed"
-  );
-};
 
 export const LiveChatBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -114,11 +43,13 @@ export const LiveChatBubble: React.FC = () => {
     selectExtraChoice,
   } = useLiveChat(isOpen, isOpen && view === "chat");
 
-  const messagePlaceholder = getMessagePlaceholder(profileStep);
+  const messagePlaceholder = getLiveChatMessagePlaceholder(profileStep);
   const isProfileCaptureActive = profileStep !== "ready";
 
   const isComposerDisabled =
-    isSending || isAgentTyping || isComposerDisabledForStep(profileStep);
+    isSending ||
+    isAgentTyping ||
+    isLiveChatComposerDisabledForStep(profileStep);
 
   const closeChat = () => {
     setIsOpen(false);
@@ -186,20 +117,7 @@ export const LiveChatBubble: React.FC = () => {
   };
 
   const handleDownloadTranscript = () => {
-    const transcript = buildTranscript(messages);
-
-    const blob = new Blob([transcript], {
-      type: "text/plain;charset=utf-8",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = liveChatTranscript.fileName;
-    link.click();
-
-    URL.revokeObjectURL(url);
+    downloadLiveChatTranscript(messages);
     setIsOptionsOpen(false);
   };
 

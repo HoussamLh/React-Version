@@ -13,8 +13,21 @@ import type {
   AdminConversationStatus,
   AdminMessage,
 } from "./adminChat.types";
+import {
+  AdminActionButton,
+  AdminStatusBadge,
+  AdminSuccessMessage,
+  AdminMetaChip,
+} from "../components";
+import { formatAdminDateTime } from "../utils";
 import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
+import {
+  getConversationStatusTone,
+  getAdminConversationVisitorLabel,
+} from "./adminChat.helpers";
+
+import { TypingIndicator } from "../../../shared/components";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
@@ -38,51 +51,6 @@ const appendUniqueMessage = (
   }
 
   return [...currentMessages, nextMessage];
-};
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
-};
-
-const getStatusBadgeStyle = (status: AdminConversationStatus) => {
-  if (status === "open") {
-    return {
-      ...styles.badge,
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.45)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    };
-  }
-
-  if (status === "pending") {
-    return {
-      ...styles.badge,
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.45)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    };
-  }
-
-  return {
-    ...styles.badge,
-    color: colors.text.muted,
-    borderColor: colors.border.default,
-    backgroundColor: "rgba(255,255,255,0.04)",
-  };
 };
 
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
@@ -313,7 +281,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
     );
   }
 
-  const visitorLabel = getVisitorLabel(conversation);
+  const visitorLabel = getAdminConversationVisitorLabel(conversation);
   const hasVisitorEmail = Boolean(conversation.visitorEmail);
 
   return (
@@ -333,9 +301,11 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           <div style={styles.headerTitleRow}>
             <h2 style={styles.title}>{visitorLabel}</h2>
 
-            <span style={getStatusBadgeStyle(conversation.status)}>
+            <AdminStatusBadge
+              tone={getConversationStatusTone(conversation.status)}
+            >
               {conversation.status}
-            </span>
+            </AdminStatusBadge>
           </div>
 
           <p style={styles.status}>
@@ -352,22 +322,19 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
                 {conversation.visitorEmail}
               </a>
             )}
-
-            <span style={styles.metaChip}>
+            <AdminMetaChip>
               {conversation.chatMode === "offline"
                 ? "Offline enquiry"
                 : "Live chat"}
-            </span>
-
-            <span style={styles.metaChip}>Source: {conversation.source}</span>
-
-            <span style={styles.metaChip}>
-              Last message: {formatDate(conversation.lastMessageAt)}
-            </span>
-
-            <span style={styles.metaChip}>
+            </AdminMetaChip>
+            <AdminMetaChip>Source: {conversation.source}</AdminMetaChip>
+            <AdminMetaChip>
+              {" "}
+              Last message: {formatAdminDateTime(conversation.lastMessageAt)}
+            </AdminMetaChip>
+            <AdminMetaChip>
               Visitor ID: {conversation.visitorId.slice(0, 8)}
-            </span>
+            </AdminMetaChip>
           </div>
         </div>
 
@@ -404,47 +371,36 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
             }}
           >
             {conversation.status !== "open" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.primaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                  ...(isUpdatingStatus ? styles.disabledAction : {}),
-                }}
+              <AdminActionButton
+                variant="primary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("open")}
               >
                 Open
-              </button>
+              </AdminActionButton>
             )}
 
             {conversation.status !== "pending" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.secondaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                  ...(isUpdatingStatus ? styles.disabledAction : {}),
-                }}
+              <AdminActionButton
+                variant="secondary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("pending")}
               >
                 Pending
-              </button>
+              </AdminActionButton>
             )}
 
             {conversation.status !== "closed" && (
-              <button
-                type="button"
-                style={{
-                  ...styles.secondaryAction,
-                  ...(isNarrowChat ? styles.actionButtonNarrow : {}),
-                }}
+              <AdminActionButton
+                variant="secondary"
                 disabled={isUpdatingStatus}
+                fullWidth={isNarrowChat}
                 onClick={() => handleStatusChange("closed")}
               >
                 Close
-              </button>
+              </AdminActionButton>
             )}
           </div>
         </div>
@@ -466,16 +422,12 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
           <AdminMessageBubble key={message.id} message={message} />
         ))}
 
-        {isVisitorTyping && (
-          <div style={styles.typingIndicator}>
-            <span className="typing-dot-delay-1" style={styles.typingDot} />
-            <span className="typing-dot-delay-2" style={styles.typingDot} />
-            <span style={styles.typingDot} />
-          </div>
-        )}
+        {isVisitorTyping && <TypingIndicator label="Visitor is typing" />}
 
         {error && <p style={styles.error}>{error}</p>}
-        {successMessage && <p style={styles.successText}>{successMessage}</p>}
+        {successMessage && (
+          <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
+        )}
 
         <div ref={bottomRef} />
       </div>
@@ -550,23 +502,6 @@ const styles = {
     overflowWrap: "anywhere" as const,
   },
 
-  metaChip: {
-    color: colors.text.muted,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-  },
-
-  badge: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "6px 10px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
-  },
-
   headerActions: {
     display: "flex",
     flexDirection: "column" as const,
@@ -594,30 +529,6 @@ const styles = {
     flexWrap: "wrap" as const,
   },
 
-  primaryAction: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.black,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
-  secondaryAction: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "9px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    boxSizing: "border-box" as const,
-  },
-
   disabledAction: {
     opacity: 0.55,
     cursor: "not-allowed",
@@ -638,37 +549,10 @@ const styles = {
     margin: 0,
   },
 
-  successText: {
-    color: colors.accent.green,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
   error: {
     color: colors.accent.yellow,
     fontSize: "13px",
     margin: 0,
-  },
-
-  typingIndicator: {
-    width: "fit-content",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderRadius: "18px 18px 18px 6px",
-    backgroundColor: colors.background.card,
-    border: `1px solid ${colors.border.default}`,
-  },
-
-  typingDot: {
-    width: "5px",
-    height: "5px",
-    borderRadius: "50%",
-    backgroundColor: colors.text.muted,
-    display: "block",
-    animation: "liveChatTypingDot 1.4s infinite ease-in-out both",
   },
 
   emptyState: {
@@ -724,10 +608,6 @@ const styles = {
     width: "100%",
     flexDirection: "column" as const,
     alignItems: "stretch",
-  },
-
-  actionButtonNarrow: {
-    width: "100%",
   },
 
   bodyCompact: {

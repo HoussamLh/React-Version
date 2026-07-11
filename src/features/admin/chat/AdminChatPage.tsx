@@ -3,80 +3,26 @@ import React, {
   useEffect,
   useMemo,
   useState,
-  useSyncExternalStore,
 } from "react";
-import { colors, radius } from "../../../design-system";
+import { colors } from "../../../design-system";
+import { useMediaQuery } from "../../../shared/hooks";
+import { AdminPanel } from "../components";
 import {
   getAdminConversations,
   markConversationReadForAdmin,
   subscribeToAllAdminMessages,
 } from "./adminChat.service";
 import type { AdminConversation } from "./adminChat.types";
+import { getAdminConversationSearchableText } from "./adminChat.helpers";
 import { AdminChatWindow } from "./AdminChatWindow";
 import {
   ConversationList,
   type AdminConversationFilter,
 } from "./ConversationList";
 
-const subscribeToCompactChat = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 1250px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getCompactChatSnapshot = () => {
-  return window.matchMedia("(max-width: 1250px)").matches;
-};
-
-const getServerCompactChatSnapshot = () => false;
-
-const subscribeToNarrowChat = (callback: () => void) => {
-  const mediaQuery = window.matchMedia("(max-width: 640px)");
-
-  mediaQuery.addEventListener("change", callback);
-
-  return () => {
-    mediaQuery.removeEventListener("change", callback);
-  };
-};
-
-const getNarrowChatSnapshot = () => {
-  return window.matchMedia("(max-width: 640px)").matches;
-};
-
-const getServerNarrowChatSnapshot = () => false;
-
-const getSearchableConversationText = (conversation: AdminConversation) => {
-  return [
-    conversation.visitorName,
-    conversation.visitorEmail,
-    conversation.visitorId,
-    conversation.lastMessageBody,
-    conversation.status,
-    conversation.source,
-    conversation.chatMode,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-};
-
 export const AdminChatPage: React.FC = () => {
-  const isCompactChat = useSyncExternalStore(
-    subscribeToCompactChat,
-    getCompactChatSnapshot,
-    getServerCompactChatSnapshot,
-  );
-
-  const isNarrowChat = useSyncExternalStore(
-    subscribeToNarrowChat,
-    getNarrowChatSnapshot,
-    getServerNarrowChatSnapshot,
-  );
+  const isCompactChat = useMediaQuery("(max-width: 1250px)");
+  const isNarrowChat = useMediaQuery("(max-width: 640px)");
 
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
@@ -163,7 +109,7 @@ export const AdminChatPage: React.FC = () => {
         return true;
       }
 
-      return getSearchableConversationText(conversation).includes(
+      return getAdminConversationSearchableText(conversation).includes(
         normalizedSearchQuery,
       );
     });
@@ -248,7 +194,7 @@ export const AdminChatPage: React.FC = () => {
   ]);
 
   return (
-    <section
+    <AdminPanel
       style={{
         ...styles.shell,
         ...(isCompactChat ? styles.shellCompact : {}),
@@ -282,7 +228,7 @@ export const AdminChatPage: React.FC = () => {
         isNarrowChat={isNarrowChat}
         onConversationUpdated={loadConversations}
       />
-    </section>
+    </AdminPanel>
   );
 };
 
@@ -290,9 +236,6 @@ const styles = {
   shell: {
     height: "calc(100vh - 146px)",
     minHeight: "620px",
-    borderRadius: radius.lg,
-    border: `1px solid ${colors.border.default}`,
-    overflow: "hidden",
     display: "flex",
     backgroundColor: colors.background.dark,
   },

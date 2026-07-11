@@ -1,9 +1,26 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
+import {
+  AdminActionButton,
+  AdminEmptyState,
+  AdminErrorRecovery,
+  AdminSearchInput,
+  AdminStatusBadge,
+  AdminFilterButton,
+  AdminResetButton,
+  AdminCountBadge,
+  AdminLoadingText,
+  AdminPanelHeader,
+} from "../components";
+import { formatAdminTimeWithDate } from "../utils";
 import type {
   AdminConversation,
   AdminConversationStatus,
 } from "./adminChat.types";
+import {
+  getConversationStatusTone,
+  getAdminConversationVisitorLabel,
+} from "./adminChat.helpers";
 
 export type AdminConversationFilter =
   | "all"
@@ -45,50 +62,6 @@ const filterOptions: {
   { label: "Offline", value: "offline" },
 ];
 
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
-};
-
-const getVisitorLabel = (conversation: AdminConversation) => {
-  return (
-    conversation.visitorName ??
-    conversation.visitorEmail ??
-    `Visitor ${conversation.visitorId.slice(0, 8)}`
-  );
-};
-
-const getStatusStyle = (status: AdminConversationStatus) => {
-  if (status === "open") {
-    return {
-      ...styles.status,
-      color: colors.accent.green,
-      borderColor: "rgba(147, 220, 92, 0.4)",
-      backgroundColor: "rgba(147, 220, 92, 0.1)",
-    };
-  }
-
-  if (status === "pending") {
-    return {
-      ...styles.status,
-      color: "#93b5ff",
-      borderColor: "rgba(147, 181, 255, 0.4)",
-      backgroundColor: "rgba(147, 181, 255, 0.1)",
-    };
-  }
-
-  return {
-    ...styles.status,
-    color: colors.text.muted,
-    borderColor: colors.border.default,
-    backgroundColor: "rgba(255,255,255,0.04)",
-  };
-};
-
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
   totalConversationCount,
@@ -117,87 +90,61 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         ...(isCompactChat ? styles.panelCompact : {}),
       }}
     >
-      <div style={styles.header}>
-        <div>
-          <h2 style={styles.title}>Conversations</h2>
-          <p style={styles.subtitle}>Live chat inbox</p>
-        </div>
+      <AdminPanelHeader
+        title="Conversations"
+        subtitle="Live chat inbox"
+        actions={
+          <div style={styles.headerActions}>
+            <AdminCountBadge count={conversations.length} />
 
-        <div style={styles.headerActions}>
-          <span style={styles.count}>{conversations.length}</span>
+            {hasUnreadConversations && (
+              <AdminActionButton
+                variant="successGhost"
+                size="sm"
+                disabled={isMarkingAllRead || isLoading}
+                onClick={onMarkAllRead}
+              >
+                {isMarkingAllRead ? "Marking..." : "Mark all read"}
+              </AdminActionButton>
+            )}
 
-          {hasUnreadConversations && (
-            <button
-              type="button"
-              style={{
-                ...styles.markReadButton,
-                ...(isMarkingAllRead || isLoading ? styles.disabledAction : {}),
-              }}
-              onClick={onMarkAllRead}
-              disabled={isMarkingAllRead || isLoading}
+            <AdminActionButton
+              variant="ghost"
+              size="sm"
+              disabled={isLoading}
+              onClick={onRefresh}
             >
-              {isMarkingAllRead ? "Marking..." : "Mark all read"}
-            </button>
-          )}
-
-          <button
-            type="button"
-            style={{
-              ...styles.refreshButton,
-              ...(isLoading ? styles.disabledAction : {}),
-            }}
-            onClick={onRefresh}
-            disabled={isLoading}
-          >
-            {isLoading ? "..." : "Refresh"}
-          </button>
-        </div>
-      </div>
-
+              {isLoading ? "..." : "Refresh"}
+            </AdminActionButton>
+          </div>
+        }
+      />
       <div
         style={{
           ...styles.searchArea,
           ...(isNarrowChat ? styles.searchAreaNarrow : {}),
         }}
       >
-        <input
-          type="search"
+        <AdminSearchInput
           value={searchQuery}
-          placeholder="Search visitor, email, message..."
-          style={styles.searchInput}
-          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search by name, email or phone number..."
+          onChange={onSearchChange}
         />
 
         {hasActiveFilters && (
-          <button
-            type="button"
-            style={{
-              ...styles.resetButton,
-              ...(isNarrowChat ? styles.resetButtonNarrow : {}),
-            }}
-            onClick={onResetFilters}
-          >
-            Reset
-          </button>
+          <AdminResetButton isNarrow={isNarrowChat} onClick={onResetFilters} />
         )}
       </div>
 
       <div style={styles.filters}>
         {filterOptions.map((filter) => (
-          <button
+          <AdminFilterButton
             key={filter.value}
-            type="button"
-            style={{
-              ...styles.filterButton,
-              ...(conversationFilter === filter.value
-                ? styles.filterButtonActive
-                : {}),
-            }}
+            label={filter.label}
+            count={filterCounts[filter.value]}
+            isActive={conversationFilter === filter.value}
             onClick={() => onFilterChange(filter.value)}
-          >
-            {filter.label}
-            <span style={styles.filterCount}>{filterCounts[filter.value]}</span>
-          </button>
+          />
         ))}
       </div>
 
@@ -209,29 +156,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       )}
 
       {error && (
-        <div style={styles.errorRecovery}>
-          <p style={styles.errorRecoveryText}>{error}</p>
-
-          <button
-            type="button"
-            style={styles.errorRecoveryButton}
-            onClick={onRefresh}
-            disabled={isLoading}
-          >
-            {isLoading ? "Retrying..." : "Retry"}
-          </button>
-        </div>
+        <AdminErrorRecovery
+          message={error}
+          isLoading={isLoading}
+          onRetry={onRefresh}
+        />
       )}
 
-      {isLoading && <p style={styles.stateText}>Loading conversations...</p>}
+      {isLoading && (
+        <AdminLoadingText padded>Loading conversations...</AdminLoadingText>
+      )}
 
       {!isLoading && !error && conversations.length === 0 && (
-        <div style={styles.emptyState}>
-          <h3 style={styles.emptyTitle}>No conversations found</h3>
-          <p style={styles.emptyText}>
-            Try another filter, reset search, or wait for new visitor messages.
-          </p>
-        </div>
+        <AdminEmptyState
+          title="No conversations found"
+          text="Try another search term or reset the filters."
+        />
       )}
 
       <div
@@ -243,7 +183,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         {conversations.map((conversation) => {
           const isActive = conversation.id === selectedConversationId;
           const hasUnread = conversation.unreadCount > 0;
-          const visitorLabel = getVisitorLabel(conversation);
+          const visitorLabel = getAdminConversationVisitorLabel(conversation);
 
           return (
             <button
@@ -276,7 +216,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
                   )}
 
                   <span style={styles.time}>
-                    {formatDate(conversation.lastMessageAt)}
+                    {formatAdminTimeWithDate(conversation.lastMessageAt)}
                   </span>
                 </div>
               </div>
@@ -291,9 +231,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               </p>
 
               <div style={styles.itemFooter}>
-                <span style={getStatusStyle(conversation.status)}>
+                <AdminStatusBadge
+                  tone={getConversationStatusTone(conversation.status)}
+                >
                   {conversation.status}
-                </span>
+                </AdminStatusBadge>
 
                 <span style={styles.modeBadge}>
                   {conversation.chatMode === "offline"
@@ -326,30 +268,6 @@ const styles = {
     borderBottom: `1px solid ${colors.border.default}`,
   },
 
-  header: {
-    minHeight: "72px",
-    padding: spacing.lg,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "18px",
-    fontWeight: typography.fontWeight.black,
-    margin: 0,
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    lineHeight: "18px",
-    margin: "4px 0 0 0",
-  },
-
   headerActions: {
     display: "flex",
     alignItems: "center",
@@ -357,41 +275,6 @@ const styles = {
     gap: spacing.sm,
     flexWrap: "wrap" as const,
     flexShrink: 0,
-  },
-
-  count: {
-    color: colors.background.dark,
-    backgroundColor: colors.accent.green,
-    borderRadius: radius.pill,
-    padding: "4px 9px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-  },
-
-  markReadButton: {
-    border: `1px solid rgba(147, 220, 92, 0.35)`,
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(147, 220, 92, 0.08)",
-    color: colors.accent.green,
-    padding: "6px 10px",
-    fontSize: "11px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-  },
-
-  refreshButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "6px 10px",
-    fontSize: "11px",
-    cursor: "pointer",
-  },
-
-  disabledAction: {
-    opacity: 0.55,
-    cursor: "not-allowed",
   },
 
   searchArea: {
@@ -405,70 +288,12 @@ const styles = {
     flexDirection: "column" as const,
   },
 
-  searchInput: {
-    width: "100%",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "11px 12px",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box" as const,
-  },
-
-  resetButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: "0 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  resetButtonNarrow: {
-    padding: "11px 12px",
-  },
-
   filters: {
     padding: spacing.md,
     borderBottom: `1px solid ${colors.border.default}`,
     display: "flex",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
-  },
-
-  filterButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "7px 12px",
-    fontSize: "12px",
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-
-  filterButtonActive: {
-    backgroundColor: "rgba(147, 220, 92, 0.12)",
-    borderColor: colors.accent.green,
-    color: colors.accent.green,
-  },
-
-  filterCount: {
-    minWidth: "18px",
-    height: "18px",
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
   },
 
   activeFilterText: {
@@ -478,63 +303,6 @@ const styles = {
     margin: 0,
     padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  errorRecovery: {
-    margin: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    border: `1px solid rgba(255, 210, 122, 0.35)`,
-    backgroundColor: "rgba(255, 210, 122, 0.08)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-
-  errorRecoveryText: {
-    color: colors.accent.yellow,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
-  errorRecoveryButton: {
-    border: `1px solid rgba(255, 210, 122, 0.45)`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.accent.yellow,
-    padding: "7px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    cursor: "pointer",
-    flexShrink: 0,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    padding: spacing.lg,
-  },
-
-  emptyState: {
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  emptyTitle: {
-    color: colors.text.main,
-    fontSize: "16px",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  emptyText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
   },
 
   list: {
@@ -635,14 +403,6 @@ const styles = {
     alignItems: "center",
     gap: spacing.sm,
     flexWrap: "wrap" as const,
-  },
-
-  status: {
-    border: "1px solid",
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
-    textTransform: "capitalize" as const,
   },
 
   modeBadge: {
