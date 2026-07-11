@@ -17,7 +17,7 @@ export const LiveChatOptionsMenu: React.FC<LiveChatOptionsMenuProps> = ({
     <div style={styles.optionsMenu}>
       <button
         type="button"
-        style={styles.optionButton}
+        style={styles.menuButton}
         onClick={onToggleExpanded}
       >
         <Maximize2 size={16} style={styles.optionIcon} />
@@ -26,7 +26,7 @@ export const LiveChatOptionsMenu: React.FC<LiveChatOptionsMenuProps> = ({
 
       <button
         type="button"
-        style={styles.optionButton}
+        style={styles.menuButton}
         onClick={onDownloadTranscript}
       >
         <Download size={16} style={styles.optionIcon} />
@@ -50,7 +50,7 @@ const styles = {
     zIndex: 20,
   },
 
-  optionButton: {
+  menuButton: {
     width: "100%",
     border: "none",
     backgroundColor: "transparent",

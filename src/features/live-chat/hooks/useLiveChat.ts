@@ -1,50 +1,36 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isSupabaseConfigured } from "../../../lib/supabase";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { liveChatProfileCapture } from "../data/liveChat.data";
-
 import {
-  createLiveChatRealtimeChannel,
-  ensureAnonymousVisitor,
-  getConversationMessages,
-  getOrCreateOpenConversation,
-  getVisitorProfile,
   sendSystemMessage,
-  sendVisitorMessage,
-  subscribeToConversationMessages,
   updateVisitorProfile,
-  upsertVisitorProfile,
 } from "../services/liveChat.service";
-
 import type {
   LiveChatConversation,
-  LiveChatExtraChoice,
   LiveChatMessage,
   LiveChatPresenceState,
   LiveChatVisitorProfile,
 } from "../types/liveChat.types";
-
 import {
   appendUniqueLiveChatMessage,
   getUkBusinessAvailability,
-  hasLiveChatMessageContaining,
-  isValidLiveChatEmail,
+  initialLiveChatVisitorProfile,
   wait,
 } from "../utils";
+import { useLiveChatChoiceHandlers } from "./useLiveChatChoiceHandlers";
+import { useLiveChatConversationRunner } from "./useLiveChatConversationRunner";
+import { useLiveChatInitialisation } from "./useLiveChatInitialisation";
+import { useLiveChatMessageSender } from "./useLiveChatMessageSender";
+import { useLiveChatMessagesSubscription } from "./useLiveChatMessagesSubscription";
+import { useLiveChatProfileCapture } from "./useLiveChatProfileCapture";
+import { useLiveChatRealtime } from "./useLiveChatRealtime";
 
-const initialVisitorProfile: LiveChatVisitorProfile = {
-  displayName: null,
-  email: null,
-  contactService: null,
-  contactTopic: null,
-  contactExtraDetails: null,
-  chatMode: null,
-  onboardingStep: "welcome",
-};
-
-export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
+export const useLiveChat = (
+  enabled: boolean,
+  shouldRunConversationFlow: boolean,
+) => {
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [visitorProfile, setVisitorProfile] = useState<LiveChatVisitorProfile>(
-    initialVisitorProfile,
+    initialLiveChatVisitorProfile,
   );
   const [conversation, setConversation] = useState<LiveChatConversation | null>(
     null,
@@ -56,13 +42,9 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const typingTimeoutRef = useRef<number | null>(null);
-  const adminTypingTimeoutRef = useRef<number | null>(null);
-  const onboardingRunnerRef = useRef(false);
-  const realtimeRef = useRef<{
-    sendTypingStatus: (isTyping: boolean) => Promise<void>;
-    unsubscribe: () => void;
-  } | null>(null);
+
   const conversationId = conversation?.id ?? null;
   const profileStep = visitorProfile.onboardingStep;
   const chatMode = visitorProfile.chatMode ?? getUkBusinessAvailability();
@@ -78,553 +60,133 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
     [],
   );
 
+  useLiveChatInitialisation({
+    enabled,
+    conversationId,
+    setVisitorId,
+    setVisitorProfile,
+    setConversation,
+    setMessages,
+    setIsLoading,
+    setError,
+  });
+
+  const { sendRealtimeTypingStatus } = useLiveChatRealtime({
+    enabled,
+    conversationId,
+    visitorId,
+    setPresence,
+    setIsAdminTyping,
+  });
+
+  useLiveChatMessagesSubscription({
+    enabled,
+    conversationId,
+    setMessages,
+  });
+
   const sendPromptWithTyping = useCallback(
     async (body: string) => {
       if (!conversationId) return;
+
       setIsAgentTyping(true);
+
       await wait(liveChatProfileCapture.typingDelayMs);
-      const nextMessage = await sendSystemMessage({ conversationId, body });
+
+      const nextMessage = await sendSystemMessage({
+        conversationId,
+        body,
+      });
+
       setMessages((currentMessages) =>
         appendUniqueLiveChatMessage(currentMessages, nextMessage),
       );
+
       setIsAgentTyping(false);
     },
     [conversationId],
   );
 
-  const saveOnboardingStep = useCallback(
+  const saveConversationStep = useCallback(
     async (nextStep: LiveChatVisitorProfile["onboardingStep"]) => {
       if (!visitorId) return;
-      await updateVisitorProfile({ visitorId, onboardingStep: nextStep });
-      updateLocalProfile({ onboardingStep: nextStep });
+
+      await updateVisitorProfile({
+        visitorId,
+        onboardingStep: nextStep,
+      });
+
+      updateLocalProfile({
+        onboardingStep: nextStep,
+      });
     },
     [updateLocalProfile, visitorId],
   );
 
-  useEffect(() => {
-    if (!enabled || conversationId) return;
-    let isMounted = true;
-    const initialiseLiveChat = async () => {
-      if (!isSupabaseConfigured) {
-        setError("Live chat is not configured yet.");
-        return;
-      }
-      setIsLoading(true);
-      setError(null);
-      try {
-        const nextVisitorId = await ensureAnonymousVisitor();
-        await upsertVisitorProfile({ visitorId: nextVisitorId });
-        const nextVisitorProfile = await getVisitorProfile(nextVisitorId);
-        const nextConversation =
-          await getOrCreateOpenConversation(nextVisitorId);
-        const nextMessages = await getConversationMessages(nextConversation.id);
-        if (!isMounted) return;
-        setVisitorId(nextVisitorId);
-        setVisitorProfile(nextVisitorProfile);
-        setConversation(nextConversation);
-        setMessages(nextMessages);
-      } catch (error) {
-        console.error("Live chat init failed:", error);
-        if (!isMounted) return;
-        setError("Live chat could not connect. Please try again later.");
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    void initialiseLiveChat();
-    return () => {
-      isMounted = false;
-    };
-  }, [enabled, conversationId]);
-
-  useEffect(() => {
-    if (!enabled || !conversationId) return;
-    const unsubscribe = subscribeToConversationMessages({
-      conversationId,
-      onMessage: (nextMessage) => {
-        setMessages((currentMessages) =>
-          appendUniqueLiveChatMessage(currentMessages, nextMessage),
-        );
-      },
-    });
-    return unsubscribe;
-  }, [enabled, conversationId]);
-
-  useEffect(() => {
-    if (!enabled || !conversationId || !visitorId) return;
-    const realtime = createLiveChatRealtimeChannel({
-      conversationId,
-      visitorId,
-      onTypingChange: (payload) => {
-        if (payload.conversationId !== conversationId) return;
-        if (payload.role !== "admin") return;
-        if (adminTypingTimeoutRef.current) {
-          window.clearTimeout(adminTypingTimeoutRef.current);
-          adminTypingTimeoutRef.current = null;
-        }
-        setIsAdminTyping(Boolean(payload.isTyping));
-        if (!payload.isTyping) return;
-        adminTypingTimeoutRef.current = window.setTimeout(() => {
-          setIsAdminTyping(false);
-          adminTypingTimeoutRef.current = null;
-        }, 2200);
-      },
-      onPresenceChange: setPresence,
-    });
-    realtimeRef.current = realtime;
-    return () => {
-      if (adminTypingTimeoutRef.current) {
-        window.clearTimeout(adminTypingTimeoutRef.current);
-        adminTypingTimeoutRef.current = null;
-      }
-      realtime.unsubscribe();
-      realtimeRef.current = null;
-      setPresence([]);
-      setIsAdminTyping(false);
-    };
-  }, [enabled, conversationId, visitorId]);
-
-  useEffect(() => {
-    if (!enabled || !shouldRunOnboarding || !visitorId || !conversationId) {
-      return;
-    }
-    if (profileStep === "ready") return;
-    if (onboardingRunnerRef.current) return;
-    let isMounted = true;
-    const runOnboardingStep = async () => {
-      onboardingRunnerRef.current = true;
-      setError(null);
-      try {
-        if (profileStep === "welcome") {
-          const welcomePrompt = liveChatProfileCapture.welcomePrompt();
-          if (
-            !hasLiveChatMessageContaining(
-              messages,
-              "Welcome to DevBySam Live Chat",
-            )
-          ) {
-            await sendPromptWithTyping(welcomePrompt);
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("privacy");
-          await wait(300);
-          if (!hasLiveChatMessageContaining(messages, "Privacy Statement")) {
-            await sendPromptWithTyping(liveChatProfileCapture.privacyPrompt);
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("name");
-          await wait(300);
-          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
-            await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
-          }
-          return;
-        }
-        if (profileStep === "privacy") {
-          if (!hasLiveChatMessageContaining(messages, "Privacy Statement")) {
-            await sendPromptWithTyping(liveChatProfileCapture.privacyPrompt);
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("name");
-          await wait(300);
-          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
-            await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
-          }
-          return;
-        }
-        if (profileStep === "name") {
-          if (!hasLiveChatMessageContaining(messages, "what’s your name")) {
-            await sendPromptWithTyping(liveChatProfileCapture.namePrompt);
-          }
-          return;
-        }
-        if (profileStep === "email") {
-          const name = visitorProfile.displayName ?? "there";
-          const isEmailRequired = chatMode === "offline";
-          if (
-            !hasLiveChatMessageContaining(messages, "What email should I use")
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.emailPrompt(name, isEmailRequired),
-            );
-          }
-          return;
-        }
-        if (profileStep === "offline_notice") {
-          const name = visitorProfile.displayName ?? "there";
-          if (
-            !hasLiveChatMessageContaining(messages, "We are currently offline")
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.offlineNoticePrompt(name),
-            );
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("service");
-          return;
-        }
-        if (profileStep === "service") {
-          const name = visitorProfile.displayName ?? "there";
-          const isOffline = chatMode === "offline";
-          if (
-            !hasLiveChatMessageContaining(
-              messages,
-              "How may I help you today",
-            ) &&
-            !hasLiveChatMessageContaining(
-              messages,
-              "What service are you contacting",
-            )
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.servicePrompt(name, isOffline),
-            );
-          }
-          return;
-        }
-        if (profileStep === "topic") {
-          const name = visitorProfile.displayName ?? "there";
-          if (!hasLiveChatMessageContaining(messages, "Briefly describe")) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.topicPrompt(name),
-            );
-          }
-          return;
-        }
-        if (profileStep === "connecting") {
-          if (
-            !hasLiveChatMessageContaining(
-              messages,
-              "connecting you to one of our team",
-            )
-          ) {
-            await sendPromptWithTyping(liveChatProfileCapture.connectingPrompt);
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("ready");
-          return;
-        }
-        if (profileStep === "offline_confirm") {
-          const name = visitorProfile.displayName ?? "there";
-          if (
-            !hasLiveChatMessageContaining(
-              messages,
-              "We’ve received your message",
-            )
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.offlineReceivedPrompt(name),
-            );
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("extra_choice");
-          await wait(300);
-          if (!hasLiveChatMessageContaining(messages, "anything else")) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.anythingElsePrompt,
-            );
-          }
-          return;
-        }
-        if (profileStep === "extra_choice") {
-          if (!hasLiveChatMessageContaining(messages, "anything else")) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.anythingElsePrompt,
-            );
-          }
-          return;
-        }
-        if (profileStep === "extra_message_prompt") {
-          if (!hasLiveChatMessageContaining(messages, "extra details")) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.extraDetailsPrompt,
-            );
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("extra_message");
-          return;
-        }
-        if (profileStep === "extra_received") {
-          const name = visitorProfile.displayName ?? "there";
-          if (
-            !hasLiveChatMessageContaining(
-              messages,
-              "added that to your enquiry",
-            )
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.extraReceivedPrompt(name),
-            );
-          }
-          if (!isMounted) return;
-          await saveOnboardingStep("extra_choice");
-          await wait(300);
-          await sendPromptWithTyping(liveChatProfileCapture.anythingElsePrompt);
-          return;
-        }
-        if (profileStep === "closed") {
-          const name = visitorProfile.displayName ?? "there";
-          if (
-            !hasLiveChatMessageContaining(messages, "Have a lovely day") &&
-            !hasLiveChatMessageContaining(messages, "Have a good night")
-          ) {
-            await sendPromptWithTyping(
-              liveChatProfileCapture.closingPrompt(name),
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Live chat onboarding failed:", error);
-        if (!isMounted) return;
-        setError("Live chat setup could not continue. Please try again.");
-      } finally {
-        setIsAgentTyping(false);
-        onboardingRunnerRef.current = false;
-      }
-    };
-    void runOnboardingStep();
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    chatMode,
-    conversationId,
+  useLiveChatConversationRunner({
     enabled,
-    messages,
-    profileStep,
-    saveOnboardingStep,
-    sendPromptWithTyping,
-    shouldRunOnboarding,
+    shouldRunConversationFlow,
     visitorId,
-    visitorProfile.displayName,
-  ]);
+    conversationId,
+    profileStep,
+    chatMode,
+    messages,
+    visitorProfile,
+    sendPromptWithTyping,
+    saveConversationStep,
+    setIsAgentTyping,
+    setError,
+  });
 
-  const captureProfileValue = useCallback(
-    async (value: string): Promise<boolean> => {
-      const trimmedValue = value.trim();
-      if (!trimmedValue) {
-        return false;
-      }
-      if (!visitorId || !conversationId) {
-        setError("Live chat is still connecting. Please try again.");
-        return false;
-      }
-      setIsSending(true);
-      setError(null);
-      try {
-        if (profileStep === "email") {
-          const shouldSkipEmail =
-            trimmedValue.toLowerCase() ===
-            liveChatProfileCapture.skipEmailValue;
-          const nextEmail = shouldSkipEmail ? null : trimmedValue;
-          const isEmailRequired = chatMode === "offline";
-          if (isEmailRequired && shouldSkipEmail) {
-            setError(
-              "Please enter an email so our team can reply when we are back online.",
-            );
-            return false;
-          }
-          if (nextEmail && !isValidLiveChatEmail(nextEmail)) {
-            setError("Please enter a valid email address.");
-            return false;
-          }
-        }
-        const visitorMessage = await sendVisitorMessage({
-          conversationId,
-          body: trimmedValue,
-        });
-        setMessages((currentMessages) =>
-          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
-        );
-        if (profileStep === "name") {
-          const nextChatMode = getUkBusinessAvailability();
-          await updateVisitorProfile({
-            visitorId,
-            displayName: trimmedValue,
-            chatMode: nextChatMode,
-            onboardingStep: "email",
-          });
-          updateLocalProfile({
-            displayName: trimmedValue,
-            chatMode: nextChatMode,
-            onboardingStep: "email",
-          });
-          return true;
-        }
-        if (profileStep === "email") {
-          const shouldSkipEmail =
-            trimmedValue.toLowerCase() ===
-            liveChatProfileCapture.skipEmailValue;
-          const nextEmail = shouldSkipEmail ? null : trimmedValue;
-          const nextStep = isOfflineMode ? "offline_notice" : "service";
-          await updateVisitorProfile({
-            visitorId,
-            email: nextEmail,
-            onboardingStep: nextStep,
-          });
-          updateLocalProfile({ email: nextEmail, onboardingStep: nextStep });
-          return true;
-        }
-        if (profileStep === "topic") {
-          const nextStep = isOfflineMode ? "offline_confirm" : "connecting";
-          await updateVisitorProfile({
-            visitorId,
-            contactTopic: trimmedValue,
-            onboardingStep: nextStep,
-          });
-          updateLocalProfile({
-            contactTopic: trimmedValue,
-            onboardingStep: nextStep,
-          });
-          return true;
-        }
-        if (profileStep === "extra_message") {
-          const existingDetails = visitorProfile.contactExtraDetails;
-          const nextExtraDetails = existingDetails
-            ? `${existingDetails}\n\n${trimmedValue}`
-            : trimmedValue;
-          await updateVisitorProfile({
-            visitorId,
-            contactExtraDetails: nextExtraDetails,
-            onboardingStep: "extra_received",
-          });
-          updateLocalProfile({
-            contactExtraDetails: nextExtraDetails,
-            onboardingStep: "extra_received",
-          });
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error("Could not save onboarding reply:", error);
-        setError("Could not save your reply. Please try again.");
-        return false;
-      } finally {
-        setIsSending(false);
-      }
-    },
-    [
-      chatMode,
-      conversationId,
-      isOfflineMode,
-      profileStep,
-      updateLocalProfile,
-      visitorId,
-      visitorProfile.contactExtraDetails,
-    ],
-  );
+  const captureProfileValue = useLiveChatProfileCapture({
+    visitorId,
+    conversationId,
+    profileStep,
+    isOfflineMode,
+    contactExtraDetails: visitorProfile.contactExtraDetails,
+    updateLocalProfile,
+    setMessages,
+    setIsSending,
+    setError,
+  });
 
-  const selectServiceOption = useCallback(
-    async (service: string): Promise<boolean> => {
-      if (!visitorId || !conversationId) {
-        setError("Live chat is still connecting. Please try again.");
-        return false;
-      }
-      if (profileStep !== "service") {
-        return false;
-      }
-      setIsSending(true);
-      setError(null);
-      try {
-        const visitorMessage = await sendVisitorMessage({
-          conversationId,
-          body: service,
-        });
-        setMessages((currentMessages) =>
-          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
-        );
-        await updateVisitorProfile({
-          visitorId,
-          contactService: service,
-          onboardingStep: "topic",
-        });
-        updateLocalProfile({
-          contactService: service,
-          onboardingStep: "topic",
-        });
-        return true;
-      } catch (error) {
-        console.error("Could not save selected service:", error);
-        setError("Could not save your selected service. Please try again.");
-        return false;
-      } finally {
-        setIsSending(false);
-      }
-    },
-    [conversationId, profileStep, updateLocalProfile, visitorId],
-  );
+  const { selectServiceOption, selectExtraChoice } = useLiveChatChoiceHandlers({
+    visitorId,
+    conversationId,
+    profileStep,
+    updateLocalProfile,
+    setMessages,
+    setIsSending,
+    setError,
+  });
 
-  const selectExtraChoice = useCallback(
-    async (choice: LiveChatExtraChoice): Promise<boolean> => {
-      if (!visitorId || !conversationId) {
-        setError("Live chat is still connecting. Please try again.");
-        return false;
-      }
-      if (profileStep !== "extra_choice") {
-        return false;
-      }
-      setIsSending(true);
-      setError(null);
-      const choiceText =
-        choice === "yes" ? "Yes, add more details" : "No, that’s everything";
-      try {
-        const visitorMessage = await sendVisitorMessage({
-          conversationId,
-          body: choiceText,
-        });
-        setMessages((currentMessages) =>
-          appendUniqueLiveChatMessage(currentMessages, visitorMessage),
-        );
-        const nextStep = choice === "yes" ? "extra_message_prompt" : "closed";
-        await updateVisitorProfile({ visitorId, onboardingStep: nextStep });
-        updateLocalProfile({ onboardingStep: nextStep });
-        return true;
-      } catch (error) {
-        console.error("Could not save visitor choice:", error);
-        setError("Could not save your choice. Please try again.");
-        return false;
-      } finally {
-        setIsSending(false);
-      }
-    },
-    [conversationId, profileStep, updateLocalProfile, visitorId],
-  );
+  const clearReadyTypingStatus = useCallback(async () => {
+    await sendRealtimeTypingStatus(false);
+  }, [sendRealtimeTypingStatus]);
+
+  const sendReadyMessage = useLiveChatMessageSender({
+    conversationId,
+    clearTypingStatus: clearReadyTypingStatus,
+    setMessages,
+    setIsSending,
+    setError,
+  });
 
   const sendMessage = useCallback(
     async (body: string): Promise<boolean> => {
       const trimmedBody = body.trim();
+
       if (!trimmedBody) {
         return false;
       }
+
       if (profileStep !== "ready") {
         return captureProfileValue(trimmedBody);
       }
-      if (!conversationId) {
-        setError("Live chat is still connecting. Please try again.");
-        return false;
-      }
-      setIsSending(true);
-      setError(null);
-      try {
-        await realtimeRef.current?.sendTypingStatus(false);
-        const nextMessage = await sendVisitorMessage({
-          conversationId,
-          body: trimmedBody,
-        });
-        setMessages((currentMessages) =>
-          appendUniqueLiveChatMessage(currentMessages, nextMessage),
-        );
-        return true;
-      } catch (error) {
-        console.error("Live chat send failed:", error);
-        setError("Message could not be sent. Please try again.");
-        return false;
-      } finally {
-        setIsSending(false);
-      }
+
+      return sendReadyMessage(trimmedBody);
     },
-    [captureProfileValue, conversationId, profileStep],
+    [captureProfileValue, profileStep, sendReadyMessage],
   );
 
   const sendTypingStatus = useCallback(
@@ -632,27 +194,34 @@ export const useLiveChat = (enabled: boolean, shouldRunOnboarding: boolean) => {
       if (profileStep !== "ready") {
         return;
       }
+
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = null;
       }
-      void realtimeRef.current?.sendTypingStatus(isTyping);
+
+      void sendRealtimeTypingStatus(isTyping);
+
       if (!isTyping) return;
+
       typingTimeoutRef.current = window.setTimeout(() => {
-        void realtimeRef.current?.sendTypingStatus(false);
+        void sendRealtimeTypingStatus(false);
         typingTimeoutRef.current = null;
       }, 1500);
     },
-    [profileStep],
+    [profileStep, sendRealtimeTypingStatus],
   );
+
   const latestMessage = useMemo(() => {
     return messages[messages.length - 1] ?? null;
   }, [messages]);
+
   const isVisitorOnline = Boolean(
     visitorId && presence.some((item) => item.userId === visitorId),
   );
 
   const isAdminOnline = presence.some((item) => item.role === "admin");
+
   return {
     visitorId,
     visitorProfile,
