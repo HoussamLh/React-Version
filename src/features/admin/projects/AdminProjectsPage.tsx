@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { AdminProjectForm } from "./AdminProjectForm";
-import { createAdminProject, getAdminProjects } from "./projectsCms.service";
-import type { AdminProject, ProjectStatus } from "./projectsCms.types";
+import {
+  createAdminProject,
+  getAdminProjects,
+  updateAdminProject,
+} from "./projectsCms.service";
+import type {
+  AdminProject,
+  AdminProjectFormValues,
+  ProjectStatus,
+} from "./projectsCms.types";
 
 type ProjectFilter = "all" | ProjectStatus;
 
@@ -22,15 +30,49 @@ const getProjectStatusStyle = (status: ProjectStatus) => {
   return styles.draftBadge;
 };
 
+const getProjectFormValues = (
+  project: AdminProject,
+): AdminProjectFormValues => {
+  return {
+    title: project.title,
+    slug: project.slug,
+    text: project.text,
+
+    category: project.category,
+    tags: project.tags,
+
+    mediaType: project.mediaType,
+    imageUrl: project.imageUrl,
+    videoUrl: project.videoUrl,
+    videoPosterUrl: project.videoPosterUrl,
+
+    span: project.span,
+    imageHeight: project.imageHeight,
+    hoverAccent: project.hoverAccent,
+
+    demoUrl: project.demoUrl,
+    githubUrl: project.githubUrl,
+
+    featured: project.featured,
+    status: project.status,
+    sortOrder: project.sortOrder,
+  };
+};
+
 export const AdminProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [statusFilter, setStatusFilter] = useState<ProjectFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<AdminProject | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [isUpdatingProject, setIsUpdatingProject] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
@@ -92,9 +134,7 @@ export const AdminProjectsPage: React.FC = () => {
     setSearchQuery("");
   };
 
-  const handleCreateProject = async (
-    values: Parameters<typeof createAdminProject>[0],
-  ) => {
+  const handleCreateProject = async (values: AdminProjectFormValues) => {
     setIsCreatingProject(true);
     setCreateError(null);
 
@@ -110,6 +150,44 @@ export const AdminProjectsPage: React.FC = () => {
     } finally {
       setIsCreatingProject(false);
     }
+  };
+
+  const handleUpdateProject = async (values: AdminProjectFormValues) => {
+    if (!editingProject) return;
+
+    setIsUpdatingProject(true);
+    setUpdateError(null);
+
+    try {
+      await updateAdminProject({
+        projectId: editingProject.id,
+        values,
+      });
+
+      setEditingProject(null);
+      await loadProjects();
+    } catch (error) {
+      console.error("Could not update project:", error);
+      setUpdateError(
+        "Could not update project. Check the slug is unique and all required fields are valid.",
+      );
+    } finally {
+      setIsUpdatingProject(false);
+    }
+  };
+
+  const openCreateForm = () => {
+    setCreateError(null);
+    setUpdateError(null);
+    setEditingProject(null);
+    setIsCreateFormOpen((currentValue) => !currentValue);
+  };
+
+  const openEditForm = (project: AdminProject) => {
+    setCreateError(null);
+    setUpdateError(null);
+    setIsCreateFormOpen(false);
+    setEditingProject(project);
   };
 
   return (
@@ -128,10 +206,7 @@ export const AdminProjectsPage: React.FC = () => {
           <button
             type="button"
             style={styles.createButton}
-            onClick={() => {
-              setCreateError(null);
-              setIsCreateFormOpen((currentValue) => !currentValue);
-            }}
+            onClick={openCreateForm}
           >
             {isCreateFormOpen ? "Close Form" : "New Project"}
           </button>
@@ -161,6 +236,7 @@ export const AdminProjectsPage: React.FC = () => {
           {createError && <div style={styles.errorBox}>{createError}</div>}
 
           <AdminProjectForm
+            key="create-project"
             submitLabel="Create Project"
             isSubmitting={isCreatingProject}
             onCancel={() => {
@@ -168,6 +244,33 @@ export const AdminProjectsPage: React.FC = () => {
               setIsCreateFormOpen(false);
             }}
             onSubmit={handleCreateProject}
+          />
+        </div>
+      )}
+
+      {editingProject && (
+        <div style={styles.createPanel}>
+          <div style={styles.createPanelHeader}>
+            <div>
+              <h2 style={styles.createPanelTitle}>Edit project</h2>
+              <p style={styles.createPanelText}>
+                Update project content, media, layout, tags, and publish status.
+              </p>
+            </div>
+          </div>
+
+          {updateError && <div style={styles.errorBox}>{updateError}</div>}
+
+          <AdminProjectForm
+            key={editingProject.id}
+            initialValues={getProjectFormValues(editingProject)}
+            submitLabel="Save Changes"
+            isSubmitting={isUpdatingProject}
+            onCancel={() => {
+              setUpdateError(null);
+              setEditingProject(null);
+            }}
+            onSubmit={handleUpdateProject}
           />
         </div>
       )}
@@ -344,6 +447,16 @@ export const AdminProjectsPage: React.FC = () => {
                           {tag}
                         </span>
                       ))}
+                    </div>
+
+                    <div style={styles.cardActions}>
+                      <button
+                        type="button"
+                        style={styles.editButton}
+                        onClick={() => openEditForm(project)}
+                      >
+                        Edit
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -721,5 +834,24 @@ const styles = {
     color: colors.text.muted,
     padding: "5px 9px",
     fontSize: "11px",
+  },
+
+  cardActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTop: `1px solid ${colors.border.default}`,
+  },
+
+  editButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: typography.fontWeight.bold,
   },
 };
