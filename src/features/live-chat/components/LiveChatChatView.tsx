@@ -1,16 +1,16 @@
 import React from "react";
 
+import { LiveChatChatHeader } from "./LiveChatChatHeader";
+import { LiveChatComposer } from "./LiveChatComposer";
+import { LiveChatFeedbackBanner } from "./LiveChatFeedbackBanner";
+import { LiveChatMessageList } from "./LiveChatMessageList";
+
 import type {
   LiveChatAvailabilityMode,
   LiveChatExtraChoice,
   LiveChatMessage,
   LiveChatProfileStep,
 } from "../types/liveChat.types";
-
-import { LiveChatComposer } from "./LiveChatComposer";
-import { LiveChatChatHeader } from "./LiveChatChatHeader";
-import { LiveChatFeedbackBanner } from "./LiveChatFeedbackBanner";
-import { LiveChatMessageList } from "./LiveChatMessageList";
 
 type LiveChatChatViewProps = {
   message: string;
@@ -61,7 +61,6 @@ export const LiveChatChatView: React.FC<LiveChatChatViewProps> = ({
   onExtraChoiceSelect,
   onSubmit,
 }) => {
-
   return (
     <>
       <LiveChatChatHeader
