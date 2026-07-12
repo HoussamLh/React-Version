@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
+  AdminEmergencyRestorationPanel,
   AdminMaintenancePlansPanel,
   AdminPricingEmptyState,
   AdminPricingListCard,
@@ -115,32 +116,10 @@ export const AdminPricingPage: React.FC = () => {
             plans={maintenancePlans}
             onRefresh={loadPricingContent}
           />
-          <AdminPricingSectionPanel
-            title="Emergency Restoration"
-            subtitle="Urgent one-time restoration offer shown above maintenance subscriptions."
-          >
-            {emergencyRestorations.length === 0 ? (
-              <AdminPricingEmptyState
-                title="No emergency restoration item yet"
-                text="Create the emergency restoration item in a later phase."
-              />
-            ) : (
-              <div style={styles.gridSingle}>
-                {emergencyRestorations.map((item) => (
-                  <AdminPricingListCard
-                    key={item.id}
-                    title={item.title}
-                    eyebrow="Urgent Fix"
-                    price={item.price}
-                    suffix={item.suffix}
-                    description={item.text}
-                    status={item.status}
-                  />
-                ))}
-              </div>
-            )}
-          </AdminPricingSectionPanel>
-
+          <AdminEmergencyRestorationPanel
+            restorations={emergencyRestorations}
+            onRefresh={loadPricingContent}
+          />
           <AdminPricingSectionPanel
             title="Comparison Rows"
             subtitle="Rows shown inside the Pricing comparison table."

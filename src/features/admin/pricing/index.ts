@@ -3,6 +3,8 @@ export { AdminPricingPlanForm } from "./components/AdminPricingPlanForm";
 export { AdminPricingPlansPanel } from "./components/AdminPricingPlansPanel";
 export { AdminMaintenancePlanForm } from "./components/AdminMaintenancePlanForm";
 export { AdminMaintenancePlansPanel } from "./components/AdminMaintenancePlansPanel";
+export { AdminEmergencyRestorationForm } from "./components/AdminEmergencyRestorationForm";
+export { AdminEmergencyRestorationPanel } from "./components/AdminEmergencyRestorationPanel";
 
 export { AdminPricingCardActions } from "./components/AdminPricingCardActions";
 export { AdminPricingEmptyState } from "./components/AdminPricingEmptyState";
