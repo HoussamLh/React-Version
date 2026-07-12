@@ -19,6 +19,7 @@ import {
   AdminDashboard,
   AdminLayout,
   AdminLogin,
+  AdminPricingPage,
   AdminProjectsPage,
   AdminServicesPage,
   ContactSubmissionsPage,
@@ -105,6 +106,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="projects" element={<AdminProjectsPage />} />
           <Route path="services" element={<AdminServicesPage />} />
+          <Route path="pricing" element={<AdminPricingPage />} />
           <Route path="chat" element={<AdminChatPage />} />
           <Route path="contacts" element={<ContactSubmissionsPage />} />
         </Route>

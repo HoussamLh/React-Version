@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Briefcase,
+  CreditCard,
   MessageSquare,
   PanelTop,
   Users,
@@ -46,6 +47,12 @@ const navItems: NavItem[] = [
     label: "Services",
     to: "/admin/services",
     icon: <Wrench size={18} />,
+    badgeKey: null,
+  },
+  {
+    label: "Pricing",
+    to: "/admin/pricing",
+    icon: <CreditCard size={18} />,
     badgeKey: null,
   },
   {
