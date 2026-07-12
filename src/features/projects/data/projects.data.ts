@@ -13,10 +13,17 @@ export type ProjectAccent =
   | "yellow"
   | "cyan";
 
+export type ProjectMediaType = "image" | "video";
+
 export type Project = {
+  id?: string;
+  slug?: string;
   title: string;
   text: string;
-  image: string;
+  image?: string | null;
+  videoUrl?: string | null;
+  videoPosterUrl?: string | null;
+  mediaType?: ProjectMediaType;
   tags: string[];
   span: string;
   imageHeight: string;
@@ -28,6 +35,7 @@ export const projects: Project[] = [
     title: "CloudArchitect Pro",
     text: "Enterprise infrastructure management tool with real-time topology mapping and automated scaling policies.",
     image: cloudArchitectImg,
+    mediaType: "image",
     tags: ["React", "Go", "Cloud"],
     span: "span 8",
     imageHeight: "320px",
@@ -37,6 +45,7 @@ export const projects: Project[] = [
     title: "VeloFit iOS",
     text: "Precision biometric tracking and workout optimization for professional athletes.",
     image: veloFitImg,
+    mediaType: "image",
     tags: ["Swift", "iOS", "Health"],
     span: "span 4",
     imageHeight: "320px",
@@ -46,6 +55,7 @@ export const projects: Project[] = [
     title: "FluxAnalytics",
     text: "Full-stack data pipeline and visualization engine for e-commerce growth.",
     image: fluxAnalyticsImg,
+    mediaType: "image",
     tags: ["Next.js", "Python", "Data"],
     span: "span 4",
     imageHeight: "320px",
@@ -55,6 +65,7 @@ export const projects: Project[] = [
     title: "OmniHome Hub",
     text: "Unified smart device controller with edge-computing logic and zero-latency local control.",
     image: omniHomeImg,
+    mediaType: "image",
     tags: ["Flutter", "Rust", "IoT"],
     span: "span 8",
     imageHeight: "320px",
@@ -64,6 +75,7 @@ export const projects: Project[] = [
     title: "DevSync API",
     text: "Automated documentation engine that generates real-time sandboxes from OpenAPI specs.",
     image: devSyncImg,
+    mediaType: "image",
     tags: ["Node.js", "TypeScript", "API"],
     span: "span 6",
     imageHeight: "280px",
@@ -73,6 +85,7 @@ export const projects: Project[] = [
     title: "CollabLayer",
     text: "Real-time collaborative project workspace with integrated Git-flow visualization.",
     image: collabLayerImg,
+    mediaType: "image",
     tags: ["Vue.js", "Firebase", "Realtime"],
     span: "span 6",
     imageHeight: "280px",
