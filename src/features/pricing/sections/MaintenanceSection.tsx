@@ -1,9 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, colors, SharedHero, spacing } from "../../../design-system";
 import { MaintenanceCard } from "../components";
-import { emergencyRestoration, maintenancePlans } from "../data/pricing.data";
+import {
+  emergencyRestoration as fallbackEmergencyRestoration,
+  maintenancePlans as fallbackMaintenancePlans,
+  type EmergencyRestoration,
+  type MaintenancePlan,
+} from "../data/pricing.data";
+import {
+  getPublishedEmergencyRestoration,
+  getPublishedMaintenancePlans,
+} from "../api";
 
 export const MaintenanceSection: React.FC = () => {
+  const [plans, setPlans] = useState<MaintenancePlan[]>(
+    fallbackMaintenancePlans,
+  );
+  const [restoration, setRestoration] = useState<EmergencyRestoration>(
+    fallbackEmergencyRestoration,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const [cmsPlans, cmsRestoration] = await Promise.all([
+            getPublishedMaintenancePlans(),
+            getPublishedEmergencyRestoration(),
+          ]);
+
+          if (!isMounted) return;
+
+          if (cmsPlans.length > 0) {
+            setPlans(cmsPlans);
+          }
+
+          if (cmsRestoration) {
+            setRestoration(cmsRestoration);
+          }
+        } catch (error) {
+          console.error("Could not load CMS maintenance pricing:", error);
+        }
+      })();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <section style={styles.container} className="ds-section">
       <SharedHero
@@ -32,23 +80,23 @@ export const MaintenanceSection: React.FC = () => {
 
             <div style={styles.emergencyHeader}>
               <h3 className="ds-card-title" style={styles.emergencyTitle}>
-                {emergencyRestoration.title}
+                {restoration.title}
               </h3>
 
               <div style={styles.emergencyPrice}>
-                <span style={styles.price}>{emergencyRestoration.price}</span>
-                <span style={styles.suffix}>{emergencyRestoration.suffix}</span>
+                <span style={styles.price}>{restoration.price}</span>
+                <span style={styles.suffix}>{restoration.suffix}</span>
               </div>
             </div>
 
             <p className="ds-card-text" style={styles.emergencyText}>
-              {emergencyRestoration.text}
+              {restoration.text}
             </p>
           </div>
         </Card>
 
         <div className="ds-grid ds-grid-3" style={styles.grid}>
-          {maintenancePlans.map((plan) => (
+          {plans.map((plan) => (
             <MaintenanceCard key={plan.name} plan={plan} />
           ))}
         </div>

@@ -28,6 +28,13 @@ export type ComparisonRow = {
   premium: string;
 };
 
+export type EmergencyRestoration = {
+  title: string;
+  price: string;
+  suffix: string;
+  text: string;
+};
+
 export const pricingPlans: PricingPlan[] = [
   {
     name: "Basic",
@@ -178,7 +185,7 @@ export const comparisonRows: ComparisonRow[] = [
   },
 ];
 
-export const emergencyRestoration = {
+export const emergencyRestoration: EmergencyRestoration = {
   title: "Emergency Restoration",
   price: "£150",
   suffix: "one-time",

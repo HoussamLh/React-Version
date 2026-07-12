@@ -1,9 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { colors, SharedHero } from "../../../design-system";
 import { ComparisonTable } from "../components";
-import { comparisonRows } from "../data/pricing.data";
+import {
+  comparisonRows as fallbackComparisonRows,
+  type ComparisonRow,
+} from "../data/pricing.data";
+import { getPublishedComparisonRows } from "../api";
 
 export const ComparisonSection: React.FC = () => {
+  const [rows, setRows] = useState<ComparisonRow[]>(fallbackComparisonRows);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const cmsRows = await getPublishedComparisonRows();
+
+          if (!isMounted || cmsRows.length === 0) return;
+
+          setRows(cmsRows);
+        } catch (error) {
+          console.error("Could not load CMS comparison rows:", error);
+        }
+      })();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <section style={styles.container} className="ds-section">
       <SharedHero
@@ -18,7 +47,7 @@ export const ComparisonSection: React.FC = () => {
         }}
       />
 
-      <ComparisonTable rows={comparisonRows} />
+      <ComparisonTable rows={rows} />
     </section>
   );
 };

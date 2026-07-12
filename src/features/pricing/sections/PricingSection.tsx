@@ -1,23 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { colors, spacing } from "../../../design-system";
 import { PricingCard } from "../components";
-import { pricingPlans } from "../data/pricing.data";
+import {
+  pricingPlans as fallbackPricingPlans,
+  type PricingPlan,
+} from "../data/pricing.data";
+import { getPublishedPricingPlans } from "../api";
 
 export const PricingSection: React.FC = () => {
+  const [plans, setPlans] = useState<PricingPlan[]>(fallbackPricingPlans);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const cmsPlans = await getPublishedPricingPlans();
+
+          if (!isMounted || cmsPlans.length === 0) return;
+
+          setPlans(cmsPlans);
+        } catch (error) {
+          console.error("Could not load CMS pricing plans:", error);
+        }
+      })();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
-    <section style={styles.container} 
-    className="ds-section">
+    <section style={styles.container} className="ds-section">
       <div style={styles.header}>
-        <div style={styles.noticeBanner} 
-        className="mono-text">
+        <div style={styles.noticeBanner} className="mono-text">
           ⚡ Advanced is recommended for businesses that need authentication,
           database logic and API development.
         </div>
       </div>
 
-      <div style={styles.grid} 
-      className="ds-grid ds-grid-5">
-        {pricingPlans.map((plan) => (
+      <div style={styles.grid} className="ds-grid ds-grid-5">
+        {plans.map((plan) => (
           <PricingCard key={plan.name} plan={plan} />
         ))}
       </div>
