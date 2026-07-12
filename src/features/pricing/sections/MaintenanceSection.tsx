@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Card, colors, SharedHero, spacing } from "../../../design-system";
-import { MaintenanceCard } from "../components";
 import {
-  emergencyRestoration as fallbackEmergencyRestoration,
-  maintenancePlans as fallbackMaintenancePlans,
-  type EmergencyRestoration,
-  type MaintenancePlan,
+  Card,
+  colors,
+  radius,
+  SharedHero,
+  spacing,
+  typography,
+} from "../../../design-system";
+import { MaintenanceCard } from "../components";
+import type {
+  EmergencyRestoration,
+  MaintenancePlan,
 } from "../data/pricing.data";
 import {
   getPublishedEmergencyRestoration,
@@ -13,12 +18,12 @@ import {
 } from "../api";
 
 export const MaintenanceSection: React.FC = () => {
-  const [plans, setPlans] = useState<MaintenancePlan[]>(
-    fallbackMaintenancePlans,
+  const [plans, setPlans] = useState<MaintenancePlan[]>([]);
+  const [restoration, setRestoration] = useState<EmergencyRestoration | null>(
+    null,
   );
-  const [restoration, setRestoration] = useState<EmergencyRestoration>(
-    fallbackEmergencyRestoration,
-  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,15 +38,19 @@ export const MaintenanceSection: React.FC = () => {
 
           if (!isMounted) return;
 
-          if (cmsPlans.length > 0) {
-            setPlans(cmsPlans);
-          }
-
-          if (cmsRestoration) {
-            setRestoration(cmsRestoration);
-          }
+          setPlans(cmsPlans);
+          setRestoration(cmsRestoration);
+          setError(null);
         } catch (error) {
           console.error("Could not load CMS maintenance pricing:", error);
+
+          if (!isMounted) return;
+
+          setError("Maintenance pricing could not be loaded right now.");
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
         }
       })();
     }, 0);
@@ -67,39 +76,65 @@ export const MaintenanceSection: React.FC = () => {
       />
 
       <div style={styles.content}>
-        <Card
-          interactive
-          hoverAccent="yellow"
-          className="ds-card-stack"
-          style={styles.emergencyCard}
-        >
-          <div>
-            <span className="ds-pill mono-text" style={styles.urgentPill}>
-              Urgent Fix
-            </span>
+        {isLoading && (
+          <div style={styles.stateBox}>
+            <p style={styles.stateText}>Loading maintenance plans...</p>
+          </div>
+        )}
 
-            <div style={styles.emergencyHeader}>
-              <h3 className="ds-card-title" style={styles.emergencyTitle}>
-                {restoration.title}
-              </h3>
+        {!isLoading && error && (
+          <div style={styles.stateBox}>
+            <h2 style={styles.stateTitle}>Maintenance unavailable</h2>
+            <p style={styles.stateText}>{error}</p>
+          </div>
+        )}
 
-              <div style={styles.emergencyPrice}>
-                <span style={styles.price}>{restoration.price}</span>
-                <span style={styles.suffix}>{restoration.suffix}</span>
-              </div>
-            </div>
-
-            <p className="ds-card-text" style={styles.emergencyText}>
-              {restoration.text}
+        {!isLoading && !error && !restoration && plans.length === 0 && (
+          <div style={styles.stateBox}>
+            <h2 style={styles.stateTitle}>Maintenance plans coming soon</h2>
+            <p style={styles.stateText}>
+              Maintenance subscriptions will be published here soon.
             </p>
           </div>
-        </Card>
+        )}
 
-        <div className="ds-grid ds-grid-3" style={styles.grid}>
-          {plans.map((plan) => (
-            <MaintenanceCard key={plan.name} plan={plan} />
-          ))}
-        </div>
+        {!isLoading && !error && restoration && (
+          <Card
+            interactive
+            hoverAccent="yellow"
+            className="ds-card-stack"
+            style={styles.emergencyCard}
+          >
+            <div>
+              <span className="ds-pill mono-text" style={styles.urgentPill}>
+                Urgent Fix
+              </span>
+
+              <div style={styles.emergencyHeader}>
+                <h3 className="ds-card-title" style={styles.emergencyTitle}>
+                  {restoration.title}
+                </h3>
+
+                <div style={styles.emergencyPrice}>
+                  <span style={styles.price}>{restoration.price}</span>
+                  <span style={styles.suffix}>{restoration.suffix}</span>
+                </div>
+              </div>
+
+              <p className="ds-card-text" style={styles.emergencyText}>
+                {restoration.text}
+              </p>
+            </div>
+          </Card>
+        )}
+
+        {!isLoading && !error && plans.length > 0 && (
+          <div className="ds-grid ds-grid-3" style={styles.grid}>
+            {plans.map((plan) => (
+              <MaintenanceCard key={plan.name} plan={plan} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -169,5 +204,28 @@ const styles = {
   grid: {
     alignItems: "stretch",
     marginTop: spacing["4xl"],
+  },
+
+  stateBox: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.xl,
+    backgroundColor: colors.background.card,
+    padding: spacing.xl,
+    textAlign: "center" as const,
+  },
+
+  stateTitle: {
+    color: colors.text.main,
+    fontSize: "22px",
+    lineHeight: "28px",
+    margin: 0,
+    fontWeight: typography.fontWeight.black,
+  },
+
+  stateText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: `${spacing.sm} 0 0 0`,
   },
 };
