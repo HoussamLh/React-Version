@@ -1,3 +1,4 @@
+export { AdminServiceForm } from "./AdminServiceForm";
 export { AdminServicesPage } from "./AdminServicesPage";
 
 export type {
