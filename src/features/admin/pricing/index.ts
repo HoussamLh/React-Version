@@ -1,3 +1,5 @@
+export { AdminPricingPage } from "./AdminPricingPage";
+
 export { AdminPricingCardActions } from "./components/AdminPricingCardActions";
 export { AdminPricingEmptyState } from "./components/AdminPricingEmptyState";
 export { AdminPricingFeatureList } from "./components/AdminPricingFeatureList";
