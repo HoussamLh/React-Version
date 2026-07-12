@@ -1,18 +1,17 @@
 import React from "react";
-import {
-  Card,
-  colors,
-  spacing,
-  typography,
-} from "../../../design-system";
+import { Card, colors, spacing, typography } from "../../../design-system";
 import type { Project } from "../data/projects.data";
 
 type ProjectCardProps = {
   project: Project;
+  onPlayVideo?: (project: Project) => void;
 };
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  const isVideoProject = project.mediaType === "video";
+export const ProjectCard: React.FC<ProjectCardProps> = ({
+  project,
+  onPlayVideo,
+}) => {
+  const isVideoProject = project.mediaType === "video" && project.videoUrl;
 
   return (
     <Card
@@ -39,7 +38,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <div style={styles.mediaPlaceholder}>No media preview</div>
         )}
 
-        {isVideoProject && <span style={styles.videoBadge}>Video</span>}
+        {isVideoProject && (
+          <button
+            type="button"
+            style={styles.playButton}
+            onClick={() => onPlayVideo?.(project)}
+          >
+            ▶ Play Demo
+          </button>
+        )}
       </div>
 
       <div>
@@ -70,16 +77,18 @@ const styles = {
     backgroundColor: "rgba(255, 255, 255, 0.03)",
   },
 
-  videoBadge: {
+  playButton: {
     position: "absolute" as const,
-    right: spacing.md,
-    top: spacing.md,
+    left: spacing.md,
+    bottom: spacing.md,
+    border: "1px solid rgba(255, 255, 255, 0.22)",
     borderRadius: "999px",
-    backgroundColor: "rgba(0, 0, 0, 0.62)",
+    backgroundColor: "rgba(0, 0, 0, 0.66)",
     color: colors.text.main,
-    padding: "5px 9px",
-    fontSize: "11px",
+    padding: "8px 12px",
+    cursor: "pointer",
+    fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
-    border: `1px solid ${colors.border.default}`,
+    backdropFilter: "blur(10px)",
   },
 };

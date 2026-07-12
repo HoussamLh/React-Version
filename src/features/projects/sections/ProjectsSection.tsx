@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { ProjectCard } from "../components";
+import { ProjectCard, ProjectVideoModal } from "../components";
 import type { Project } from "../data/projects.data";
 import { getPublishedProjects } from "../services";
 
 export const ProjectsSection: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedVideoProject, setSelectedVideoProject] =
+    useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,10 +73,16 @@ export const ProjectsSection: React.FC = () => {
             <ProjectCard
               key={project.id ?? project.slug ?? project.title}
               project={project}
+              onPlayVideo={setSelectedVideoProject}
             />
           ))}
         </div>
       )}
+
+      <ProjectVideoModal
+        project={selectedVideoProject}
+        onClose={() => setSelectedVideoProject(null)}
+      />
     </section>
   );
 };
