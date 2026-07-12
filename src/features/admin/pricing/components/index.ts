@@ -1,3 +1,5 @@
+export { AdminComparisonRowForm } from "./AdminComparisonRowForm";
+export { AdminComparisonRowsPanel } from "./AdminComparisonRowsPanel";
 export { AdminEmergencyRestorationForm } from "./AdminEmergencyRestorationForm";
 export { AdminEmergencyRestorationPanel } from "./AdminEmergencyRestorationPanel";
 export { AdminMaintenancePlanForm } from "./AdminMaintenancePlanForm";

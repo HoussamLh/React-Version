@@ -5,6 +5,8 @@ export { AdminMaintenancePlanForm } from "./components/AdminMaintenancePlanForm"
 export { AdminMaintenancePlansPanel } from "./components/AdminMaintenancePlansPanel";
 export { AdminEmergencyRestorationForm } from "./components/AdminEmergencyRestorationForm";
 export { AdminEmergencyRestorationPanel } from "./components/AdminEmergencyRestorationPanel";
+export { AdminComparisonRowForm } from "./components/AdminComparisonRowForm";
+export { AdminComparisonRowsPanel } from "./components/AdminComparisonRowsPanel";
 
 export { AdminPricingCardActions } from "./components/AdminPricingCardActions";
 export { AdminPricingEmptyState } from "./components/AdminPricingEmptyState";

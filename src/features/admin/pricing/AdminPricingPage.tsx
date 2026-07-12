@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
+  AdminComparisonRowsPanel,
   AdminEmergencyRestorationPanel,
   AdminMaintenancePlansPanel,
-  AdminPricingEmptyState,
-  AdminPricingListCard,
   AdminPricingPlansPanel,
-  AdminPricingSectionPanel,
 } from "./components";
 import { getAdminComparisonRows } from "./comparisonRows.service";
 import { getAdminEmergencyRestorations } from "./emergencyRestoration.service";
@@ -120,52 +118,10 @@ export const AdminPricingPage: React.FC = () => {
             restorations={emergencyRestorations}
             onRefresh={loadPricingContent}
           />
-          <AdminPricingSectionPanel
-            title="Comparison Rows"
-            subtitle="Rows shown inside the Pricing comparison table."
-          >
-            {comparisonRows.length === 0 ? (
-              <AdminPricingEmptyState
-                title="No comparison rows yet"
-                text="Create comparison rows in a later phase."
-              />
-            ) : (
-              <div style={styles.grid}>
-                {comparisonRows.map((row) => (
-                  <AdminPricingListCard
-                    key={row.id}
-                    title={row.feature}
-                    eyebrow="Comparison Row"
-                    status={row.status}
-                    metaItems={[`Order: ${row.sortOrder}`]}
-                  >
-                    <div style={styles.comparisonValues}>
-                      <div style={styles.comparisonValue}>
-                        <span style={styles.comparisonLabel}>Standard</span>
-                        <strong style={styles.comparisonText}>
-                          {row.standard}
-                        </strong>
-                      </div>
-
-                      <div style={styles.comparisonValue}>
-                        <span style={styles.comparisonLabel}>Advanced</span>
-                        <strong style={styles.comparisonText}>
-                          {row.advanced}
-                        </strong>
-                      </div>
-
-                      <div style={styles.comparisonValue}>
-                        <span style={styles.comparisonLabel}>Premium</span>
-                        <strong style={styles.comparisonText}>
-                          {row.premium}
-                        </strong>
-                      </div>
-                    </div>
-                  </AdminPricingListCard>
-                ))}
-              </div>
-            )}
-          </AdminPricingSectionPanel>
+          <AdminComparisonRowsPanel
+            rows={comparisonRows}
+            onRefresh={loadPricingContent}
+          />
         </div>
       )}
     </section>
