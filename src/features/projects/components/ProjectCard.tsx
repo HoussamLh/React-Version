@@ -12,6 +12,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   onPlayVideo,
 }) => {
   const isVideoProject = project.mediaType === "video" && project.videoUrl;
+  const hasProjectLinks = Boolean(project.demoUrl || project.githubUrl);
 
   return (
     <Card
@@ -62,6 +63,32 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           </span>
         ))}
       </div>
+
+      {hasProjectLinks && (
+        <div style={styles.actionRow}>
+          {project.demoUrl && (
+            <a
+              href={project.demoUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={styles.primaryLink}
+            >
+              Live Demo
+            </a>
+          )}
+
+          {project.githubUrl && (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={styles.secondaryLink}
+            >
+              GitHub
+            </a>
+          )}
+        </div>
+      )}
     </Card>
   );
 };
@@ -90,5 +117,42 @@ const styles = {
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
     backdropFilter: "blur(10px)",
+  },
+
+  actionRow: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap" as const,
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    paddingTop: spacing.lg,
+    borderTop: `1px solid ${colors.border.default}`,
+  },
+
+  primaryLink: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "999px",
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
+    padding: "9px 14px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
+  },
+
+  secondaryLink: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: "999px",
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    color: colors.text.main,
+    padding: "9px 14px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
   },
 };

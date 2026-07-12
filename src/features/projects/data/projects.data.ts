@@ -17,6 +17,8 @@ export type Project = {
   videoUrl?: string | null;
   videoPosterUrl?: string | null;
   mediaType?: ProjectMediaType;
+  demoUrl?: string | null;
+  githubUrl?: string | null;
   tags: string[];
   span: string;
   imageHeight: string;

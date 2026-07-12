@@ -18,6 +18,8 @@ type ProjectRow = {
   span: string;
   image_height: string;
   hover_accent: ProjectAccent;
+  demo_url: string | null;
+  github_url: string | null;
 };
 
 const mapProjectRow = (row: ProjectRow): Project => {
@@ -35,6 +37,8 @@ const mapProjectRow = (row: ProjectRow): Project => {
     videoUrl: row.video_url,
     videoPosterUrl: row.video_poster_url,
     mediaType: row.media_type,
+    demoUrl: row.demo_url,
+    githubUrl: row.github_url,
     tags: row.tags ?? [],
     span: row.span,
     imageHeight: row.image_height,
@@ -50,7 +54,7 @@ export const getPublishedProjects = async (): Promise<Project[]> => {
   const { data, error } = await supabase
     .from("projects")
     .select(
-      "id, title, slug, text, tags, media_type, image_url, video_url, video_poster_url, span, image_height, hover_accent",
+      "id, title, slug, text, tags, media_type, image_url, video_url, video_poster_url, span, image_height, hover_accent, demo_url, github_url",
     )
     .eq("status", "published")
     .order("sort_order", { ascending: true })
