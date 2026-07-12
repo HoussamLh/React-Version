@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   AdminPricingEmptyState,
-  AdminPricingFeatureList,
   AdminPricingListCard,
+  AdminPricingPlansPanel,
   AdminPricingSectionPanel,
 } from "./components";
 import { getAdminComparisonRows } from "./comparisonRows.service";
@@ -106,40 +106,10 @@ export const AdminPricingPage: React.FC = () => {
 
       {!isLoading && (
         <div style={styles.stack}>
-          <AdminPricingSectionPanel
-            title="Build Pricing Plans"
-            subtitle="Main website and application build packages shown on the Pricing page."
-          >
-            {pricingPlans.length === 0 ? (
-              <AdminPricingEmptyState
-                title="No pricing plans yet"
-                text="Create pricing plans in the next phase."
-              />
-            ) : (
-              <div style={styles.grid}>
-                {pricingPlans.map((plan) => (
-                  <AdminPricingListCard
-                    key={plan.id}
-                    title={plan.name}
-                    eyebrow={plan.label}
-                    price={plan.price}
-                    suffix={plan.suffix}
-                    description={plan.description}
-                    status={plan.status}
-                    recommended={plan.recommended}
-                    metaItems={[
-                      `CTA: ${plan.ctaLabel}`,
-                      `Link: ${plan.ctaTo}`,
-                      `Order: ${plan.sortOrder}`,
-                    ]}
-                  >
-                    <AdminPricingFeatureList features={plan.features} />
-                  </AdminPricingListCard>
-                ))}
-              </div>
-            )}
-          </AdminPricingSectionPanel>
-
+          <AdminPricingPlansPanel
+            plans={pricingPlans}
+            onRefresh={loadPricingContent}
+          />
           <AdminPricingSectionPanel
             title="Maintenance Plans"
             subtitle="Monthly maintenance subscriptions used by the Pricing page and later the Home Subscription section."
@@ -167,7 +137,6 @@ export const AdminPricingPage: React.FC = () => {
                       `Order: ${plan.sortOrder}`,
                     ]}
                   >
-                    <AdminPricingFeatureList features={plan.features} />
                   </AdminPricingListCard>
                 ))}
               </div>

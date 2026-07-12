@@ -1,4 +1,6 @@
 export { AdminPricingPage } from "./AdminPricingPage";
+export { AdminPricingPlanForm } from "./components/AdminPricingPlanForm";
+export { AdminPricingPlansPanel } from "./components/AdminPricingPlansPanel";
 
 export { AdminPricingCardActions } from "./components/AdminPricingCardActions";
 export { AdminPricingEmptyState } from "./components/AdminPricingEmptyState";
