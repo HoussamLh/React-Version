@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Briefcase, MessageSquare, PanelTop, Users } from "lucide-react";
+import {
+  Briefcase,
+  MessageSquare,
+  PanelTop,
+  Users,
+  Wrench,
+} from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { getAdminConversations } from "../chat/adminChat.service";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
@@ -34,6 +40,12 @@ const navItems: NavItem[] = [
     label: "Projects",
     to: "/admin/projects",
     icon: <Briefcase size={18} />,
+    badgeKey: null,
+  },
+  {
+    label: "Services",
+    to: "/admin/services",
+    icon: <Wrench size={18} />,
     badgeKey: null,
   },
   {

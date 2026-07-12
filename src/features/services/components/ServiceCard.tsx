@@ -70,7 +70,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         ) : undefined
       }
     >
-      {image && (
+      {image?.trim() && (
         <div className="ds-card-media" style={styles.media}>
           <img
             src={image}

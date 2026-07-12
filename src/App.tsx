@@ -20,6 +20,7 @@ import {
   AdminLayout,
   AdminLogin,
   AdminProjectsPage,
+  AdminServicesPage,
   ContactSubmissionsPage,
   ProtectedAdminRoute,
 } from "./features/admin";
@@ -102,9 +103,10 @@ function App() {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="projects" element={<AdminProjectsPage />} />
+          <Route path="services" element={<AdminServicesPage />} />
           <Route path="chat" element={<AdminChatPage />} />
           <Route path="contacts" element={<ContactSubmissionsPage />} />
-          <Route path="projects" element={<AdminProjectsPage />} />
         </Route>
       </Routes>
 
