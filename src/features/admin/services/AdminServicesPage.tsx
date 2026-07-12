@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Code, Server, ShieldCheck, Smartphone } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { getAdminServices } from "./servicesCms.service";
-import type { AdminService, ServiceStatus } from "./servicesCms.types";
+import { AdminServiceForm } from "./AdminServiceForm";
+import { createAdminService, getAdminServices } from "./servicesCms.service";
+import type {
+  AdminService,
+  AdminServiceFormValues,
+  ServiceStatus,
+} from "./servicesCms.types";
 
 type ServiceFilter = "all" | ServiceStatus;
 
@@ -22,11 +27,14 @@ const getServiceStatusStyle = (status: ServiceStatus) => {
 };
 
 export const AdminServicesPage: React.FC = () => {
-  const [services, setServices] = useState<AdminService[]>([]);
-  const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const [services, setServices] = useState<AdminService[]>([]);
+const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
+const [searchQuery, setSearchQuery] = useState("");
+const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+const [isCreatingService, setIsCreatingService] = useState(false);
+const [error, setError] = useState<string | null>(null);
+const [createError, setCreateError] = useState<string | null>(null);
 
   const loadServices = useCallback(async () => {
     setIsLoading(true);
@@ -89,6 +97,29 @@ export const AdminServicesPage: React.FC = () => {
     setSearchQuery("");
   };
 
+  const handleCreateService = async (values: AdminServiceFormValues) => {
+    setIsCreatingService(true);
+    setCreateError(null);
+
+    try {
+      await createAdminService(values);
+      setIsCreateFormOpen(false);
+      await loadServices();
+    } catch (error) {
+      console.error("Could not create service:", error);
+      setCreateError(
+        "Could not create service. Check the slug is unique and all required fields are valid.",
+      );
+    } finally {
+      setIsCreatingService(false);
+    }
+  };
+
+  const openCreateForm = () => {
+    setCreateError(null);
+    setIsCreateFormOpen((currentValue) => !currentValue);
+  };
+
   return (
     <section style={styles.page}>
       <div style={styles.header}>
@@ -101,16 +132,52 @@ export const AdminServicesPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          style={styles.refreshButton}
-          onClick={loadServices}
-        >
-          {isLoading ? "Refreshing..." : "Refresh"}
-        </button>
+        <div style={styles.headerActions}>
+          <button
+            type="button"
+            style={styles.createButton}
+            onClick={openCreateForm}
+          >
+            {isCreateFormOpen ? "Close Form" : "New Service"}
+          </button>
+
+          <button
+            type="button"
+            style={styles.refreshButton}
+            onClick={loadServices}
+          >
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
       </div>
 
       <div style={styles.panel}>
+        {isCreateFormOpen && (
+          <div style={styles.createPanel}>
+            <div style={styles.createPanelHeader}>
+              <div>
+                <h2 style={styles.createPanelTitle}>Create service</h2>
+                <p style={styles.createPanelText}>
+                  Add a new service card to the CMS. Draft services stay hidden
+                  from the public services page.
+                </p>
+              </div>
+            </div>
+
+            {createError && <div style={styles.errorBox}>{createError}</div>}
+
+            <AdminServiceForm
+              key="create-service"
+              submitLabel="Create Service"
+              isSubmitting={isCreatingService}
+              onCancel={() => {
+                setCreateError(null);
+                setIsCreateFormOpen(false);
+              }}
+              onSubmit={handleCreateService}
+            />
+          </div>
+        )}
         <div style={styles.toolbar}>
           <div style={styles.searchWrap}>
             <input
@@ -312,6 +379,13 @@ const styles = {
     gap: spacing.xl,
   },
 
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexShrink: 0,
+  },
+
   eyebrow: {
     color: colors.accent.green,
     fontSize: "12px",
@@ -337,6 +411,16 @@ const styles = {
     margin: `${spacing.sm} 0 0 0`,
   },
 
+  createButton: {
+    border: "none",
+    borderRadius: radius.md,
+    backgroundColor: colors.accent.green,
+    color: colors.background.dark,
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontWeight: typography.fontWeight.bold,
+  },
+
   refreshButton: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -345,6 +429,32 @@ const styles = {
     padding: `${spacing.sm} ${spacing.md}`,
     cursor: "pointer",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  createPanel: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.xl,
+    backgroundColor: colors.background.card,
+    padding: spacing.xl,
+  },
+
+  createPanelHeader: {
+    marginBottom: spacing.lg,
+  },
+
+  createPanelTitle: {
+    color: colors.text.main,
+    fontSize: "22px",
+    lineHeight: "28px",
+    margin: 0,
+    fontWeight: typography.fontWeight.black,
+  },
+
+  createPanelText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: `${spacing.sm} 0 0 0`,
   },
 
   panel: {
