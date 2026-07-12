@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
+  AdminMaintenancePlansPanel,
   AdminPricingEmptyState,
   AdminPricingListCard,
   AdminPricingPlansPanel,
@@ -110,39 +111,10 @@ export const AdminPricingPage: React.FC = () => {
             plans={pricingPlans}
             onRefresh={loadPricingContent}
           />
-          <AdminPricingSectionPanel
-            title="Maintenance Plans"
-            subtitle="Monthly maintenance subscriptions used by the Pricing page and later the Home Subscription section."
-          >
-            {maintenancePlans.length === 0 ? (
-              <AdminPricingEmptyState
-                title="No maintenance plans yet"
-                text="Create maintenance plans in the next phase."
-              />
-            ) : (
-              <div style={styles.grid}>
-                {maintenancePlans.map((plan) => (
-                  <AdminPricingListCard
-                    key={plan.id}
-                    title={plan.name}
-                    eyebrow="Maintenance"
-                    price={plan.price}
-                    suffix={plan.suffix}
-                    description={plan.description}
-                    status={plan.status}
-                    recommended={plan.recommended}
-                    metaItems={[
-                      `CTA: ${plan.ctaLabel}`,
-                      `Link: ${plan.ctaTo}`,
-                      `Order: ${plan.sortOrder}`,
-                    ]}
-                  >
-                  </AdminPricingListCard>
-                ))}
-              </div>
-            )}
-          </AdminPricingSectionPanel>
-
+          <AdminMaintenancePlansPanel
+            plans={maintenancePlans}
+            onRefresh={loadPricingContent}
+          />
           <AdminPricingSectionPanel
             title="Emergency Restoration"
             subtitle="Urgent one-time restoration offer shown above maintenance subscriptions."
