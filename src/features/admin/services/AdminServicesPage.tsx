@@ -2,7 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Code, Server, ShieldCheck, Smartphone } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { AdminServiceForm } from "./AdminServiceForm";
-import { createAdminService, getAdminServices } from "./servicesCms.service";
+import {
+  createAdminService,
+  getAdminServices,
+  updateAdminService,
+} from "./servicesCms.service";
 import type {
   AdminService,
   AdminServiceFormValues,
@@ -26,15 +30,43 @@ const getServiceStatusStyle = (status: ServiceStatus) => {
   return styles.draftBadge;
 };
 
+const getServiceFormValues = (
+  service: AdminService,
+): AdminServiceFormValues => {
+  return {
+    title: service.title,
+    slug: service.slug,
+    text: service.text,
+
+    icon: service.icon,
+    imageUrl: service.imageUrl,
+
+    pills: service.pills,
+
+    span: service.span,
+    badge: service.badge,
+    monitoring: service.monitoring,
+
+    hoverAccent: service.hoverAccent,
+
+    status: service.status,
+    sortOrder: service.sortOrder,
+  };
+};
+
 export const AdminServicesPage: React.FC = () => {
-const [services, setServices] = useState<AdminService[]>([]);
-const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
-const [searchQuery, setSearchQuery] = useState("");
-const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-const [isLoading, setIsLoading] = useState(false);
-const [isCreatingService, setIsCreatingService] = useState(false);
-const [error, setError] = useState<string | null>(null);
-const [createError, setCreateError] = useState<string | null>(null);
+
+  const [services, setServices] = useState<AdminService[]>([]);
+  const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [editingService, setEditingService] = useState<AdminService | null>(null,);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingService, setIsCreatingService] = useState(false);
+  const [isUpdatingService, setIsUpdatingService] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const loadServices = useCallback(async () => {
     setIsLoading(true);
@@ -115,9 +147,42 @@ const [createError, setCreateError] = useState<string | null>(null);
     }
   };
 
+  const handleUpdateService = async (values: AdminServiceFormValues) => {
+    if (!editingService) return;
+
+    setIsUpdatingService(true);
+    setUpdateError(null);
+
+    try {
+      await updateAdminService({
+        serviceId: editingService.id,
+        values,
+      });
+
+      setEditingService(null);
+      await loadServices();
+    } catch (error) {
+      console.error("Could not update service:", error);
+      setUpdateError(
+        "Could not update service. Check the slug is unique and all required fields are valid.",
+      );
+    } finally {
+      setIsUpdatingService(false);
+    }
+  };
+
   const openCreateForm = () => {
     setCreateError(null);
+    setUpdateError(null);
+    setEditingService(null);
     setIsCreateFormOpen((currentValue) => !currentValue);
+  };
+
+  const openEditForm = (service: AdminService) => {
+    setCreateError(null);
+    setUpdateError(null);
+    setIsCreateFormOpen(false);
+    setEditingService(service);
   };
 
   return (
@@ -178,6 +243,35 @@ const [createError, setCreateError] = useState<string | null>(null);
             />
           </div>
         )}
+
+        {editingService && (
+          <div style={styles.createPanel}>
+            <div style={styles.createPanelHeader}>
+              <div>
+                <h2 style={styles.createPanelTitle}>Edit service</h2>
+                <p style={styles.createPanelText}>
+                  Update service content, icon, image, pills, layout, badge,
+                  monitoring, and publish status.
+                </p>
+              </div>
+            </div>
+
+            {updateError && <div style={styles.errorBox}>{updateError}</div>}
+
+            <AdminServiceForm
+              key={editingService.id}
+              initialValues={getServiceFormValues(editingService)}
+              submitLabel="Save Changes"
+              isSubmitting={isUpdatingService}
+              onCancel={() => {
+                setUpdateError(null);
+                setEditingService(null);
+              }}
+              onSubmit={handleUpdateService}
+            />
+          </div>
+        )}
+
         <div style={styles.toolbar}>
           <div style={styles.searchWrap}>
             <input
@@ -355,6 +449,17 @@ const [createError, setCreateError] = useState<string | null>(null);
                       </span>
                     )}
                   </div>
+
+                  <div style={styles.cardActions}>
+                    <button
+                      type="button"
+                      style={styles.editButton}
+                      onClick={() => openEditForm(service)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+
                 </div>
               </article>
             ))}
@@ -763,6 +868,25 @@ const styles = {
     color: colors.accent.blue,
     padding: "5px 9px",
     fontSize: "11px",
+    fontWeight: typography.fontWeight.bold,
+  },
+
+  cardActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTop: `1px solid ${colors.border.default}`,
+  },
+
+  editButton: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.md,
+    backgroundColor: colors.background.card,
+    color: colors.text.main,
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontSize: "13px",
     fontWeight: typography.fontWeight.bold,
   },
 };
