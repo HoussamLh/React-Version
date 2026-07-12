@@ -1,3 +1,5 @@
+export { AdminServicesPage } from "./AdminServicesPage";
+
 export type {
   AdminService,
   AdminServiceFormValues,
