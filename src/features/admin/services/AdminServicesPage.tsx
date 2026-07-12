@@ -4,6 +4,7 @@ import { colors, radius, spacing, typography } from "../../../design-system";
 import { AdminServiceForm } from "./AdminServiceForm";
 import {
   createAdminService,
+  deleteAdminService,
   getAdminServices,
   updateAdminService,
 } from "./servicesCms.service";
@@ -64,9 +65,11 @@ export const AdminServicesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isUpdatingService, setIsUpdatingService] = useState(false);
+  const [isDeletingServiceId, setIsDeletingServiceId] = useState<string | null>(null,);
   const [error, setError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const loadServices = useCallback(async () => {
     setIsLoading(true);
@@ -171,9 +174,36 @@ export const AdminServicesPage: React.FC = () => {
     }
   };
 
+  const handleDeleteService = async (service: AdminService) => {
+    const isConfirmed = window.confirm(
+      `Delete "${service.title}"? This cannot be undone.`,
+    );
+
+    if (!isConfirmed) return;
+
+    setIsDeletingServiceId(service.id);
+    setDeleteError(null);
+
+    try {
+      await deleteAdminService(service.id);
+
+      if (editingService?.id === service.id) {
+        setEditingService(null);
+      }
+
+      await loadServices();
+    } catch (error) {
+      console.error("Could not delete service:", error);
+      setDeleteError("Could not delete service. Please try again.");
+    } finally {
+      setIsDeletingServiceId(null);
+    }
+  };
+
   const openCreateForm = () => {
     setCreateError(null);
     setUpdateError(null);
+    setDeleteError(null);
     setEditingService(null);
     setIsCreateFormOpen((currentValue) => !currentValue);
   };
@@ -181,6 +211,7 @@ export const AdminServicesPage: React.FC = () => {
   const openEditForm = (service: AdminService) => {
     setCreateError(null);
     setUpdateError(null);
+    setDeleteError(null);
     setIsCreateFormOpen(false);
     setEditingService(service);
   };
@@ -271,6 +302,8 @@ export const AdminServicesPage: React.FC = () => {
             />
           </div>
         )}
+
+        {deleteError && <div style={styles.errorBox}>{deleteError}</div>}
 
         <div style={styles.toolbar}>
           <div style={styles.searchWrap}>
@@ -458,8 +491,23 @@ export const AdminServicesPage: React.FC = () => {
                     >
                       Edit
                     </button>
-                  </div>
 
+                    <button
+                      type="button"
+                      style={{
+                        ...styles.deleteButton,
+                        ...(isDeletingServiceId === service.id
+                          ? styles.disabledButton
+                          : {}),
+                      }}
+                      disabled={isDeletingServiceId === service.id}
+                      onClick={() => void handleDeleteService(service)}
+                    >
+                      {isDeletingServiceId === service.id
+                        ? "Deleting..."
+                        : "Delete"}
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
@@ -874,6 +922,7 @@ const styles = {
   cardActions: {
     display: "flex",
     justifyContent: "flex-end",
+    gap: spacing.sm,
     marginTop: spacing.md,
     paddingTop: spacing.md,
     borderTop: `1px solid ${colors.border.default}`,
@@ -888,5 +937,21 @@ const styles = {
     cursor: "pointer",
     fontSize: "13px",
     fontWeight: typography.fontWeight.bold,
+  },
+
+  deleteButton: {
+    border: `1px solid rgba(255, 90, 90, 0.45)`,
+    borderRadius: radius.md,
+    backgroundColor: "rgba(255, 90, 90, 0.08)",
+    color: "#ff7777",
+    padding: `${spacing.sm} ${spacing.md}`,
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: typography.fontWeight.bold,
+  },
+
+  disabledButton: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 };
