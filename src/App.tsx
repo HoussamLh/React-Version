@@ -22,6 +22,7 @@ import {
   AdminPricingPage,
   AdminProjectsPage,
   AdminServicesPage,
+  AdminTeamPage,
   ContactSubmissionsPage,
   ProtectedAdminRoute,
 } from "./features/admin";
@@ -107,6 +108,7 @@ function App() {
           <Route path="projects" element={<AdminProjectsPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="pricing" element={<AdminPricingPage />} />
+          <Route path="team" element={<AdminTeamPage />} />
           <Route path="chat" element={<AdminChatPage />} />
           <Route path="contacts" element={<ContactSubmissionsPage />} />
         </Route>
