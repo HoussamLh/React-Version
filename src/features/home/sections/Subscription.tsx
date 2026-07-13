@@ -1,22 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Card,
   colors,
+  radius,
   SectionHeader,
   spacing,
   typography,
-  radius,
 } from "../../../design-system";
-import { 
-  SubscriptionCard 
-} from "../components/SubscriptionCard";
-import { 
-  subscriptionPlans 
-} from "../data/subscription.data";
+import { MaintenanceCard } from "../../pricing/components";
+import type {
+  EmergencyRestoration,
+  MaintenancePlan,
+} from "../../pricing/data/pricing.data";
+import {
+  getPublishedEmergencyRestoration,
+  getPublishedMaintenancePlans,
+} from "../../pricing/api";
 
 export const SubscriptionSection: React.FC = () => {
+  const [plans, setPlans] = useState<MaintenancePlan[]>([]);
+  const [restoration, setRestoration] = useState<EmergencyRestoration | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const [cmsPlans, cmsRestoration] = await Promise.all([
+            getPublishedMaintenancePlans(),
+            getPublishedEmergencyRestoration(),
+          ]);
+
+          if (!isMounted) return;
+
+          setPlans(cmsPlans);
+          setRestoration(cmsRestoration);
+          setError(null);
+        } catch (error) {
+          console.error("Could not load home maintenance content:", error);
+
+          if (!isMounted) return;
+
+          setError("Maintenance subscriptions could not be loaded right now.");
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+      })();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <section style={styles.container} className="ds-section">
-      {/* Section Header */}
       <div style={styles.header}>
         <SectionHeader
           badgeText="Subscribe Now"
@@ -34,25 +80,70 @@ export const SubscriptionSection: React.FC = () => {
               <h2 style={styles.heading}>Fixed Pricing.</h2>
             </>
           }
-          subtitle="Enterprise-grade support and insurance 
-          for digital products that can't afford to fail."
+          subtitle="Enterprise-grade support and insurance for digital products that can't afford to fail."
           subtitleStyle={styles.subheading}
         />
+      </div>
 
-        {/* Anti-Churn Protection Banner */}
-        <div style={styles.emergencyBanner} className="mono-text">
-          ⚠️ Website currently broken? A one-time{" "}
-          <strong>£150 Restoration Fee</strong> applies to stabilize
-          pre-existing crashes.
+      {isLoading && (
+        <div style={styles.stateBox}>
+          <p style={styles.stateText}>Loading maintenance subscriptions...</p>
         </div>
-      </div>
+      )}
 
-      {/* 3-Column Tier Grid */}
-      <div style={styles.grid} className="ds-grid ds-grid-3">
-        {subscriptionPlans.map((plan) => (
-          <SubscriptionCard key={plan.tier} plan={plan} />
-        ))}
-      </div>
+      {!isLoading && error && (
+        <div style={styles.stateBox}>
+          <h3 style={styles.stateTitle}>Maintenance unavailable</h3>
+          <p style={styles.stateText}>{error}</p>
+        </div>
+      )}
+
+      {!isLoading && !error && !restoration && plans.length === 0 && (
+        <div style={styles.stateBox}>
+          <h3 style={styles.stateTitle}>Maintenance plans coming soon</h3>
+          <p style={styles.stateText}>
+            Maintenance subscriptions will be published here soon.
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !error && restoration && (
+        <Card
+          interactive
+          hoverAccent="yellow"
+          className="ds-card-stack"
+          style={styles.emergencyCard}
+        >
+          <div>
+            <span className="ds-pill mono-text" style={styles.urgentPill}>
+              Urgent Fix
+            </span>
+
+            <div style={styles.emergencyHeader}>
+              <h3 className="ds-card-title" style={styles.emergencyTitle}>
+                {restoration.title}
+              </h3>
+
+              <div style={styles.emergencyPrice}>
+                <span style={styles.price}>{restoration.price}</span>
+                <span style={styles.suffix}>{restoration.suffix}</span>
+              </div>
+            </div>
+
+            <p className="ds-card-text" style={styles.emergencyText}>
+              {restoration.text}
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {!isLoading && !error && plans.length > 0 && (
+        <div style={styles.grid} className="ds-grid ds-grid-3">
+          {plans.map((plan) => (
+            <MaintenanceCard key={plan.name} plan={plan} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };
@@ -104,16 +195,6 @@ const styles = {
     textAlign: "left" as const,
   },
 
-  emergencyBanner: {
-    backgroundColor: "rgba(255, 189, 46, 0.06)",
-    border: "1px solid #ffbd2e",
-    color: "#ffbd2e",
-    padding: `12px ${spacing.lg}`,
-    borderRadius: "30px",
-    fontSize: "13px",
-    maxWidth: "700px",
-  },
-
   badge: {
     backgroundColor: "#1c1f26",
     color: colors.accent.green,
@@ -121,8 +202,83 @@ const styles = {
     marginBottom: spacing.lg,
   },
 
+  emergencyCard: {
+    backgroundColor: "rgba(255, 189, 46, 0.06)",
+    border: `1px solid ${colors.accent.yellow}`,
+    borderRadius: "30px",
+  },
+
+  urgentPill: {
+    color: colors.accent.yellow,
+    borderColor: colors.accent.yellow,
+    backgroundColor: "rgba(255, 189, 46, 0.08)",
+  },
+
+  emergencyHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: spacing.xl,
+    flexWrap: "wrap" as const,
+    marginTop: spacing.lg,
+  },
+
+  emergencyTitle: {
+    margin: 0,
+    color: colors.text.main,
+  },
+
+  emergencyText: {
+    maxWidth: "760px",
+    marginTop: spacing.md,
+  },
+
+  emergencyPrice: {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: "8px",
+  },
+
+  price: {
+    fontSize: "44px",
+    lineHeight: "48px",
+    fontWeight: 900,
+    color: colors.accent.yellow,
+    letterSpacing: "-1px",
+  },
+
+  suffix: {
+    fontSize: "13px",
+    color: colors.text.muted,
+    marginBottom: "8px",
+  },
+
   grid: {
     gap: spacing.xl,
     alignItems: "stretch",
+    marginTop: spacing["4xl"],
+  },
+
+  stateBox: {
+    border: `1px solid ${colors.border.default}`,
+    borderRadius: radius.xl,
+    backgroundColor: colors.background.card,
+    padding: spacing.xl,
+    textAlign: "center" as const,
+  },
+
+  stateTitle: {
+    color: colors.text.main,
+    fontSize: "22px",
+    lineHeight: "28px",
+    margin: 0,
+    fontWeight: typography.fontWeight.black,
+  },
+
+  stateText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: `${spacing.sm} 0 0 0`,
   },
 };
