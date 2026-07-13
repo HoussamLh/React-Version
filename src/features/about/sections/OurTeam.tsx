@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   colors,
@@ -9,11 +9,40 @@ import {
 } from "../../../design-system";
 import { TeamMemberCard } from "../components/TeamMemberCard";
 import type { TeamCardAccent } from "../components/TeamMemberCard";
-import { teamMembers } from "../data/team.data";
+import {
+  teamMembers as fallbackTeamMembers,
+  type TeamMember,
+} from "../data/team.data";
+import { getPublishedTeamMembers } from "../api";
 
 const hoverAccents: TeamCardAccent[] = ["green", "purple", "blue", "pink"];
 
 export const OurTeam: React.FC = () => {
+  const [members, setMembers] = useState<TeamMember[]>(fallbackTeamMembers);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const cmsMembers = await getPublishedTeamMembers();
+
+          if (!isMounted || cmsMembers.length === 0) return;
+
+          setMembers(cmsMembers);
+        } catch (error) {
+          console.error("Could not load CMS team members:", error);
+        }
+      })();
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <section style={styles.container}>
       <div style={styles.headerRow} className="ds-grid ds-grid-2">
@@ -35,11 +64,13 @@ export const OurTeam: React.FC = () => {
       </div>
 
       <div style={styles.grid} className="ds-grid ds-grid-2">
-        {teamMembers.map((member, index) => (
+        {members.map((member, index) => (
           <TeamMemberCard
             key={member.name}
             member={member}
-            hoverAccent={hoverAccents[index % hoverAccents.length]}
+            hoverAccent={
+              member.hoverAccent ?? hoverAccents[index % hoverAccents.length]
+            }
           />
         ))}
       </div>
