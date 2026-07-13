@@ -22,10 +22,16 @@ const formatLabel = (value: string) => {
   return value.replaceAll("_", " ");
 };
 
-export const CustomerProjectRequestsPanel: React.FC = () => {
+type CustomerProjectRequestsPanelProps = {
+  initialRequestValues?: Partial<CustomerProjectRequestFormValues>;
+};
+
+export const CustomerProjectRequestsPanel: React.FC<
+  CustomerProjectRequestsPanelProps
+> = ({ initialRequestValues }) => {
   const [requests, setRequests] = useState<CustomerProjectRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState( Boolean(initialRequestValues?.selectedPackage),);
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [formError, setFormError] = useState("");
@@ -101,13 +107,12 @@ export const CustomerProjectRequestsPanel: React.FC = () => {
       </header>
 
       {isFormOpen && (
-        <div style={styles.formBox}>
-          <CustomerProjectRequestForm
-            isSubmitting={isCreatingRequest}
-            error={formError}
-            onSubmit={handleCreateRequest}
-          />
-        </div>
+        <CustomerProjectRequestForm
+          initialValues={initialRequestValues}
+          isSubmitting={isCreatingRequest}
+          error={formError}
+          onSubmit={handleCreateRequest}
+        />
       )}
 
       {loadError && <p style={styles.error}>{loadError}</p>}

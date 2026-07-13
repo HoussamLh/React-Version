@@ -71,7 +71,7 @@ export const ProtectedCustomerRoute: React.FC<ProtectedCustomerRouteProps> = ({
         to="/sign-in"
         replace
         state={{
-          from: location.pathname,
+          from: `${location.pathname}${location.search}`,
         }}
       />
     );

@@ -1,5 +1,6 @@
 export { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
 export { CustomerProjectRequestsPanel } from "./CustomerProjectRequestsPanel";
+export { getProjectRequestValuesFromSearch } from "./projectRequestIntent.helpers";
 
 export type {
   CustomerProjectRequest,

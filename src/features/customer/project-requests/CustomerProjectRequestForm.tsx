@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import type {
   CustomerProjectRequestFormValues,
@@ -7,24 +7,64 @@ import type {
 } from "./projectRequests.types";
 
 type CustomerProjectRequestFormProps = {
+  initialValues?: Partial<CustomerProjectRequestFormValues>;
   isSubmitting?: boolean;
   error?: string;
   onSubmit: (values: CustomerProjectRequestFormValues) => Promise<void>;
 };
 
+const defaultFormValues: CustomerProjectRequestFormValues = {
+  title: "",
+  projectType: "website",
+  selectedPackage: "",
+  packageCategory: "custom",
+  budgetRange: "",
+  timeline: "",
+  description: "",
+  goals: "",
+};
+
 export const CustomerProjectRequestForm: React.FC<
   CustomerProjectRequestFormProps
-> = ({ isSubmitting = false, error, onSubmit }) => {
-  const [title, setTitle] = useState("");
-  const [projectType, setProjectType] = useState<ProjectRequestType>("website");
-  const [selectedPackage, setSelectedPackage] = useState("");
+> = ({ initialValues, isSubmitting = false, error, onSubmit }) => {
+  const mergedInitialValues = useMemo<CustomerProjectRequestFormValues>(() => {
+    return {
+      ...defaultFormValues,
+      ...initialValues,
+    };
+  }, [initialValues]);
+
+  const [title, setTitle] = useState(mergedInitialValues.title);
+  const [projectType, setProjectType] = useState<ProjectRequestType>(
+    mergedInitialValues.projectType,
+  );
+  const [selectedPackage, setSelectedPackage] = useState(
+    mergedInitialValues.selectedPackage,
+  );
   const [packageCategory, setPackageCategory] =
-    useState<ProjectRequestPackageCategory>("custom");
-  const [budgetRange, setBudgetRange] = useState("");
-  const [timeline, setTimeline] = useState("");
-  const [description, setDescription] = useState("");
-  const [goals, setGoals] = useState("");
+    useState<ProjectRequestPackageCategory>(
+      mergedInitialValues.packageCategory,
+    );
+  const [budgetRange, setBudgetRange] = useState(
+    mergedInitialValues.budgetRange,
+  );
+  const [timeline, setTimeline] = useState(mergedInitialValues.timeline);
+  const [description, setDescription] = useState(
+    mergedInitialValues.description,
+  );
+  const [goals, setGoals] = useState(mergedInitialValues.goals);
   const [validationError, setValidationError] = useState("");
+
+  useEffect(() => {
+    setTitle(mergedInitialValues.title);
+    setProjectType(mergedInitialValues.projectType);
+    setSelectedPackage(mergedInitialValues.selectedPackage);
+    setPackageCategory(mergedInitialValues.packageCategory);
+    setBudgetRange(mergedInitialValues.budgetRange);
+    setTimeline(mergedInitialValues.timeline);
+    setDescription(mergedInitialValues.description);
+    setGoals(mergedInitialValues.goals);
+  }, [mergedInitialValues]);
 
   const validateForm = () => {
     if (!title.trim()) {
