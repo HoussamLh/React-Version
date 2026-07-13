@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getCurrentCustomerProfile,
-  signUpCustomer,
+  signInCustomer,
   subscribeToCustomerAuthChanges,
 } from "./customerAuth.service";
 
@@ -14,18 +14,14 @@ const getErrorMessage = (error: unknown) => {
     return error.message;
   }
 
-  return "Could not create your account. Please try again.";
+  return "Could not sign in. Please try again.";
 };
 
-export const CustomerSignUpPage: React.FC = () => {
+export const CustomerSignInPage: React.FC = () => {
   const [authState, setAuthState] = useState<AuthCheckState>("checking");
 
-  const [fullName, setFullName] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -67,20 +63,12 @@ export const CustomerSignUpPage: React.FC = () => {
   }, []);
 
   const validateForm = () => {
-    if (!fullName.trim()) {
-      return "Full name is required.";
-    }
-
     if (!email.trim()) {
       return "Email address is required.";
     }
 
-    if (password.length < 8) {
-      return "Password must be at least 8 characters.";
-    }
-
-    if (password !== confirmPassword) {
-      return "Passwords do not match.";
+    if (!password) {
+      return "Password is required.";
     }
 
     return "";
@@ -102,29 +90,14 @@ export const CustomerSignUpPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await signUpCustomer({
-        fullName,
-        companyName,
-        phone,
+      await signInCustomer({
         email,
         password,
       });
 
-      setFullName("");
-      setCompanyName("");
-      setPhone("");
       setEmail("");
       setPassword("");
-      setConfirmPassword("");
-
-      if (result.needsEmailConfirmation) {
-        setSuccessMessage(
-          "Account created. Please check your email to confirm your account before signing in.",
-        );
-        return;
-      }
-
-      setSuccessMessage("Your customer account has been created successfully.");
+      setSuccessMessage("You are signed in successfully.");
     } catch (error) {
       setError(getErrorMessage(error));
     } finally {
@@ -174,90 +147,40 @@ export const CustomerSignUpPage: React.FC = () => {
     <main style={styles.page}>
       <section style={styles.card}>
         <div style={styles.header}>
-          <span style={styles.badge}>Get Started</span>
+          <span style={styles.badge}>Customer Login</span>
 
-          <h1 style={styles.title}>Create your customer account</h1>
+          <h1 style={styles.title}>Sign in to your account</h1>
 
           <p style={styles.subtitle}>
-            Start your project request and manage your DevBySam onboarding from
-            one place.
+            Access your DevBySam customer area and continue your project
+            onboarding.
           </p>
         </div>
 
         <form style={styles.form} onSubmit={handleSubmit}>
-          <div style={styles.grid}>
-            <label style={styles.field}>
-              <span style={styles.label}>Full name</span>
-              <input
-                style={styles.input}
-                type="text"
-                value={fullName}
-                placeholder="Your full name"
-                onChange={(event) => setFullName(event.target.value)}
-                autoComplete="name"
-              />
-            </label>
+          <label style={styles.field}>
+            <span style={styles.label}>Email</span>
+            <input
+              style={styles.input}
+              type="email"
+              value={email}
+              placeholder="you@example.com"
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+            />
+          </label>
 
-            <label style={styles.field}>
-              <span style={styles.label}>Company name</span>
-              <input
-                style={styles.input}
-                type="text"
-                value={companyName}
-                placeholder="Optional"
-                onChange={(event) => setCompanyName(event.target.value)}
-                autoComplete="organization"
-              />
-            </label>
-
-            <label style={styles.field}>
-              <span style={styles.label}>Phone</span>
-              <input
-                style={styles.input}
-                type="tel"
-                value={phone}
-                placeholder="Optional"
-                onChange={(event) => setPhone(event.target.value)}
-                autoComplete="tel"
-              />
-            </label>
-
-            <label style={styles.field}>
-              <span style={styles.label}>Email</span>
-              <input
-                style={styles.input}
-                type="email"
-                value={email}
-                placeholder="you@example.com"
-                onChange={(event) => setEmail(event.target.value)}
-                autoComplete="email"
-              />
-            </label>
-
-            <label style={styles.field}>
-              <span style={styles.label}>Password</span>
-              <input
-                style={styles.input}
-                type="password"
-                value={password}
-                placeholder="Minimum 8 characters"
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="new-password"
-              />
-            </label>
-
-            <label style={styles.field}>
-              <span style={styles.label}>Confirm password</span>
-              <input
-                style={styles.input}
-                type="password"
-                value={confirmPassword}
-                placeholder="Repeat password"
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                autoComplete="new-password"
-              />
-            </label>
-          </div>
+          <label style={styles.field}>
+            <span style={styles.label}>Password</span>
+            <input
+              style={styles.input}
+              type="password"
+              value={password}
+              placeholder="Your password"
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+            />
+          </label>
 
           {error && <p style={styles.error}>{error}</p>}
 
@@ -271,13 +194,13 @@ export const CustomerSignUpPage: React.FC = () => {
             }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating account..." : "Create Account"}
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
 
           <p style={styles.footerText}>
-            Already have a customer account?{" "}
-            <Link to="/sign-in" style={styles.inlineLink}>
-              Sign in here
+            No customer account yet?{" "}
+            <Link to="/get-started" style={styles.inlineLink}>
+              Create one here
             </Link>
           </p>
         </form>
@@ -299,7 +222,7 @@ const styles = {
 
   card: {
     width: "100%",
-    maxWidth: "820px",
+    maxWidth: "520px",
     padding: spacing["2xl"],
     borderRadius: radius["2xl"],
     backgroundColor: colors.background.card,
@@ -334,8 +257,8 @@ const styles = {
 
   title: {
     color: colors.text.main,
-    fontSize: "34px",
-    lineHeight: "42px",
+    fontSize: "32px",
+    lineHeight: "40px",
     margin: `0 0 ${spacing.sm} 0`,
     fontWeight: typography.fontWeight.black,
   },
@@ -345,18 +268,11 @@ const styles = {
     fontSize: "15px",
     lineHeight: "24px",
     margin: 0,
-    maxWidth: "640px",
   },
 
   form: {
     display: "flex",
     flexDirection: "column" as const,
-    gap: spacing.lg,
-  },
-
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
     gap: spacing.lg,
   },
 
@@ -422,6 +338,20 @@ const styles = {
     margin: 0,
   },
 
+  footerText: {
+    color: colors.text.muted,
+    fontSize: "14px",
+    lineHeight: "22px",
+    margin: 0,
+    textAlign: "center" as const,
+  },
+
+  inlineLink: {
+    color: colors.accent.green,
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
+  },
+
   linkActions: {
     display: "flex",
     gap: spacing.md,
@@ -444,20 +374,6 @@ const styles = {
     backgroundColor: colors.background.dark,
     color: colors.text.main,
     padding: "13px 18px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
-
-  footerText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    textAlign: "center" as const,
-  },
-
-  inlineLink: {
-    color: colors.accent.green,
     fontWeight: typography.fontWeight.bold,
     textDecoration: "none",
   },

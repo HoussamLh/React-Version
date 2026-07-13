@@ -12,7 +12,7 @@ import { Services } from "./routes/Services";
 import { Projects } from "./routes/Projects";
 import { Pricing } from "./routes/Pricing";
 import { Contact } from "./routes/Contact";
-import { CustomerSignUpPage } from "./features/customer";
+import { CustomerSignInPage, CustomerSignUpPage } from "./features/customer";
 import { LiveChatBubble } from "./features/live-chat";
 
 import {
@@ -98,6 +98,14 @@ function App() {
           element={
             <RootLayout>
               <CustomerSignUpPage />
+            </RootLayout>
+          }
+        />
+        <Route
+          path="/sign-in"
+          element={
+            <RootLayout>
+              <CustomerSignInPage />
             </RootLayout>
           }
         />

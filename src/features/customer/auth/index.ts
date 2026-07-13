@@ -1,3 +1,4 @@
+export { CustomerSignInPage } from "./CustomerSignInPage";
 export { CustomerSignUpPage } from "./CustomerSignUpPage";
 
 export type {
