@@ -8,3 +8,4 @@ export { AdminProjectsPage } from "./projects/AdminProjectsPage";
 export { AdminServicesPage } from "./services/AdminServicesPage";
 export { AdminPricingPage } from "./pricing/AdminPricingPage";
 export { AdminTeamPage } from "./team/AdminTeamPage";
+export { AdminProjectRequestsPage } from "./project-requests/AdminProjectRequestsPage";

@@ -26,6 +26,7 @@ import {
   AdminLayout,
   AdminLogin,
   AdminPricingPage,
+  AdminProjectRequestsPage,
   AdminProjectsPage,
   AdminServicesPage,
   AdminTeamPage,
@@ -143,6 +144,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="projects" element={<AdminProjectsPage />} />
+          <Route path="project-requests" element={<AdminProjectRequestsPage />}/>
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="pricing" element={<AdminPricingPage />} />
           <Route path="team" element={<AdminTeamPage />} />
