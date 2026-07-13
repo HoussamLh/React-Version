@@ -10,10 +10,10 @@ export const CTASection: React.FC = () => {
           Ready to Start Your <AccentText>Project?</AccentText>
         </>
       }
-      subtitle="Tell us what you want to build, and we’ll recommend the right package for your goals."
+      subtitle="Create your customer account and start your DevBySam project onboarding."
       primaryAction={{
         label: "Start Your Project",
-        to: "/contact",
+        to: "/get-started",
       }}
       secondaryAction={{
         label: "View Services",

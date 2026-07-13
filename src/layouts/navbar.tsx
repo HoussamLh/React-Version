@@ -72,10 +72,7 @@ export const Navbar: React.FC = () => {
           Contact
         </Link>
       </div>
-      <Link to="/services" 
-      style={styles.ctaLink} 
-      className="desktop-menu"
-      onClick={toggleMenu}>
+      <Link to="/get-started" style={styles.ctaLink} className="desktop-menu">
         Get Started
       </Link>
       {/* Mobile Hamburger Menu */}
@@ -122,9 +119,10 @@ export const Navbar: React.FC = () => {
             Contact
           </Link>
           <Link
-            to="/services"
+            to="/get-started"
             style={styles.ctaLink}
             className="mobile-menu-cta"
+            onClick={toggleMenu}
           >
             Get Started
           </Link>
