@@ -6,3 +6,4 @@ export { AdminChatPage } from "./chat/AdminChatPage";
 export { ContactSubmissionsPage } from "./contacts/ContactSubmissionsPage";
 export { AdminProjectsPage } from "./projects/AdminProjectsPage";
 export { AdminServicesPage } from "./services/AdminServicesPage";
+export { AdminPricingPage } from "./pricing/AdminPricingPage";
