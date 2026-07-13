@@ -4,6 +4,7 @@ import {
   Briefcase,
   CreditCard,
   MessageSquare,
+  UserRound,
   PanelTop,
   Users,
   Wrench,
@@ -53,6 +54,12 @@ const navItems: NavItem[] = [
     label: "Pricing",
     to: "/admin/pricing",
     icon: <CreditCard size={18} />,
+    badgeKey: null,
+  },
+  {
+    label: "Team",
+    to: "/admin/team",
+    icon: <UserRound size={18} />,
     badgeKey: null,
   },
   {
