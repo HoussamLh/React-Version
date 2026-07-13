@@ -1,5 +1,6 @@
 export { CustomerSignInPage } from "./CustomerSignInPage";
 export { CustomerSignUpPage } from "./CustomerSignUpPage";
+export { ProtectedCustomerRoute } from "./ProtectedCustomerRoute";
 
 export type {
   CustomerAccountStatus,

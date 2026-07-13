@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getCurrentCustomerProfile,
@@ -8,6 +8,20 @@ import {
 } from "./customerAuth.service";
 
 type AuthCheckState = "checking" | "ready" | "authenticated";
+
+type LocationState = {
+  from?: string;
+};
+
+const getSafeCustomerRedirectPath = (path?: string) => {
+  if (!path) return "/customer/dashboard";
+
+  if (!path.startsWith("/customer")) {
+    return "/customer/dashboard";
+  }
+
+  return path;
+};
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -18,14 +32,18 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export const CustomerSignInPage: React.FC = () => {
-  const [authState, setAuthState] = useState<AuthCheckState>("checking");
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const state = location.state as LocationState | null;
+  const redirectTo = getSafeCustomerRedirectPath(state?.from);
+
+  const [authState, setAuthState] = useState<AuthCheckState>("checking");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -78,7 +96,6 @@ export const CustomerSignInPage: React.FC = () => {
     event.preventDefault();
 
     setError("");
-    setSuccessMessage("");
 
     const validationError = validateForm();
 
@@ -95,9 +112,7 @@ export const CustomerSignInPage: React.FC = () => {
         password,
       });
 
-      setEmail("");
-      setPassword("");
-      setSuccessMessage("You are signed in successfully.");
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       setError(getErrorMessage(error));
     } finally {
@@ -116,31 +131,7 @@ export const CustomerSignInPage: React.FC = () => {
   }
 
   if (authState === "authenticated") {
-    return (
-      <main style={styles.page}>
-        <section style={styles.card}>
-          <div style={styles.header}>
-            <span style={styles.badge}>Customer Account</span>
-
-            <h1 style={styles.title}>You are already signed in.</h1>
-
-            <p style={styles.subtitle}>
-              Your customer dashboard will be connected in the next phase.
-            </p>
-          </div>
-
-          <div style={styles.linkActions}>
-            <Link to="/pricing" style={styles.secondaryLink}>
-              View Pricing
-            </Link>
-
-            <Link to="/contact" style={styles.primaryLink}>
-              Contact Us
-            </Link>
-          </div>
-        </section>
-      </main>
-    );
+    return <Navigate to={redirectTo} replace />;
   }
 
   return (
@@ -183,8 +174,6 @@ export const CustomerSignInPage: React.FC = () => {
           </label>
 
           {error && <p style={styles.error}>{error}</p>}
-
-          {successMessage && <p style={styles.success}>{successMessage}</p>}
 
           <button
             type="submit"
@@ -327,17 +316,6 @@ const styles = {
     margin: 0,
   },
 
-  success: {
-    border: `1px solid ${colors.accent.green}`,
-    borderRadius: radius.md,
-    backgroundColor: "rgba(116, 245, 66, 0.08)",
-    color: colors.accent.green,
-    padding: spacing.md,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
   footerText: {
     color: colors.text.muted,
     fontSize: "14px",
@@ -348,32 +326,6 @@ const styles = {
 
   inlineLink: {
     color: colors.accent.green,
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
-
-  linkActions: {
-    display: "flex",
-    gap: spacing.md,
-    flexWrap: "wrap" as const,
-  },
-
-  primaryLink: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "13px 18px",
-    fontWeight: typography.fontWeight.black,
-    textDecoration: "none",
-  },
-
-  secondaryLink: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "13px 18px",
     fontWeight: typography.fontWeight.bold,
     textDecoration: "none",
   },
