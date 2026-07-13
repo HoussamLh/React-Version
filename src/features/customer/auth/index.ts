@@ -1,3 +1,5 @@
+export { CustomerSignUpPage } from "./CustomerSignUpPage";
+
 export type {
   CustomerAccountStatus,
   CustomerOnboardingStatus,
