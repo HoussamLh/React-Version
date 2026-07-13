@@ -1,7 +1,5 @@
 import type { TeamAvatar } from "../../../design-system";
 import SupportAgent from "../../../Assets/about/SupportAgent.png";
-import JackHImg from "../../../Assets/about/JackHImg.png";
-import ShannonRImg from "../../../Assets/about/ShannonRImg.png";
 
 export const teamAvatars: TeamAvatar[] = [
   {
@@ -9,11 +7,11 @@ export const teamAvatars: TeamAvatar[] = [
     alt: "Support Agent",
   },
   {
-    src: JackHImg,
+    src: "/team/jack-h.png",
     alt: "DevBySam developer",
   },
   {
-    src: ShannonRImg,
+    src: "/team/shannon-r.png",
     alt: "DevBySam consultant",
   },
 ];
