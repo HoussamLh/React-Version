@@ -1,3 +1,6 @@
+export { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
+export { CustomerProjectRequestsPanel } from "./CustomerProjectRequestsPanel";
+
 export type {
   CustomerProjectRequest,
   CustomerProjectRequestFormValues,

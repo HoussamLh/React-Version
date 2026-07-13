@@ -6,6 +6,7 @@ import {
   signOutCustomer,
 } from "../auth/customerAuth.service";
 import type { CustomerProfile } from "../auth/customerAuth.types";
+import { CustomerProjectRequestsPanel } from "../project-requests";
 
 export const CustomerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -165,7 +166,7 @@ export const CustomerDashboardPage: React.FC = () => {
             </p>
           </article>
         </div>
-
+        <CustomerProjectRequestsPanel />
         <section style={styles.nextPanel}>
           <div>
             <p style={styles.panelEyebrow}>Next Step</p>
