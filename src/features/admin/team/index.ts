@@ -1,3 +1,6 @@
+export { AdminTeamMemberForm } from "./AdminTeamMemberForm";
+export { AdminTeamPage } from "./AdminTeamPage";
+
 export type {
   AdminTeamAccent,
   AdminTeamMember,
