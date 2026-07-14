@@ -1,14 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getCurrentCustomerProfile,
   signOutCustomer,
 } from "../auth/customerAuth.service";
 import type { CustomerProfile } from "../auth/customerAuth.types";
+import { CustomerProjectRequestsPanel } from "../project-requests";
+import { getProjectRequestValuesFromSearch } from "../project-requests/projectRequestIntent.helpers";
 
 export const CustomerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const initialRequestValues = useMemo(() => {
+    return getProjectRequestValuesFromSearch(location.search);
+  }, [location.search]);
+
+  const clearProjectRequestIntent = () => {
+    if (!location.search) return;
+
+    navigate("/customer/dashboard", { replace: true });
+  };
 
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,7 +178,10 @@ export const CustomerDashboardPage: React.FC = () => {
             </p>
           </article>
         </div>
-
+        <CustomerProjectRequestsPanel
+          initialRequestValues={initialRequestValues}
+          onClearInitialRequestIntent={clearProjectRequestIntent}
+        />
         <section style={styles.nextPanel}>
           <div>
             <p style={styles.panelEyebrow}>Next Step</p>

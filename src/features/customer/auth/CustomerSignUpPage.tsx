@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import {
   getCurrentCustomerProfile,
@@ -18,6 +18,12 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export const CustomerSignUpPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const dashboardRedirectPath = `/customer/dashboard${location.search}`;
+  const signInPath = `/sign-in${location.search}`;
+
   const [authState, setAuthState] = useState<AuthCheckState>("checking");
 
   const [fullName, setFullName] = useState("");
@@ -124,7 +130,7 @@ export const CustomerSignUpPage: React.FC = () => {
         return;
       }
 
-      setSuccessMessage("Your customer account has been created successfully.");
+      navigate(dashboardRedirectPath, { replace: true });
     } catch (error) {
       setError(getErrorMessage(error));
     } finally {
@@ -143,31 +149,7 @@ export const CustomerSignUpPage: React.FC = () => {
   }
 
   if (authState === "authenticated") {
-    return (
-      <main style={styles.page}>
-        <section style={styles.card}>
-          <div style={styles.header}>
-            <span style={styles.badge}>Customer Account</span>
-
-            <h1 style={styles.title}>You are already signed in.</h1>
-
-            <p style={styles.subtitle}>
-              Your customer dashboard will be connected in the next phase.
-            </p>
-          </div>
-
-          <div style={styles.linkActions}>
-            <Link to="/pricing" style={styles.secondaryLink}>
-              View Pricing
-            </Link>
-
-            <Link to="/contact" style={styles.primaryLink}>
-              Contact Us
-            </Link>
-          </div>
-        </section>
-      </main>
-    );
+    return <Navigate to={dashboardRedirectPath} replace />;
   }
 
   return (
@@ -276,7 +258,7 @@ export const CustomerSignUpPage: React.FC = () => {
 
           <p style={styles.footerText}>
             Already have a customer account?{" "}
-            <Link to="/sign-in" style={styles.inlineLink}>
+            <Link to={signInPath} style={styles.inlineLink}>
               Sign in here
             </Link>
           </p>
@@ -286,7 +268,7 @@ export const CustomerSignUpPage: React.FC = () => {
   );
 };
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "calc(100vh - 90px)",
     backgroundColor: colors.background.dark,
@@ -311,7 +293,7 @@ const styles = {
     color: colors.text.muted,
     fontSize: "14px",
     fontWeight: typography.fontWeight.bold,
-    textAlign: "center" as const,
+    textAlign: "center",
     margin: 0,
   },
 
@@ -329,7 +311,7 @@ const styles = {
     fontSize: "10px",
     fontWeight: typography.fontWeight.bold,
     letterSpacing: "0.12em",
-    textTransform: "uppercase" as const,
+    textTransform: "uppercase",
   },
 
   title: {
@@ -350,7 +332,7 @@ const styles = {
 
   form: {
     display: "flex",
-    flexDirection: "column" as const,
+    flexDirection: "column",
     gap: spacing.lg,
   },
 
@@ -362,7 +344,7 @@ const styles = {
 
   field: {
     display: "flex",
-    flexDirection: "column" as const,
+    flexDirection: "column",
     gap: spacing.sm,
   },
 
@@ -370,12 +352,12 @@ const styles = {
     color: colors.text.main,
     fontSize: "11px",
     letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
+    textTransform: "uppercase",
   },
 
   input: {
     width: "100%",
-    boxSizing: "border-box" as const,
+    boxSizing: "border-box",
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
     backgroundColor: colors.background.dark,
@@ -422,38 +404,12 @@ const styles = {
     margin: 0,
   },
 
-  linkActions: {
-    display: "flex",
-    gap: spacing.md,
-    flexWrap: "wrap" as const,
-  },
-
-  primaryLink: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "13px 18px",
-    fontWeight: typography.fontWeight.black,
-    textDecoration: "none",
-  },
-
-  secondaryLink: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.dark,
-    color: colors.text.main,
-    padding: "13px 18px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
-
   footerText: {
     color: colors.text.muted,
     fontSize: "14px",
     lineHeight: "22px",
     margin: 0,
-    textAlign: "center" as const,
+    textAlign: "center",
   },
 
   inlineLink: {

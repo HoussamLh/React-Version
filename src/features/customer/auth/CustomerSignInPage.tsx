@@ -36,7 +36,14 @@ export const CustomerSignInPage: React.FC = () => {
   const location = useLocation();
 
   const state = location.state as LocationState | null;
-  const redirectTo = getSafeCustomerRedirectPath(state?.from);
+
+  const dashboardRedirectFromSearch = location.search
+    ? `/customer/dashboard${location.search}`
+    : undefined;
+
+const redirectTo = getSafeCustomerRedirectPath(
+  state?.from ?? dashboardRedirectFromSearch,
+);
 
   const [authState, setAuthState] = useState<AuthCheckState>("checking");
   const [email, setEmail] = useState("");

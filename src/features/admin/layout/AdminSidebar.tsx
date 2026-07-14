@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Briefcase,
+  ClipboardList,
   CreditCard,
   MessageSquare,
   UserRound,
@@ -42,6 +43,12 @@ const navItems: NavItem[] = [
     label: "Projects",
     to: "/admin/projects",
     icon: <Briefcase size={18} />,
+    badgeKey: null,
+  },
+  {
+    label: "Requests",
+    to: "/admin/project-requests",
+    icon: <ClipboardList size={18} />,
     badgeKey: null,
   },
   {
