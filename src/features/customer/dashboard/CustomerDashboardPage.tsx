@@ -17,6 +17,12 @@ export const CustomerDashboardPage: React.FC = () => {
     return getProjectRequestValuesFromSearch(location.search);
   }, [location.search]);
 
+  const clearProjectRequestIntent = () => {
+    if (!location.search) return;
+
+    navigate("/customer/dashboard", { replace: true });
+  };
+
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -174,6 +180,7 @@ export const CustomerDashboardPage: React.FC = () => {
         </div>
         <CustomerProjectRequestsPanel
           initialRequestValues={initialRequestValues}
+          onClearInitialRequestIntent={clearProjectRequestIntent}
         />
         <section style={styles.nextPanel}>
           <div>

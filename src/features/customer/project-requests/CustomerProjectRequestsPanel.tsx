@@ -24,14 +24,17 @@ const formatLabel = (value: string) => {
 
 type CustomerProjectRequestsPanelProps = {
   initialRequestValues?: Partial<CustomerProjectRequestFormValues>;
+  onClearInitialRequestIntent?: () => void;
 };
 
 export const CustomerProjectRequestsPanel: React.FC<
   CustomerProjectRequestsPanelProps
-> = ({ initialRequestValues }) => {
+> = ({ initialRequestValues, onClearInitialRequestIntent }) => {
   const [requests, setRequests] = useState<CustomerProjectRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState( Boolean(initialRequestValues?.selectedPackage),);
+  const [isFormOpen, setIsFormOpen] = useState(
+    Boolean(initialRequestValues?.selectedPackage),
+  );
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [formError, setFormError] = useState("");
@@ -72,7 +75,8 @@ export const CustomerProjectRequestsPanel: React.FC<
     try {
       await createCustomerProjectRequest(values);
       setIsFormOpen(false);
-      await loadRequests();
+      onClearInitialRequestIntent?.();
+await loadRequests();
     } catch {
       setFormError("Could not submit your project request. Please try again.");
     } finally {
@@ -99,7 +103,14 @@ export const CustomerProjectRequestsPanel: React.FC<
           style={styles.primaryButton}
           onClick={() => {
             setFormError("");
-            setIsFormOpen((currentValue) => !currentValue);
+
+            if (isFormOpen) {
+              setIsFormOpen(false);
+              onClearInitialRequestIntent?.();
+              return;
+            }
+
+            setIsFormOpen(true);
           }}
         >
           {isFormOpen ? "Close Form" : "New Request"}
