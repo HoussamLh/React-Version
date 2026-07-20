@@ -25,8 +25,20 @@ export const CustomerPasswordForm: React.FC<CustomerPasswordFormProps> = ({
     setValidationError("");
 
     if (password.length < 8) {
-      setValidationError("Password must be at least 8 characters.");
-      return;
+    setValidationError("Password must be at least 8 characters.");
+    return;
+    }
+
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialCharacter = /[^a-zA-Z0-9]/.test(password);
+
+    if (!hasLowercase || !hasUppercase || !hasNumber || !hasSpecialCharacter) {
+    setValidationError(
+    "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character.",
+    );
+    return;
     }
 
     if (password !== confirmPassword) {
@@ -65,6 +77,10 @@ export const CustomerPasswordForm: React.FC<CustomerPasswordFormProps> = ({
           onChange={(event) => setConfirmPassword(event.target.value)}
         />
       </label>
+      <p style={styles.hint}>
+        Minimum 8 characters with uppercase, lowercase, number, and special
+        character.
+      </p>
 
       {(validationError || error) && (
         <p style={styles.error}>{validationError || error}</p>
@@ -149,5 +165,12 @@ const styles: Record<string, React.CSSProperties> = {
     padding: spacing.md,
     margin: 0,
     fontSize: "13px",
+  },
+
+  hint: {
+    color: colors.text.muted,
+    fontSize: "12px",
+    lineHeight: "18px",
+    margin: 0,
   },
 };

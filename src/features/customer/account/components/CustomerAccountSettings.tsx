@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
 import type { CustomerProfile } from "../../auth/customerAuth.types";
 import { CustomerProfileForm } from "./CustomerProfileForm";
+import { CustomerPasswordForm } from "./CustomerPasswordForm";
+import { updateCustomerPassword } from "../../auth";
 
 type CustomerAccountSettingsProps = {
   profile: CustomerProfile;
@@ -21,6 +23,9 @@ export const CustomerAccountSettings: React.FC<
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
 
   const handleUpdateProfile = async (values: {
     fullName: string;
@@ -46,6 +51,26 @@ export const CustomerAccountSettings: React.FC<
       );
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async (password: string) => {
+    setIsUpdatingPassword(true);
+    setPasswordError("");
+    setPasswordSuccessMessage("");
+
+    try {
+      await updateCustomerPassword(password);
+
+      setPasswordSuccessMessage("Password updated successfully.");
+    } catch (error) {
+      console.error("Could not update password:", error);
+
+      setPasswordError(
+        error instanceof Error ? error.message : "Could not update password.",
+      );
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -118,6 +143,25 @@ export const CustomerAccountSettings: React.FC<
           onSubmit={handleUpdateProfile}
         />
       )}
+
+      <div style={styles.securitySection}>
+        <div style={styles.sectionHeader}>
+          <p style={styles.badge}>Security</p>
+
+          <h3 style={styles.sectionTitle}>Update Password</h3>
+
+          <p style={styles.subtitle}>
+            Keep your account secure by updating your password.
+          </p>
+        </div>
+
+        <CustomerPasswordForm
+          isSaving={isUpdatingPassword}
+          error={passwordError}
+          successMessage={passwordSuccessMessage}
+          onSubmit={handleUpdatePassword}
+        />
+      </div>
     </section>
   );
 };
@@ -206,5 +250,22 @@ const styles: Record<string, React.CSSProperties> = {
     padding: spacing.md,
     marginBottom: spacing.lg,
     fontSize: "13px",
+  },
+
+  securitySection: {
+    marginTop: spacing["2xl"],
+    paddingTop: spacing["2xl"],
+    borderTop: `1px solid ${colors.border.default}`,
+  },
+
+  sectionHeader: {
+    marginBottom: spacing.lg,
+  },
+
+  sectionTitle: {
+    color: colors.text.main,
+    fontSize: "20px",
+    fontWeight: typography.fontWeight.black,
+    margin: `${spacing.sm} 0`,
   },
 };
