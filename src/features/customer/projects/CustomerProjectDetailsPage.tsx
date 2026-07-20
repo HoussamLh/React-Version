@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { getCustomerProjectRequestById } from "./customerProjects.service";
 import type { CustomerProjectRequest } from "./customerProjects.types";
+import { ProjectStatusTimeline } from "./components/ProjectStatusTimeline";
 
 export const CustomerProjectDetailsPage: React.FC = () => {
   const { id } = useParams();
@@ -85,9 +86,7 @@ export const CustomerProjectDetailsPage: React.FC = () => {
             Created {new Date(project.createdAt).toLocaleDateString()}
           </p>
 
-          <div style={styles.statusContainer}>
-            <span style={styles.status}>{project.status}</span>
-          </div>
+          <ProjectStatusTimeline status={project.status} />
         </section>
 
         <section style={styles.card}>
