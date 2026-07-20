@@ -1,5 +1,5 @@
 export { CustomerDashboardPage } from "./dashboard";
-export { CustomerProfileForm } from "./account";
+export { CustomerProfileForm, CustomerAccountSettings } from "./account";
 
 export {
   CustomerSignInPage,
