@@ -17,6 +17,7 @@ import {
   CustomerSignInPage,
   CustomerSignUpPage,
   ProtectedCustomerRoute,
+  CustomerProjectDetailsPage,
 } from "./features/customer";
 import { LiveChatBubble } from "./features/live-chat";
 
@@ -131,6 +132,15 @@ function App() {
           }
         />
 
+        <Route
+          path="/customer/projects/:id"
+          element={
+            <ProtectedCustomerRoute>
+              <CustomerProjectDetailsPage />
+            </ProtectedCustomerRoute>
+          }
+        />
+
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
@@ -144,7 +154,10 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="projects" element={<AdminProjectsPage />} />
-          <Route path="project-requests" element={<AdminProjectRequestsPage />}/>
+          <Route
+            path="project-requests"
+            element={<AdminProjectRequestsPage />}
+          />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="pricing" element={<AdminPricingPage />} />
           <Route path="team" element={<AdminTeamPage />} />

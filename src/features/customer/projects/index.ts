@@ -4,3 +4,5 @@ export type {
 } from "./customerProjects.types";
 
 export { getCustomerProjectRequestById } from "./customerProjects.service";
+
+export { CustomerProjectDetailsPage } from "./CustomerProjectDetailsPage";
