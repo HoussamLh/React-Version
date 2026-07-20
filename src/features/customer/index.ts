@@ -1,3 +1,8 @@
-export * from "./auth";
-export * from "./dashboard";
-export * from "./project-requests";
+export { CustomerDashboardPage } from "./dashboard";
+export { CustomerProfileForm } from "./account";
+
+export {
+  CustomerSignInPage,
+  CustomerSignUpPage,
+  ProtectedCustomerRoute,
+} from "./auth";
