@@ -5,6 +5,8 @@ import {
   getCurrentCustomerProfile,
   signOutCustomer,
 } from "../auth/customerAuth.service";
+import { updateCurrentCustomerProfile } from "../auth";
+import { CustomerAccountSettings } from "../account";
 import type { CustomerProfile } from "../auth/customerAuth.types";
 import { CustomerProjectRequestsPanel } from "../project-requests";
 import { getProjectRequestValuesFromSearch } from "../project-requests/projectRequestIntent.helpers";
@@ -178,6 +180,13 @@ export const CustomerDashboardPage: React.FC = () => {
             </p>
           </article>
         </div>
+        {profile && (
+          <CustomerAccountSettings
+            profile={profile}
+            onProfileUpdated={setProfile}
+            onUpdateProfile={updateCurrentCustomerProfile}
+          />
+        )}
         <CustomerProjectRequestsPanel
           initialRequestValues={initialRequestValues}
           onClearInitialRequestIntent={clearProjectRequestIntent}
