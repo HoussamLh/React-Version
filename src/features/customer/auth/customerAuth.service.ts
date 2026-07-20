@@ -263,3 +263,15 @@ export const signOutCustomer = async () => {
     throw error;
   }
 };
+
+export const updateCustomerPassword = async (password: string) => {
+  const client = requireSupabase();
+
+  const { error } = await client.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    throw error;
+  }
+};

@@ -19,4 +19,5 @@ export {
   signUpCustomer,
   subscribeToCustomerAuthChanges,
   updateCurrentCustomerProfile,
+  updateCustomerPassword,
 } from "./customerAuth.service";
