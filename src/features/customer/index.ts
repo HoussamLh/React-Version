@@ -6,3 +6,5 @@ export {
   CustomerSignUpPage,
   ProtectedCustomerRoute,
 } from "./auth";
+
+export * from "./projects";

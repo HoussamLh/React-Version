@@ -56,14 +56,20 @@ export const CustomerProjectRequestForm: React.FC<
   const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    setTitle(mergedInitialValues.title);
-    setProjectType(mergedInitialValues.projectType);
-    setSelectedPackage(mergedInitialValues.selectedPackage);
-    setPackageCategory(mergedInitialValues.packageCategory);
-    setBudgetRange(mergedInitialValues.budgetRange);
-    setTimeline(mergedInitialValues.timeline);
-    setDescription(mergedInitialValues.description);
-    setGoals(mergedInitialValues.goals);
+    const timer = window.setTimeout(() => {
+      setTitle(mergedInitialValues.title);
+      setProjectType(mergedInitialValues.projectType);
+      setSelectedPackage(mergedInitialValues.selectedPackage);
+      setPackageCategory(mergedInitialValues.packageCategory);
+      setBudgetRange(mergedInitialValues.budgetRange);
+      setTimeline(mergedInitialValues.timeline);
+      setDescription(mergedInitialValues.description);
+      setGoals(mergedInitialValues.goals);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [mergedInitialValues]);
 
   const validateForm = () => {
