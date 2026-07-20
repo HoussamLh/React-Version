@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import React, { useCallback, useEffect, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
@@ -76,7 +77,7 @@ export const CustomerProjectRequestsPanel: React.FC<
       await createCustomerProjectRequest(values);
       setIsFormOpen(false);
       onClearInitialRequestIntent?.();
-await loadRequests();
+      await loadRequests();
     } catch {
       setFormError("Could not submit your project request. Please try again.");
     } finally {
@@ -181,6 +182,12 @@ await loadRequests();
                   Submitted: {formatDate(request.createdAt)}
                 </span>
               </div>
+              <Link
+                to={`/customer/projects/${request.id}`}
+                style={styles.detailsLink}
+              >
+                View Details →
+              </Link>
             </article>
           ))}
         </div>
@@ -356,5 +363,14 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "12px",
     lineHeight: "16px",
     padding: "8px 12px",
+  },
+
+  detailsLink: {
+    display: "inline-flex",
+    marginTop: spacing.md,
+    color: colors.accent.green,
+    fontSize: "14px",
+    fontWeight: typography.fontWeight.bold,
+    textDecoration: "none",
   },
 };
