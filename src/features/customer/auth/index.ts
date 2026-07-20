@@ -6,6 +6,7 @@ export type {
   CustomerAccountStatus,
   CustomerOnboardingStatus,
   CustomerProfile,
+  CustomerProfileUpdateValues,
   CustomerSignInValues,
   CustomerSignUpResult,
   CustomerSignUpValues,
@@ -17,4 +18,5 @@ export {
   signOutCustomer,
   signUpCustomer,
   subscribeToCustomerAuthChanges,
+  updateCurrentCustomerProfile,
 } from "./customerAuth.service";

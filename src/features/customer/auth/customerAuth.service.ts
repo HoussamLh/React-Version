@@ -1,6 +1,7 @@
 import { requireSupabase } from "../../../lib/supabase";
 import type {
   CustomerProfile,
+  CustomerProfileUpdateValues,
   CustomerSignInValues,
   CustomerSignUpResult,
   CustomerSignUpValues,
@@ -103,6 +104,45 @@ export const getCurrentCustomerProfile =
     }
 
     return data ? mapCustomerProfile(data) : null;
+  };
+
+  export const updateCurrentCustomerProfile = async (
+    values: CustomerProfileUpdateValues,
+  ): Promise<CustomerProfile> => {
+    const client = requireSupabase();
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await client.auth.getSession();
+
+    if (sessionError) {
+      throw sessionError;
+    }
+
+    if (!session?.user?.id) {
+      throw new Error("Customer session is required.");
+    }
+
+    const { data, error } = await client
+      .from("customer_profiles")
+      .update({
+        full_name: values.fullName.trim(),
+        company_name: values.companyName.trim(),
+        phone: values.phone.trim(),
+        onboarding_status: "profile_started",
+      })
+      .eq("id", session.user.id)
+      .select(
+        "id, email, full_name, company_name, phone, onboarding_status, account_status",
+      )
+      .single<CustomerProfileRow>();
+
+    if (error) {
+      throw error;
+    }
+
+    return mapCustomerProfile(data);
   };
 
 export const subscribeToCustomerAuthChanges = (callback: () => void) => {

@@ -16,6 +16,12 @@ export type CustomerProfile = {
   accountStatus: CustomerAccountStatus;
 };
 
+export type CustomerProfileUpdateValues = {
+  fullName: string;
+  companyName: string;
+  phone: string;
+};
+
 export type CustomerSignUpValues = {
   email: string;
   password: string;
