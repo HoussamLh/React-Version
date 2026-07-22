@@ -75,7 +75,9 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
       return;
     }
 
-    const channel = supabase
+    const client = supabase;
+
+    const channel = client
       .channel(`project-messages-${projectRequestId}`)
       .on(
         "postgres_changes",
@@ -125,7 +127,7 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
       .subscribe();
 
     return () => {
-      void supabase.removeChannel(channel);
+      void client.removeChannel(channel);
     };
   }, [projectRequestId]);
 
