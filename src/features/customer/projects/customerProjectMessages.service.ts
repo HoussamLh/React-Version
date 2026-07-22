@@ -8,6 +8,7 @@ type ProjectMessageRow = {
   sender_type: "customer" | "admin";
   message: string;
   created_at: string;
+  read_at: string | null;
 };
 
 const requireSupabase = () => {
@@ -20,16 +21,12 @@ const requireSupabase = () => {
 
 const mapMessage = (row: ProjectMessageRow): CustomerProjectMessage => ({
   id: row.id,
-
   projectRequestId: row.project_request_id,
-
   senderId: row.sender_id,
-
   senderType: row.sender_type,
-
   message: row.message,
-
   createdAt: row.created_at,
+  readAt: row.read_at,
 });
 
 export const getCustomerProjectMessages = async (

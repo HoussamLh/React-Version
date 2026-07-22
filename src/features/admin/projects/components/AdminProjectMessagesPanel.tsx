@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 
 import { colors, radius, spacing, typography } from "../../../../design-system";
 
@@ -27,6 +27,8 @@ export const AdminProjectMessagesPanel: React.FC<
   const [isSending, setIsSending] = useState(false);
 
   const [error, setError] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const loadMessages = useCallback(async () => {
     return await getAdminProjectMessages(projectRequestId);
@@ -93,20 +95,17 @@ export const AdminProjectMessagesPanel: React.FC<
             sender_type: "customer" | "admin";
             message: string;
             created_at: string;
+            read_at: string | null;
           };
 
           const newMessage: AdminProjectMessage = {
             id: row.id,
-
             projectRequestId: row.project_request_id,
-
             senderId: row.sender_id,
-
             senderType: row.sender_type,
-
             message: row.message,
-
             createdAt: row.created_at,
+            readAt: row.read_at,
           };
 
           setMessages((current) => {
@@ -128,6 +127,12 @@ export const AdminProjectMessagesPanel: React.FC<
       void client.removeChannel(channel);
     };
   }, [projectRequestId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   const handleSend = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -181,6 +186,7 @@ export const AdminProjectMessagesPanel: React.FC<
             </span>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {error && <p style={styles.error}>{error}</p>}
@@ -204,65 +210,51 @@ export const AdminProjectMessagesPanel: React.FC<
 const styles: Record<string, React.CSSProperties> = {
   card: {
     backgroundColor: colors.background.card,
-
     border: `1px solid ${colors.border.default}`,
-
     borderRadius: radius["2xl"],
-
     padding: spacing.xl,
   },
 
   title: {
     color: colors.text.main,
-
     fontSize: "22px",
-
     fontWeight: typography.fontWeight.black,
-
     marginBottom: spacing.lg,
   },
 
   messages: {
     display: "flex",
-
     flexDirection: "column",
-
     gap: spacing.md,
   },
 
   message: {
     padding: spacing.md,
-
     borderRadius: radius.lg,
   },
 
   customerMessage: {
     backgroundColor: "rgba(255,255,255,0.04)",
-
     border: `1px solid ${colors.border.default}`,
   },
 
   adminMessage: {
     backgroundColor: "rgba(116,245,66,0.08)",
-
     border: `1px solid ${colors.accent.green}`,
   },
 
   sender: {
     color: colors.text.main,
-
     fontSize: "13px",
   },
 
   text: {
     color: colors.text.muted,
-
     lineHeight: "22px",
   },
 
   date: {
     color: colors.text.muted,
-
     fontSize: "11px",
   },
 
@@ -272,47 +264,32 @@ const styles: Record<string, React.CSSProperties> = {
 
   form: {
     display: "flex",
-
     flexDirection: "column",
-
     gap: spacing.md,
-
     marginTop: spacing.lg,
   },
 
   input: {
     minHeight: "100px",
-
     padding: spacing.md,
-
     borderRadius: radius.md,
-
     border: `1px solid ${colors.border.default}`,
-
     backgroundColor: colors.background.dark,
-
     color: colors.text.main,
   },
 
   button: {
     alignSelf: "flex-end",
-
     backgroundColor: colors.accent.green,
-
     border: "none",
-
     borderRadius: radius.md,
-
     padding: "12px 20px",
-
     fontWeight: typography.fontWeight.black,
-
     cursor: "pointer",
   },
 
   error: {
     color: "#ff7777",
-
     fontSize: "13px",
   },
 };

@@ -7,6 +7,7 @@ export type AdminProjectMessage = {
   senderType: "customer" | "admin";
   message: string;
   createdAt: string;
+  readAt: string | null;
 };
 
 
@@ -17,6 +18,7 @@ type ProjectMessageRow = {
   sender_type: "customer" | "admin";
   message: string;
   created_at: string;
+  read_at: string | null;
 };
 
 
@@ -31,25 +33,14 @@ const requireSupabase = () => {
 };
 
 
-const mapMessage = (
-  row: ProjectMessageRow,
-): AdminProjectMessage => ({
+const mapMessage = (row: ProjectMessageRow): AdminProjectMessage => ({
   id: row.id,
-
-  projectRequestId:
-    row.project_request_id,
-
-  senderId:
-    row.sender_id,
-
-  senderType:
-    row.sender_type,
-
-  message:
-    row.message,
-
-  createdAt:
-    row.created_at,
+  projectRequestId: row.project_request_id,
+  senderId: row.sender_id,
+  senderType: row.sender_type,
+  message: row.message,
+  createdAt: row.created_at,
+  readAt: row.read_at,
 });
 
 
@@ -100,7 +91,6 @@ async (
 };
 
 
-
 export const sendAdminProjectMessage =
 async (
   projectRequestId: string,
@@ -110,14 +100,12 @@ async (
   const client =
     requireSupabase();
 
-
   const {
     data:{
       session,
     },
   } =
     await client.auth.getSession();
-
 
   if (!session?.user?.id) {
     throw new Error(
@@ -144,7 +132,6 @@ async (
         message:
           message.trim(),
       });
-
 
   if (error) {
     throw error;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 
 import { colors, radius, spacing, typography } from "../../../../design-system";
 
@@ -27,6 +27,8 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
   const [isSending, setIsSending] = useState(false);
 
   const [error, setError] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const loadMessages = useCallback(async () => {
     const result = await getCustomerProjectMessages(projectRequestId);
@@ -95,22 +97,18 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
             sender_type: "customer" | "admin";
             message: string;
             created_at: string;
+            read_at: string | null;
           };
 
           const newMessage: CustomerProjectMessage = {
             id: row.id,
-
             projectRequestId: row.project_request_id,
-
             senderId: row.sender_id,
-
             senderType: row.sender_type,
-
             message: row.message,
-
             createdAt: row.created_at,
-          };
-
+            readAt: row.read_at,
+            };
           setMessages((current) => {
             const alreadyExists = current.some(
               (item) => item.id === newMessage.id,
@@ -130,6 +128,12 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
       void client.removeChannel(channel);
     };
   }, [projectRequestId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   const handleSend = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -187,6 +191,7 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
             </span>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
       {error && <p style={styles.error}>{error}</p>}
@@ -210,67 +215,52 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
 const styles: Record<string, React.CSSProperties> = {
   card: {
     backgroundColor: colors.background.card,
-
     border: `1px solid ${colors.border.default}`,
-
     borderRadius: radius["2xl"],
-
     padding: spacing.xl,
-
     marginTop: spacing.xl,
   },
 
   title: {
     color: colors.text.main,
-
     fontSize: "22px",
-
     fontWeight: typography.fontWeight.black,
-
     marginBottom: spacing.lg,
   },
 
   messages: {
     display: "flex",
-
     flexDirection: "column",
-
     gap: spacing.md,
   },
 
   message: {
     padding: spacing.md,
-
     borderRadius: radius.lg,
   },
 
   customerMessage: {
     backgroundColor: "rgba(116,245,66,0.08)",
-
     border: `1px solid ${colors.accent.green}`,
   },
 
   teamMessage: {
     backgroundColor: "rgba(255,255,255,0.04)",
-
     border: `1px solid ${colors.border.default}`,
   },
 
   sender: {
     color: colors.text.main,
-
     fontSize: "13px",
   },
 
   text: {
     color: colors.text.muted,
-
     lineHeight: "22px",
   },
 
   date: {
     color: colors.text.muted,
-
     fontSize: "11px",
   },
 
@@ -280,51 +270,34 @@ const styles: Record<string, React.CSSProperties> = {
 
   form: {
     display: "flex",
-
     flexDirection: "column",
-
     gap: spacing.md,
-
     marginTop: spacing.lg,
   },
 
   input: {
     minHeight: "100px",
-
     resize: "vertical",
-
     padding: spacing.md,
-
     borderRadius: radius.md,
-
     border: `1px solid ${colors.border.default}`,
-
     backgroundColor: colors.background.dark,
-
     color: colors.text.main,
   },
 
   button: {
     alignSelf: "flex-end",
-
     border: "none",
-
     borderRadius: radius.md,
-
     backgroundColor: colors.accent.green,
-
     color: colors.background.dark,
-
     padding: "12px 20px",
-
     fontWeight: typography.fontWeight.black,
-
     cursor: "pointer",
   },
 
   error: {
     color: "#ff7777",
-
     fontSize: "13px",
   },
 };
