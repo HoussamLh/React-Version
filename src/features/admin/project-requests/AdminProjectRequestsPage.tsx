@@ -10,6 +10,8 @@ import type {
   AdminProjectRequestStatus,
 } from "./adminProjectRequests.types";
 
+import { AdminProjectMessagesPanel } from "../projects";
+
 type RequestFilter = "all" | AdminProjectRequestStatus;
 
 const statusOptions: AdminProjectRequestStatus[] = [
@@ -256,6 +258,9 @@ export const AdminProjectRequestsPage: React.FC = () => {
             >
               {isUpdatingRequest ? "Saving..." : "Save Request"}
             </button>
+
+            <AdminProjectMessagesPanel projectRequestId={editingRequest.id} />
+
           </div>
         )}
 
