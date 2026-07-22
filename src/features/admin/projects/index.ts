@@ -1,6 +1,8 @@
 export { AdminProjectsPage } from "./AdminProjectsPage";
 export { AdminProjectForm } from "./AdminProjectForm";
 
+export { AdminProjectMessagesPanel } from "./components/AdminProjectMessagesPanel";
+
 export type {
   AdminProject,
   AdminProjectFormValues,
