@@ -4,6 +4,7 @@ import { colors, radius, spacing, typography } from "../../../design-system";
 import { getCustomerProjectRequestById } from "./customerProjects.service";
 import type { CustomerProjectRequest } from "./customerProjects.types";
 import { ProjectStatusTimeline } from "./components/ProjectStatusTimeline";
+import { ProjectMessagesPanel } from "./components/ProjectMessagesPanel";
 
 export const CustomerProjectDetailsPage: React.FC = () => {
   const { id } = useParams();
@@ -120,6 +121,7 @@ export const CustomerProjectDetailsPage: React.FC = () => {
 
           <p style={styles.text}>{project.adminNotes || "No updates yet."}</p>
         </section>
+        <ProjectMessagesPanel projectRequestId={project.id} />
       </section>
     </main>
   );
