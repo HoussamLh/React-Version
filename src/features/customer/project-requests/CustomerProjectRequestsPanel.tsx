@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import React, { useCallback, useEffect, useState } from "react";
+import { supabase } from "../../../lib/supabase";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
 import {
   createCustomerProjectRequest,
   getCustomerProjectRequests,
 } from "./projectRequests.service";
+import { getCustomerUnreadMessageCounts } from "../projects/messages/customerProjectUnread.service";
 import type {
   CustomerProjectRequest,
   CustomerProjectRequestFormValues,
@@ -32,6 +34,7 @@ export const CustomerProjectRequestsPanel: React.FC<
   CustomerProjectRequestsPanelProps
 > = ({ initialRequestValues, onClearInitialRequestIntent }) => {
   const [requests, setRequests] = useState<CustomerProjectRequest[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(
     Boolean(initialRequestValues?.selectedPackage),
@@ -40,19 +43,32 @@ export const CustomerProjectRequestsPanel: React.FC<
   const [loadError, setLoadError] = useState("");
   const [formError, setFormError] = useState("");
 
+  const loadUnreadCounts = useCallback(async () => {
+    try {
+      const counts = await getCustomerUnreadMessageCounts();
+
+      setUnreadCounts(counts);
+    } catch (error) {
+      console.error("Failed to load unread message counts:", error);
+    }
+  }, []);
+
   const loadRequests = useCallback(async () => {
     setIsLoading(true);
     setLoadError("");
 
     try {
       const results = await getCustomerProjectRequests();
+
       setRequests(results);
+
+      await loadUnreadCounts();
     } catch {
       setLoadError("Could not load your project requests.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [loadUnreadCounts]);
 
   useEffect(() => {
     let isMounted = true;
@@ -66,6 +82,49 @@ export const CustomerProjectRequestsPanel: React.FC<
       isMounted = false;
     };
   }, [loadRequests]);
+
+  useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
+    const client = supabase;
+
+    const channel = client
+      .channel("customer-project-message-badges")
+
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "project_messages",
+          filter: "sender_type=eq.admin",
+        },
+        () => {
+          void loadUnreadCounts();
+        },
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "project_messages",
+          filter: "sender_type=eq.admin",
+        },
+        () => {
+          void loadUnreadCounts();
+        },
+      )
+
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [loadUnreadCounts]);
 
   const handleCreateRequest = async (
     values: CustomerProjectRequestFormValues,
@@ -157,10 +216,18 @@ export const CustomerProjectRequestsPanel: React.FC<
 
                   <h3 style={styles.requestTitle}>{request.title}</h3>
                 </div>
+                <div style={styles.badges}>
+                  <span style={styles.statusBadge}>
+                    {formatLabel(request.status)}
+                  </span>
 
-                <span style={styles.statusBadge}>
-                  {formatLabel(request.status)}
-                </span>
+                  {unreadCounts[request.id] > 0 && (
+                    <span style={styles.messageBadge}>
+                      {unreadCounts[request.id]} new message
+                      {unreadCounts[request.id] > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <p style={styles.requestText}>{request.description}</p>
@@ -341,6 +408,23 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: typography.fontWeight.bold,
     textTransform: "capitalize",
     whiteSpace: "nowrap",
+  },
+
+  badges: {
+    display: "flex",
+    gap: spacing.sm,
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+
+  messageBadge: {
+    borderRadius: radius.md,
+    backgroundColor: "rgba(116,245,66,0.12)",
+    border: `1px solid ${colors.accent.pink}`,
+    color: colors.accent.pink,
+    padding: "8px 12px",
+    fontSize: "12px",
+    fontWeight: typography.fontWeight.bold,
   },
 
   requestText: {
