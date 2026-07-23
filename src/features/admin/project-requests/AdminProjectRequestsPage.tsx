@@ -5,6 +5,9 @@ import {
   getAdminProjectRequests,
   updateAdminProjectRequest,
 } from "./adminProjectRequests.service";
+
+import { getUnreadCustomerMessageCounts } from "../projects/messages/adminProjectUnread.service";
+
 import type {
   AdminProjectRequest,
   AdminProjectRequestStatus,
@@ -36,6 +39,9 @@ const formatDate = (value: string) => {
 
 export const AdminProjectRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<AdminProjectRequest[]>([]);
+
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+
   const [statusFilter, setStatusFilter] = useState<RequestFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRequest, setEditingRequest] =
@@ -62,6 +68,9 @@ export const AdminProjectRequestsPage: React.FC = () => {
     try {
       const results = await getAdminProjectRequests();
       setRequests(results);
+
+      const unread = await getUnreadCustomerMessageCounts();
+      setUnreadCounts(unread);
     } catch (error) {
       console.error("Could not load project requests:", error);
       setLoadError("Could not load project requests. Please try again.");
@@ -168,6 +177,17 @@ export const AdminProjectRequestsPage: React.FC = () => {
     }
   };
 
+  const handleMessagesRead = useCallback(() => {
+    if (!editingRequest) {
+      return;
+    }
+
+    setUnreadCounts((current) => ({
+      ...current,
+      [editingRequest.id]: 0,
+    }));
+  }, [editingRequest]);
+
   return (
     <section style={styles.page}>
       <header style={styles.header}>
@@ -259,8 +279,10 @@ export const AdminProjectRequestsPage: React.FC = () => {
               {isUpdatingRequest ? "Saving..." : "Save Request"}
             </button>
 
-            <AdminProjectMessagesPanel projectRequestId={editingRequest.id} />
-
+            <AdminProjectMessagesPanel
+              projectRequestId={editingRequest.id}
+              onMessagesRead={handleMessagesRead}
+            />
           </div>
         )}
 
@@ -316,7 +338,15 @@ export const AdminProjectRequestsPage: React.FC = () => {
                       {formatLabel(request.projectType)}
                     </p>
 
-                    <h2 style={styles.requestTitle}>{request.title}</h2>
+                    <div style={styles.titleRow}>
+                      <h2 style={styles.requestTitle}>{request.title}</h2>
+
+                      {unreadCounts[request.id] > 0 && (
+                        <span style={styles.messageBadge}>
+                          {unreadCounts[request.id]} new message
+                        </span>
+                      )}
+                    </div>
 
                     <p style={styles.customerLine}>
                       {request.customerName || "Unknown customer"} ·{" "}
@@ -772,5 +802,22 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "13px",
     lineHeight: "20px",
     margin: `0 0 ${spacing.lg} 0`,
+  },
+
+  titleRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+    flexWrap: "wrap",
+  },
+
+  messageBadge: {
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255,90,90,0.12)",
+    border: "1px solid rgba(255,90,90,0.45)",
+    color: "#ff7777",
+    padding: "5px 10px",
+    fontSize: "11px",
+    fontWeight: typography.fontWeight.bold,
   },
 };

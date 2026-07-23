@@ -4,7 +4,7 @@ export { AdminLayout } from "./layout/AdminLayout";
 export { AdminDashboard } from "./dashboard/AdminDashboard";
 export { AdminChatPage } from "./chat/AdminChatPage";
 export { ContactSubmissionsPage } from "./contacts/ContactSubmissionsPage";
-export { AdminProjectsPage } from "./projects/AdminProjectsPage";
+export { AdminProjectsPage } from "./projects/components/AdminProjectsPage";
 export { AdminServicesPage } from "./services/AdminServicesPage";
 export { AdminPricingPage } from "./pricing/AdminPricingPage";
 export { AdminTeamPage } from "./team/AdminTeamPage";

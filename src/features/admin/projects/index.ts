@@ -1,7 +1,7 @@
-export { AdminProjectsPage } from "./AdminProjectsPage";
-export { AdminProjectForm } from "./AdminProjectForm";
+export { AdminProjectsPage } from "./components/AdminProjectsPage";
+export { AdminProjectForm } from "./components/AdminProjectForm";
 
-export { AdminProjectMessagesPanel } from "./components/AdminProjectMessagesPanel";
+export { AdminProjectMessagesPanel } from "./messages/components/AdminProjectMessagesPanel";
 
 export type {
   AdminProject,
@@ -11,11 +11,11 @@ export type {
   ProjectMediaType,
   ProjectSpan,
   ProjectStatus,
-} from "./projectsCms.types";
+} from "./types/projectsCms.types";
 
 export {
   createAdminProject,
   deleteAdminProject,
   getAdminProjects,
   updateAdminProject,
-} from "./projectsCms.service";
+} from "./services/projectsCms.service";
