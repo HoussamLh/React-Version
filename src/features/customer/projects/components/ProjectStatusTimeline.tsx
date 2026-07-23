@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProjectStatus } from "../customerProjects.types";
+import type { CustomerProjectStatus } from "../types/customerProjects.types";
 
 type ProjectStatusTimelineProps = {
   status: CustomerProjectStatus;
@@ -23,9 +23,19 @@ const steps = [
     key: "completed",
     label: "Completed",
   },
+  {
+    key: "cancelled",
+    label: "Cancelled",
+  },
 ] as const;
 
-const statusOrder = ["submitted", "reviewed", "in_progress", "completed"];
+const statusOrder = [
+  "submitted",
+  "reviewed",
+  "in_progress",
+  "completed",
+  "cancelled",
+];
 
 export const ProjectStatusTimeline: React.FC<ProjectStatusTimelineProps> = ({
   status,
