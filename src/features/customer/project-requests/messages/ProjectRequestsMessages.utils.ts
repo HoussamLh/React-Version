@@ -1,4 +1,4 @@
-import type { CustomerProjectMessage } from "./customerProjectMessages.types";
+import type { CustomerProjectMessage } from "./ProjectRequestsMessages.types";
 export const countUnreadMessages = (
   messages: CustomerProjectMessage[],
 ): number => {

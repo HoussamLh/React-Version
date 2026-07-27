@@ -1,19 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { colors, radius, spacing, typography } from "../../../../design-system";
 import type {
-  CustomerProjectRequestFormValues,
+  ProjectRequestFormValues,
   ProjectRequestPackageCategory,
   ProjectRequestType,
-} from "./types/projectRequests.types";
+} from "../types/projectRequests.types";
 
 type CustomerProjectRequestFormProps = {
-  initialValues?: Partial<CustomerProjectRequestFormValues>;
+  initialValues?: Partial<ProjectRequestFormValues>;
   isSubmitting?: boolean;
   error?: string;
-  onSubmit: (values: CustomerProjectRequestFormValues) => Promise<void>;
+  onSubmit: (values: ProjectRequestFormValues) => Promise<void>;
 };
 
-const defaultFormValues: CustomerProjectRequestFormValues = {
+const defaultFormValues: ProjectRequestFormValues = {
   title: "",
   projectType: "website",
   selectedPackage: "",
@@ -27,7 +27,7 @@ const defaultFormValues: CustomerProjectRequestFormValues = {
 export const CustomerProjectRequestForm: React.FC<
   CustomerProjectRequestFormProps
 > = ({ initialValues, isSubmitting = false, error, onSubmit }) => {
-  const mergedInitialValues = useMemo<CustomerProjectRequestFormValues>(() => {
+  const mergedInitialValues = useMemo<ProjectRequestFormValues>(() => {
     return {
       ...defaultFormValues,
       ...initialValues,

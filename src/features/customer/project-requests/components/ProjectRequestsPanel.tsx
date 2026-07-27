@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
 import React, { useCallback, useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
-import { colors, radius, spacing, typography } from "../../../design-system";
-import { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
+import { supabase } from "../../../../lib/supabase";
+import { colors, radius, spacing, typography } from "../../../../design-system";
+import { CustomerProjectRequestForm } from "./ProjectRequestForm";
 import {
   createCustomerProjectRequest,
   getCustomerProjectRequests,
-} from "./services/projectRequests.service";
-import { getCustomerUnreadMessageCounts } from "./messages/customerProjectUnread.service";
+} from "../services/projectRequests.service";
+import { getCustomerUnreadMessageCounts } from "../messages/ProjectRequestsUnread.service";
 import type {
-  CustomerProjectRequest,
-  CustomerProjectRequestFormValues,
-} from "./types/projectRequests.types";
+  ProjectRequest,
+  ProjectRequestFormValues,
+} from "../types/projectRequests.types";
 
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {
@@ -26,14 +26,14 @@ const formatLabel = (value: string) => {
 };
 
 type CustomerProjectRequestsPanelProps = {
-  initialRequestValues?: Partial<CustomerProjectRequestFormValues>;
+  initialRequestValues?: Partial<ProjectRequestFormValues>;
   onClearInitialRequestIntent?: () => void;
 };
 
 export const CustomerProjectRequestsPanel: React.FC<
   CustomerProjectRequestsPanelProps
 > = ({ initialRequestValues, onClearInitialRequestIntent }) => {
-  const [requests, setRequests] = useState<CustomerProjectRequest[]>([]);
+  const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(
@@ -127,7 +127,7 @@ export const CustomerProjectRequestsPanel: React.FC<
   }, [loadUnreadCounts]);
 
   const handleCreateRequest = async (
-    values: CustomerProjectRequestFormValues,
+    values: ProjectRequestFormValues,
   ) => {
     setIsCreatingRequest(true);
     setFormError("");

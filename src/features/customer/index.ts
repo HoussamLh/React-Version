@@ -9,4 +9,6 @@ export {
 
 export { ProjectMessagesPanel } from "./project-requests/messages/components/ProjectMessagesPanel";
 
-export * from "./projects";
+export * from "./project-requests";
+
+export { CustomerProjectDetailsPage } from "./project-requests/components/ProjectRequestsDetailsPage";

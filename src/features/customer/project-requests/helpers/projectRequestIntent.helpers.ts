@@ -1,8 +1,8 @@
-import type { CustomerProjectRequestFormValues } from "./types/projectRequests.types";
+import type { ProjectRequestFormValues } from "../types/projectRequests.types";
 
 export const getProjectRequestValuesFromSearch = (
   search: string,
-): Partial<CustomerProjectRequestFormValues> | undefined => {
+): Partial<ProjectRequestFormValues> | undefined => {
   const searchParams = new URLSearchParams(search);
 
   const selectedPlan = searchParams.get("plan")?.trim();

@@ -1,9 +1,9 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProjectRequest } from "../../project-requests/types/customerProjects.types";
+import type { ProjectRequest } from "../types/projectRequests.types";
 
 type ProjectActivityTimelineProps = {
-  project: CustomerProjectRequest;
+  project: ProjectRequest;
 };
 
 export const ProjectActivityTimeline: React.FC<

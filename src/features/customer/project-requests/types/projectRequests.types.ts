@@ -17,7 +17,7 @@ export type ProjectRequestStatus =
   | "completed"
   | "cancelled";
 
-export type CustomerProjectRequest = {
+export type ProjectRequest = {
   id: string;
   customerId: string;
 
@@ -40,7 +40,7 @@ export type CustomerProjectRequest = {
   updatedAt: string;
 };
 
-export type CustomerProjectRequestFormValues = {
+export type ProjectRequestFormValues = {
   title: string;
   projectType: ProjectRequestType;
 

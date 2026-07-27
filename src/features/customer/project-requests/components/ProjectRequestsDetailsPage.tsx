@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import { getCustomerProjectRequestById } from "../../project-requests/services/customerProjects.service";
-import { markCustomerProjectMessagesAsRead } from "../../project-requests/messages/customerProjectMessages.service";
-import type { CustomerProjectRequest } from "../../project-requests/types/customerProjects.types";
-import { ProjectStatusTimeline } from "./ProjectStatusTimeline";
-import { ProjectMessagesPanel } from "../../project-requests/messages/components/ProjectMessagesPanel";
-import { ProjectActivityTimeline } from "./ProjectActivityTimeline";
+import { getCustomerProjectRequestById } from "../services/projectRequests.service";
+import { markCustomerProjectMessagesAsRead } from "../messages/ProjectRequestsMessages.service";
+import type { ProjectRequest } from "../types/projectRequests.types";
+import { ProjectStatusTimeline } from "../status/ProjectStatusTimeline";
+import { ProjectMessagesPanel } from "../messages/components/ProjectMessagesPanel";
+import { ProjectActivityTimeline } from "../activities/ProjectActivityTimeline";
 
 export const CustomerProjectDetailsPage: React.FC = () => {
   const { id } = useParams();
 
-  const [project, setProject] = useState<CustomerProjectRequest | null>(null);
+  const [project, setProject] = useState<ProjectRequest | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
 

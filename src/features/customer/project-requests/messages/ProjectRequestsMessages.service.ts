@@ -1,5 +1,5 @@
 import { supabase } from "../../../../lib/supabase";
-import type { CustomerProjectMessage } from "./customerProjectMessages.types";
+import type { CustomerProjectMessage } from "./ProjectRequestsMessages.types";
 
 type ProjectMessageRow = {
   id: string;

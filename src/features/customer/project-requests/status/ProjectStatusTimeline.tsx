@@ -1,9 +1,9 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProjectStatus } from "../../project-requests/types/customerProjects.types";
+import type { ProjectRequestStatus } from "../types/projectRequests.types";
 
 type ProjectStatusTimelineProps = {
-  status: CustomerProjectStatus;
+  status: ProjectRequestStatus;
 };
 
 const steps = [

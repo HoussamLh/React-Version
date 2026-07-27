@@ -1,7 +1,7 @@
 import { requireSupabase } from "../../../../lib/supabase";
 import type {
-  CustomerProjectRequest,
-  CustomerProjectRequestFormValues,
+  ProjectRequest,
+  ProjectRequestFormValues,
 } from "../types/projectRequests.types";
 
 type ProjectRequestRow = {
@@ -9,10 +9,10 @@ type ProjectRequestRow = {
   customer_id: string;
 
   title: string;
-  project_type: CustomerProjectRequest["projectType"];
+  project_type: ProjectRequest["projectType"];
 
   selected_package: string;
-  package_category: CustomerProjectRequest["packageCategory"];
+  package_category: ProjectRequest["packageCategory"];
 
   budget_range: string;
   timeline: string;
@@ -20,7 +20,7 @@ type ProjectRequestRow = {
   description: string;
   goals: string;
 
-  status: CustomerProjectRequest["status"];
+  status: ProjectRequest["status"];
   admin_notes: string;
 
   created_at: string;
@@ -46,7 +46,7 @@ const projectRequestSelectFields = `
 
 const mapProjectRequestRow = (
   row: ProjectRequestRow,
-): CustomerProjectRequest => {
+): ProjectRequest => {
   return {
     id: row.id,
     customerId: row.customer_id,
@@ -72,7 +72,7 @@ const mapProjectRequestRow = (
 };
 
 const mapProjectRequestFormValues = (
-  values: CustomerProjectRequestFormValues,
+  values: ProjectRequestFormValues,
 ) => {
   return {
     title: values.title.trim(),
@@ -126,7 +126,7 @@ export const getCustomerProjectRequests = async () => {
 };
 
 export const createCustomerProjectRequest = async (
-  values: CustomerProjectRequestFormValues,
+  values: ProjectRequestFormValues,
 ) => {
   const client = requireSupabase();
   const customerId = await getCurrentCustomerId();
@@ -153,7 +153,7 @@ export const updateCustomerProjectRequest = async ({
   values,
 }: {
   requestId: string;
-  values: CustomerProjectRequestFormValues;
+  values: ProjectRequestFormValues;
 }) => {
   const client = requireSupabase();
   const customerId = await getCurrentCustomerId();
@@ -172,4 +172,78 @@ export const updateCustomerProjectRequest = async ({
   }
 
   return mapProjectRequestRow(data);
+};
+
+const mapProjectRequest = (row: ProjectRequestRow): ProjectRequest => ({
+  id: row.id,
+  customerId: row.customer_id,
+
+  title: row.title,
+  projectType: row.project_type,
+
+  selectedPackage: row.selected_package,
+  packageCategory: row.package_category,
+
+  budgetRange: row.budget_range,
+  timeline: row.timeline,
+
+  description: row.description,
+  goals: row.goals,
+
+  status: row.status,
+
+  adminNotes: row.admin_notes,
+
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
+
+
+export const getCustomerProjectRequestById = async (
+  id: string,
+): Promise<ProjectRequest> => {
+  const client = requireSupabase();
+
+  const {
+    data: { session },
+    error: sessionError,
+  } = await client.auth.getSession();
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  if (!session?.user?.id) {
+    throw new Error("Customer session required.");
+  }
+
+  const { data, error } = await client
+    .from("project_requests")
+    .select(
+      `
+          id,
+          customer_id,
+          title,
+          project_type,
+          selected_package,
+          package_category,
+          budget_range,
+          timeline,
+          description,
+          goals,
+          status,
+          admin_notes,
+          created_at,
+          updated_at
+          `,
+    )
+    .eq("id", id)
+    .eq("customer_id", session.user.id)
+    .single<ProjectRequestRow>();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapProjectRequest(data);
 };

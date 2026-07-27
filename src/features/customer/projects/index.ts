@@ -1,25 +1,25 @@
 export type {
-  CustomerProjectRequest,
-  CustomerProjectStatus,
-} from "../project-requests/types/customerProjects.types";
+  ProjectRequest,
+  ProjectRequestStatus,
+} from "../project-requests/types/projectRequests.types.ts";
 
 export type {
   CustomerProjectMessage,
   ProjectMessageSenderType,
-} from "../project-requests/messages/customerProjectMessages.types";
+} from "../project-requests/messages/ProjectRequestsMessages.types";
 
 export {
   getCustomerProjectMessages,
   sendCustomerProjectMessage,
   markCustomerProjectMessagesAsRead,
-} from "../project-requests/messages/customerProjectMessages.service";
+} from "../project-requests/messages/ProjectRequestsMessages.service";
 
-export { getCustomerUnreadMessageCounts } from "../project-requests/messages/customerProjectUnread.service";
+export { getCustomerUnreadMessageCounts } from "../project-requests/messages/ProjectRequestsUnread.service";
 
-export { getCustomerProjectRequestById } from "../project-requests/services/customerProjects.service";
+export { getCustomerProjectRequestById } from "../project-requests/services/projectRequests.service";
 
 export { ProjectMessagesPanel } from "../project-requests/messages/components/ProjectMessagesPanel";
 
-export { CustomerProjectDetailsPage } from "./components/CustomerProjectDetailsPage";
+export { CustomerProjectDetailsPage } from "../project-requests/components/ProjectRequestsDetailsPage";
 
-export { ProjectStatusTimeline } from "./components/ProjectStatusTimeline";
+export { ProjectStatusTimeline } from "../project-requests/status/ProjectStatusTimeline";

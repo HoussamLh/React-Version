@@ -10,9 +10,9 @@ import { supabase } from "../../../../../lib/supabase";
 import {
   getCustomerProjectMessages,
   sendCustomerProjectMessage,
-} from "../customerProjectMessages.service";
+} from "../ProjectRequestsMessages.service";
 
-import type { CustomerProjectMessage } from "../customerProjectMessages.types";
+import type { CustomerProjectMessage } from "../ProjectRequestsMessages.types";
 
 type ProjectMessagesPanelProps = {
   projectRequestId: string;
