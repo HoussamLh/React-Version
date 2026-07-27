@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import { getCustomerProjectRequestById } from "../services/customerProjects.service";
-import { markCustomerProjectMessagesAsRead } from "../messages/customerProjectMessages.service";
-import type { CustomerProjectRequest } from "../types/customerProjects.types";
+import { getCustomerProjectRequestById } from "../../project-requests/services/customerProjects.service";
+import { markCustomerProjectMessagesAsRead } from "../../project-requests/messages/customerProjectMessages.service";
+import type { CustomerProjectRequest } from "../../project-requests/types/customerProjects.types";
 import { ProjectStatusTimeline } from "./ProjectStatusTimeline";
-import { ProjectMessagesPanel } from "../messages/components/ProjectMessagesPanel";
+import { ProjectMessagesPanel } from "../../project-requests/messages/components/ProjectMessagesPanel";
 import { ProjectActivityTimeline } from "./ProjectActivityTimeline";
 
 export const CustomerProjectDetailsPage: React.FC = () => {

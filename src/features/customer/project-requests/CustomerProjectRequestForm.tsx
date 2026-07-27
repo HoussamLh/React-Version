@@ -4,7 +4,7 @@ import type {
   CustomerProjectRequestFormValues,
   ProjectRequestPackageCategory,
   ProjectRequestType,
-} from "./projectRequests.types";
+} from "./types/projectRequests.types";
 
 type CustomerProjectRequestFormProps = {
   initialValues?: Partial<CustomerProjectRequestFormValues>;

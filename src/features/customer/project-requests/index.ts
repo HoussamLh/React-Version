@@ -8,10 +8,10 @@ export type {
   ProjectRequestPackageCategory,
   ProjectRequestStatus,
   ProjectRequestType,
-} from "./projectRequests.types";
+} from "./types/projectRequests.types";
 
 export {
   createCustomerProjectRequest,
   getCustomerProjectRequests,
   updateCustomerProjectRequest,
-} from "./projectRequests.service";
+} from "./services/projectRequests.service";

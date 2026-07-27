@@ -1,24 +1,24 @@
 export type {
   CustomerProjectRequest,
   CustomerProjectStatus,
-} from "./types/customerProjects.types";
+} from "../project-requests/types/customerProjects.types";
 
 export type {
   CustomerProjectMessage,
   ProjectMessageSenderType,
-} from "./messages/customerProjectMessages.types";
+} from "../project-requests/messages/customerProjectMessages.types";
 
 export {
   getCustomerProjectMessages,
   sendCustomerProjectMessage,
   markCustomerProjectMessagesAsRead,
-} from "./messages/customerProjectMessages.service";
+} from "../project-requests/messages/customerProjectMessages.service";
 
-export { getCustomerUnreadMessageCounts } from "./messages/customerProjectUnread.service";
+export { getCustomerUnreadMessageCounts } from "../project-requests/messages/customerProjectUnread.service";
 
-export { getCustomerProjectRequestById } from "./services/customerProjects.service";
+export { getCustomerProjectRequestById } from "../project-requests/services/customerProjects.service";
 
-export { ProjectMessagesPanel } from "./messages/components/ProjectMessagesPanel";
+export { ProjectMessagesPanel } from "../project-requests/messages/components/ProjectMessagesPanel";
 
 export { CustomerProjectDetailsPage } from "./components/CustomerProjectDetailsPage";
 

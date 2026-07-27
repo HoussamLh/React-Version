@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProjectStatus } from "../types/customerProjects.types";
+import type { CustomerProjectStatus } from "../../project-requests/types/customerProjects.types";
 
 type ProjectStatusTimelineProps = {
   status: CustomerProjectStatus;

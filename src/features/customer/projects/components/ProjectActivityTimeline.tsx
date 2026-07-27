@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProjectRequest } from "../types/customerProjects.types";
+import type { CustomerProjectRequest } from "../../project-requests/types/customerProjects.types";
 
 type ProjectActivityTimelineProps = {
   project: CustomerProjectRequest;

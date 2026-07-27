@@ -1,8 +1,8 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
   CustomerProjectRequest,
   CustomerProjectRequestFormValues,
-} from "./projectRequests.types";
+} from "../types/projectRequests.types";
 
 type ProjectRequestRow = {
   id: string;

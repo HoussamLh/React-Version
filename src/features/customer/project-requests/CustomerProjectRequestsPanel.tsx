@@ -6,12 +6,12 @@ import { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
 import {
   createCustomerProjectRequest,
   getCustomerProjectRequests,
-} from "./projectRequests.service";
-import { getCustomerUnreadMessageCounts } from "../projects/messages/customerProjectUnread.service";
+} from "./services/projectRequests.service";
+import { getCustomerUnreadMessageCounts } from "./messages/customerProjectUnread.service";
 import type {
   CustomerProjectRequest,
   CustomerProjectRequestFormValues,
-} from "./projectRequests.types";
+} from "./types/projectRequests.types";
 
 const formatDate = (value: string) => {
   return new Intl.DateTimeFormat("en-GB", {

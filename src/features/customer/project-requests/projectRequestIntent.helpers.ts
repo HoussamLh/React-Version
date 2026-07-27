@@ -1,4 +1,4 @@
-import type { CustomerProjectRequestFormValues } from "./projectRequests.types";
+import type { CustomerProjectRequestFormValues } from "./types/projectRequests.types";
 
 export const getProjectRequestValuesFromSearch = (
   search: string,
