@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { supabase } from "../../../../lib/supabase";
 import { colors, radius, spacing, typography } from "../../../../design-system";
 import { getCustomerProjectRequestById } from "../services/projectRequests.service";
 import { markCustomerProjectMessagesAsRead } from "../messages/ProjectRequestsMessages.service";
@@ -8,7 +9,7 @@ import { ProjectStatusTimeline } from "../status/ProjectStatusTimeline";
 import { ProjectMessagesPanel } from "../messages/components/ProjectMessagesPanel";
 import { ProjectActivityTimeline } from "../activities/ProjectActivityTimeline";
 
-export const CustomerProjectDetailsPage: React.FC = () => {
+export const ProjectRequestsDetailsPage: React.FC = () => {
   const { id } = useParams();
 
   const [project, setProject] = useState<ProjectRequest | null>(null);
@@ -84,6 +85,62 @@ export const CustomerProjectDetailsPage: React.FC = () => {
     };
   }, [project?.id]);
 
+    useEffect(() => {
+      if (!supabase || !project?.id) {
+        return;
+      }
+
+      const client = supabase;
+
+      const channel = client
+        .channel(`project-request-status-${project.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "project_requests",
+            filter: `id=eq.${project.id}`,
+          },
+          (payload) => {
+            const updated = payload.new as {
+              id: string;
+              customer_id: string;
+              title: string;
+              project_type: ProjectRequest["projectType"];
+              selected_package: string;
+              package_category: ProjectRequest["packageCategory"];
+              budget_range: string;
+              timeline: string;
+              description: string;
+              goals: string;
+              status: ProjectRequest["status"];
+              admin_notes: string;
+              created_at: string;
+              updated_at: string;
+            };
+
+            setProject((current) => {
+              if (!current) {
+                return current;
+              }
+
+              return {
+                ...current,
+                status: updated.status,
+                adminNotes: updated.admin_notes,
+                updatedAt: updated.updated_at,
+              };
+            });
+          },
+        )
+        .subscribe();
+
+      return () => {
+        void client.removeChannel(channel);
+      };
+    }, [project?.id]);
+
   if (isLoading) {
     return (
       <main style={styles.page}>
@@ -123,7 +180,7 @@ export const CustomerProjectDetailsPage: React.FC = () => {
           </p>
 
           <ProjectStatusTimeline status={project.status} />
-          <ProjectActivityTimeline project={project} />
+          <ProjectActivityTimeline projectRequestId={project.id} />
         </section>
 
         <section style={styles.card}>
