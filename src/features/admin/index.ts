@@ -9,4 +9,4 @@ export { AdminServicesPage } from "./services/AdminServicesPage";
 export { AdminPricingPage } from "./pricing/AdminPricingPage";
 export { AdminTeamPage } from "./team/AdminTeamPage";
 export { AdminProjectRequestsPage } from "./project-requests/AdminProjectRequestsPage";
-export { AdminProjectMessagesPanel } from "./projects/messages/components/AdminProjectMessagesPanel";
+export { AdminProjectMessagesPanel } from "./project-requests/messages/components/AdminProjectMessagesPanel";

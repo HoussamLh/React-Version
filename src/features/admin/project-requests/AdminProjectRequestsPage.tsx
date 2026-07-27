@@ -6,14 +6,14 @@ import {
   updateAdminProjectRequest,
 } from "./adminProjectRequests.service";
 
-import { getUnreadCustomerMessageCounts } from "../projects/messages/adminProjectUnread.service";
+import { getUnreadCustomerMessageCounts } from "../project-requests/messages/adminProjectUnread.service";
 
 import type {
   AdminProjectRequest,
   AdminProjectRequestStatus,
 } from "./adminProjectRequests.types";
 
-import { AdminProjectMessagesPanel } from "../projects";
+import { AdminProjectMessagesPanel } from "../project-requests";
 
 type RequestFilter = "all" | AdminProjectRequestStatus;
 
