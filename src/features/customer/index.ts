@@ -7,8 +7,12 @@ export {
   ProtectedCustomerRoute,
 } from "./auth";
 
-export { ProjectMessagesPanel } from "./project-requests/messages/components/ProjectMessagesPanel";
+export { 
+  ProjectMessagesPanel 
+} from "./project-requests/messages/components/ProjectMessagesPanel";
 
 export * from "./project-requests";
 
-export { CustomerProjectDetailsPage } from "./project-requests/components/ProjectRequestsDetailsPage";
+export { 
+  ProjectRequestsDetailsPage 
+} from "./project-requests/components/ProjectRequestsDetailsPage";

@@ -3,7 +3,7 @@ import {
   Hero,
   SubscriptionSection,
   TrustSection,
-} from "../features/home/sections";
+} from "../features/pages/home/sections";
 
 export const Home: React.FC = () => {
   return (

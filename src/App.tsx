@@ -17,7 +17,7 @@ import {
   CustomerSignInPage,
   CustomerSignUpPage,
   ProtectedCustomerRoute,
-  CustomerProjectDetailsPage,
+  ProjectRequestsDetailsPage,
 } from "./features/customer";
 import { LiveChatBubble } from "./features/live-chat";
 
@@ -136,7 +136,7 @@ function App() {
           path="/customer/projects/:id"
           element={
             <ProtectedCustomerRoute>
-              <CustomerProjectDetailsPage />
+              <ProjectRequestsDetailsPage />
             </ProtectedCustomerRoute>
           }
         />

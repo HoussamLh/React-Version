@@ -1,5 +1,9 @@
 import React from "react";
-import { Hero, ServicesSection, CTASection} from "../features/services";
+import { 
+  Hero, 
+  ServicesSection, 
+  CTASection
+} from "../features/pages/services";
 
 
 export const Services: React.FC = () => (
