@@ -136,7 +136,9 @@ function App() {
           path="/customer/projects/:id"
           element={
             <ProtectedCustomerRoute>
-              <ProjectRequestsDetailsPage />
+              <RootLayout>
+                <ProjectRequestsDetailsPage />
+              </RootLayout>
             </ProtectedCustomerRoute>
           }
         />
