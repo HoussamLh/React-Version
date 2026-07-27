@@ -174,31 +174,6 @@ export const updateCustomerProjectRequest = async ({
   return mapProjectRequestRow(data);
 };
 
-const mapProjectRequest = (row: ProjectRequestRow): ProjectRequest => ({
-  id: row.id,
-  customerId: row.customer_id,
-
-  title: row.title,
-  projectType: row.project_type,
-
-  selectedPackage: row.selected_package,
-  packageCategory: row.package_category,
-
-  budgetRange: row.budget_range,
-  timeline: row.timeline,
-
-  description: row.description,
-  goals: row.goals,
-
-  status: row.status,
-
-  adminNotes: row.admin_notes,
-
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
-});
-
-
 export const getCustomerProjectRequestById = async (
   id: string,
 ): Promise<ProjectRequest> => {
@@ -245,5 +220,5 @@ export const getCustomerProjectRequestById = async (
     throw error;
   }
 
-  return mapProjectRequest(data);
+  return mapProjectRequestRow(data);
 };
