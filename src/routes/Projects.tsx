@@ -1,5 +1,9 @@
 import React from "react";
-import { CTASection, HeroSection, ProjectsSection } from "../features/projects";
+import { 
+  CTASection, 
+  HeroSection, 
+  ProjectsSection 
+} from "../features/pages/projects";
 
 export const Projects: React.FC = () => {
   return (

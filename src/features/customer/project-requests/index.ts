@@ -1,17 +1,17 @@
-export { CustomerProjectRequestForm } from "./CustomerProjectRequestForm";
-export { CustomerProjectRequestsPanel } from "./CustomerProjectRequestsPanel";
-export { getProjectRequestValuesFromSearch } from "./projectRequestIntent.helpers";
+export { CustomerProjectRequestForm } from "./components/ProjectRequestForm";
+export { CustomerProjectRequestsPanel } from "./components/ProjectRequestsPanel";
+export { getProjectRequestValuesFromSearch } from "./helpers/projectRequestIntent.helpers";
 
 export type {
-  CustomerProjectRequest,
-  CustomerProjectRequestFormValues,
+  ProjectRequest,
+  ProjectRequestFormValues,
   ProjectRequestPackageCategory,
   ProjectRequestStatus,
   ProjectRequestType,
-} from "./projectRequests.types";
+} from "./types/projectRequests.types";
 
 export {
   createCustomerProjectRequest,
   getCustomerProjectRequests,
   updateCustomerProjectRequest,
-} from "./projectRequests.service";
+} from "./services/projectRequests.service";

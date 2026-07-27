@@ -9,7 +9,7 @@ import { updateCurrentCustomerProfile } from "../auth";
 import { CustomerAccountSettings } from "../account";
 import type { CustomerProfile } from "../auth/customerAuth.types";
 import { CustomerProjectRequestsPanel } from "../project-requests";
-import { getProjectRequestValuesFromSearch } from "../project-requests/projectRequestIntent.helpers";
+import { getProjectRequestValuesFromSearch } from "../project-requests/helpers/projectRequestIntent.helpers";
 
 export const CustomerDashboardPage: React.FC = () => {
   const navigate = useNavigate();

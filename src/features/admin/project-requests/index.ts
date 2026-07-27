@@ -13,3 +13,5 @@ export {
   getAdminProjectRequests,
   updateAdminProjectRequest,
 } from "./adminProjectRequests.service";
+
+export { AdminProjectMessagesPanel } from "./messages/components/AdminProjectMessagesPanel";

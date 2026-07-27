@@ -129,6 +129,22 @@ export const updateAdminProjectRequest = async ({
 }) => {
   const client = requireSupabase();
 
+  const { data: currentRequest, error: currentError } = await client
+    .from("project_requests")
+    .select(
+      `
+      status
+      `,
+    )
+    .eq("id", requestId)
+    .single<{
+      status: AdminProjectRequest["status"];
+    }>();
+
+  if (currentError) {
+    throw currentError;
+  }
+
   const { data, error } = await client
     .from("project_requests")
     .update({
@@ -141,6 +157,39 @@ export const updateAdminProjectRequest = async ({
 
   if (error) {
     throw error;
+  }
+
+  // Create activity when status changes
+  if (currentRequest.status !== values.status) {
+    const { error: activityError } = await client
+      .from("project_activities")
+      .insert({
+        project_request_id: requestId,
+        type: "status_change",
+        message: `Project status changed to ${values.status.replace(
+          "_",
+          " ",
+        )}.`,
+      });
+
+    if (activityError) {
+      throw activityError;
+    }
+  }
+
+  // Create activity when admin adds notes
+  if (values.adminNotes?.trim()) {
+    const { error: noteError } = await client
+      .from("project_activities")
+      .insert({
+        project_request_id: requestId,
+        type: "admin_note",
+        message: values.adminNotes.trim(),
+      });
+
+    if (noteError) {
+      throw noteError;
+    }
   }
 
   return mapProjectRequestRow(data);

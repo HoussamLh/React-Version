@@ -3,7 +3,7 @@ import {
   ContactFormSection,
   CTASection,
   HeroSection,
-} from "../features/contact";
+} from "../features/pages/contact";
 export const Contact: React.FC = () => {
   return (
     <div className="ds-page">

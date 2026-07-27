@@ -4,7 +4,7 @@ import {
   BuildProcess,
   OurTeam,
   CTASection,
-} from "../features/about";
+} from "../features/pages/about";
 
 export const About: React.FC = () => (
   <div style={{padding:'0 8%', overflow:'hidden'}}>

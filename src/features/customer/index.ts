@@ -6,3 +6,13 @@ export {
   CustomerSignUpPage,
   ProtectedCustomerRoute,
 } from "./auth";
+
+export { 
+  ProjectMessagesPanel 
+} from "./project-requests/messages/components/ProjectMessagesPanel";
+
+export * from "./project-requests";
+
+export { 
+  ProjectRequestsDetailsPage 
+} from "./project-requests/components/ProjectRequestsDetailsPage";

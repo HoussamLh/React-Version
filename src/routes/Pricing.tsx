@@ -5,7 +5,7 @@ import {
   HeroSection,
   MaintenanceSection,
   PricingSection,
-} from "../features/pricing";
+} from "../features/pages/pricing";
 
 export const Pricing: React.FC = () => {
   return (

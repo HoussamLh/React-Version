@@ -20,7 +20,7 @@ export type AdminProjectRequestStatus =
 export type AdminProjectRequest = {
   id: string;
   customerId: string;
-
+  
   customerEmail: string;
   customerName: string;
   customerCompany: string;
