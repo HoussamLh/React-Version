@@ -1,6 +1,6 @@
 import React from "react";
-import { colors, spacing } from "../../../design-system";
-import type { AdminMessage } from "./types/adminChat.types";
+import { colors, spacing } from "../../../../design-system";
+import type { AdminMessage } from "../types/adminChat.types";
 
 type AdminMessageBubbleProps = {
   message: AdminMessage;

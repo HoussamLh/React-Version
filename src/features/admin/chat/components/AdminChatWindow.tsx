@@ -20,7 +20,7 @@ import {
   AdminMetaChip,
 } from "../../components";
 import { formatAdminDateTime } from "../../utils";
-import { AdminMessageBubble } from "../AdminMessageBubble";
+import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "../AdminMessageComposer";
 import {
   getConversationStatusTone,
