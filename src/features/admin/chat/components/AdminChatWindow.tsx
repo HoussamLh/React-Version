@@ -1,33 +1,33 @@
 import React, { useEffect, useRef, useState } from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
-import { getCurrentAdminProfile } from "../auth/adminAuth.service";
+import { colors, radius, spacing, typography } from "../../../../design-system";
+import { getCurrentAdminProfile } from "../../auth/adminAuth.service";
 import {
   createAdminRealtimeChannel,
   getAdminConversationMessages,
   sendAdminMessage,
   subscribeToAdminConversationMessages,
   updateConversationStatus,
-} from "./services/adminChat.service";
+} from "../services/adminChat.service";
 import type {
   AdminConversation,
   AdminConversationStatus,
   AdminMessage,
-} from "./types/adminChat.types";
+} from "../types/adminChat.types";
 import {
   AdminActionButton,
   AdminStatusBadge,
   AdminSuccessMessage,
   AdminMetaChip,
-} from "../components";
-import { formatAdminDateTime } from "../utils";
-import { AdminMessageBubble } from "./AdminMessageBubble";
-import { AdminMessageComposer } from "./AdminMessageComposer";
+} from "../../components";
+import { formatAdminDateTime } from "../../utils";
+import { AdminMessageBubble } from "../AdminMessageBubble";
+import { AdminMessageComposer } from "../AdminMessageComposer";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
-} from "./helpers/adminChat.helpers";
+} from "../helpers/adminChat.helpers";
 
-import { TypingIndicator } from "../../../shared/components";
+import { TypingIndicator } from "../../../../shared/components";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;

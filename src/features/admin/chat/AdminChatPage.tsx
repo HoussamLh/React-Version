@@ -3,7 +3,7 @@ import { colors } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
 import { AdminPanel } from "../components";
 import { useAdminConversations } from "./hooks/useAdminConversations";
-import { AdminChatWindow } from "./AdminChatWindow";
+import { AdminChatWindow } from "./components/AdminChatWindow";
 import { ConversationList } from "./ConversationList";
 
 export const AdminChatPage: React.FC = () => {
