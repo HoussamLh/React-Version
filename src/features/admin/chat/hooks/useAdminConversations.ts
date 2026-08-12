@@ -5,7 +5,7 @@ import {
   subscribeToAllAdminMessages,
 } from "../services/adminChat.service";
 import type { AdminConversation } from "../types/adminChat.types";
-import { getAdminConversationSearchableText } from "../adminChat.helpers";
+import { getAdminConversationSearchableText } from "../helpers/adminChat.helpers";
 import type { AdminConversationFilter } from "../ConversationList";
 
 export const useAdminConversations = () => {

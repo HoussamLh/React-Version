@@ -1,7 +1,7 @@
 import type {
   AdminConversation,
   AdminConversationStatus,
-} from "./types/adminChat.types";
+} from "../types/adminChat.types";
 
 export const getConversationStatusTone = (
   status: AdminConversationStatus,

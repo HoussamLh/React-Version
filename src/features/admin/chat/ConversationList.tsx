@@ -20,7 +20,7 @@ import type {
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
-} from "./adminChat.helpers";
+} from "./helpers/adminChat.helpers";
 
 export type AdminConversationFilter =
   | "all"

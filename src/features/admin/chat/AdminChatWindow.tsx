@@ -25,7 +25,7 @@ import { AdminMessageComposer } from "./AdminMessageComposer";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
-} from "./adminChat.helpers";
+} from "./helpers/adminChat.helpers";
 
 import { TypingIndicator } from "../../../shared/components";
 
