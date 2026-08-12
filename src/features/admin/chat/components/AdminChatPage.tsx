@@ -1,10 +1,10 @@
 import React from "react";
-import { colors } from "../../../design-system";
-import { useMediaQuery } from "../../../shared/hooks";
-import { AdminPanel } from "../components";
-import { useAdminConversations } from "./hooks/useAdminConversations";
-import { AdminChatWindow } from "./components/AdminChatWindow";
-import { ConversationList } from "./components/ConversationList";
+import { colors } from "../../../../design-system";
+import { useMediaQuery } from "../../../../shared/hooks";
+import { AdminPanel } from "../../components";
+import { useAdminConversations } from "../hooks/useAdminConversations";
+import { AdminChatWindow } from "../components/AdminChatWindow";
+import { ConversationList } from "../components/ConversationList";
 
 export const AdminChatPage: React.FC = () => {
   const isCompactChat = useMediaQuery("(max-width: 1250px)");
