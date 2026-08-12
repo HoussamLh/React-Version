@@ -1,5 +1,9 @@
 import React from "react";
-import { colors, radius, spacing } from "../../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+} from "../../../../design-system";
 
 type AdminChatEmptyStateProps = {
   isCompactChat: boolean;

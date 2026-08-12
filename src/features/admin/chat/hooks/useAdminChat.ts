@@ -1,19 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getCurrentAdminProfile } from "../../auth/adminAuth.service";
+import { useCallback, useEffect, useState } from "react";
 import {
   getAdminConversationMessages,
   sendAdminMessage,
   updateConversationStatus,
 } from "../services/adminChat.service";
-import {
-  subscribeToAdminConversationMessages,
-  createAdminRealtimeChannel,
-} from "../services/adminChat.realtime.service";
+import { subscribeToAdminConversationMessages } from "../services/adminChat.realtime.service";
 import type {
   AdminConversation,
   AdminConversationStatus,
   AdminMessage,
 } from "../types/adminChat.types";
+import { useAdminChatRealtime } from "./useAdminChatRealtime";
 
 const appendUniqueMessage = (
   currentMessages: AdminMessage[],
@@ -46,18 +43,18 @@ export const useAdminChat = ({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isVisitorOnline, setIsVisitorOnline] = useState(false);
-  const [isVisitorTyping, setIsVisitorTyping] = useState(false);
-
-  const typingTimeoutRef = useRef<number | null>(null);
-
-  const realtimeRef = useRef<{
-    sendTypingStatus: (isTyping: boolean) => Promise<void>;
-    unsubscribe: () => void;
-  } | null>(null);
 
   const conversationId = conversation?.id ?? null;
   const conversationStatus = conversation?.status ?? null;
+
+  const {
+    isVisitorOnline,
+    isVisitorTyping,
+    handleTypingChange,
+    sendTypingStatus,
+  } = useAdminChatRealtime({
+    conversationId,
+  });
 
   /*
    * Load conversation messages.
@@ -126,70 +123,6 @@ export const useAdminChat = ({
 
     return unsubscribe;
   }, [conversationId, onConversationUpdated]);
-
-  /*
-   * Create realtime presence + typing channel.
-   */
-  useEffect(() => {
-    if (!conversationId) {
-      return;
-    }
-
-    let isMounted = true;
-
-    void Promise.resolve().then(async () => {
-      const adminProfile = await getCurrentAdminProfile();
-
-      if (!isMounted || !adminProfile) {
-        return;
-      }
-
-      const realtime = createAdminRealtimeChannel({
-        conversationId,
-        adminId: adminProfile.id,
-        onVisitorTypingChange: setIsVisitorTyping,
-        onPresenceChange: setIsVisitorOnline,
-      });
-
-      realtimeRef.current = realtime;
-    });
-
-    return () => {
-      isMounted = false;
-
-      if (typingTimeoutRef.current) {
-        window.clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = null;
-      }
-
-      realtimeRef.current?.unsubscribe();
-      realtimeRef.current = null;
-
-      setIsVisitorOnline(false);
-      setIsVisitorTyping(false);
-    };
-  }, [conversationId]);
-
-  /*
-   * Visitor typing state.
-   */
-  const handleTypingChange = useCallback((isTyping: boolean) => {
-    if (typingTimeoutRef.current) {
-      window.clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = null;
-    }
-
-    void realtimeRef.current?.sendTypingStatus(isTyping);
-
-    if (!isTyping) {
-      return;
-    }
-
-    typingTimeoutRef.current = window.setTimeout(() => {
-      void realtimeRef.current?.sendTypingStatus(false);
-      typingTimeoutRef.current = null;
-    }, 1500);
-  }, []);
 
   /*
    * Temporary success message.
@@ -265,7 +198,7 @@ export const useAdminChat = ({
       setError("");
 
       try {
-        await realtimeRef.current?.sendTypingStatus(false);
+        await sendTypingStatus(false);
 
         const nextMessage = await sendAdminMessage({
           conversationId,
@@ -292,7 +225,13 @@ export const useAdminChat = ({
         setIsSending(false);
       }
     },
-    [conversationId, conversationStatus, onConversationUpdated, reply],
+    [
+      conversationId,
+      conversationStatus,
+      onConversationUpdated,
+      reply,
+      sendTypingStatus,
+    ],
   );
 
   return {

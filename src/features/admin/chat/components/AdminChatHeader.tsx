@@ -1,10 +1,18 @@
 import React from "react";
-import { colors, radius, spacing, typography } from "../../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography,
+ } from "../../../../design-system";
 import type {
   AdminConversation,
   AdminConversationStatus,
 } from "../types/adminChat.types";
-import { AdminActionButton, AdminStatusBadge } from "../../components";
+import { 
+  AdminActionButton, 
+  AdminStatusBadge, 
+} from "../../components";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
