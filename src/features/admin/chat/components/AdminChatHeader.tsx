@@ -4,16 +4,12 @@ import type {
   AdminConversation,
   AdminConversationStatus,
 } from "../types/adminChat.types";
-import {
-  AdminActionButton,
-  AdminStatusBadge,
-  AdminMetaChip,
-} from "../../components";
-import { formatAdminDateTime } from "../../utils";
+import { AdminActionButton, AdminStatusBadge } from "../../components";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
 } from "../helpers/adminChat.helpers";
+import { AdminChatHeaderMeta } from "./AdminChatHeaderMeta";
 
 type AdminChatHeaderProps = {
   conversation: AdminConversation;
@@ -37,7 +33,6 @@ export const AdminChatHeader: React.FC<AdminChatHeaderProps> = ({
   onStatusChange,
 }) => {
   const visitorLabel = getAdminConversationVisitorLabel(conversation);
-  const hasVisitorEmail = Boolean(conversation.visitorEmail);
 
   return (
     <header
@@ -62,32 +57,7 @@ export const AdminChatHeader: React.FC<AdminChatHeaderProps> = ({
           {isVisitorTyping ? " · typing..." : ""}
         </p>
 
-        <div style={styles.contactMeta}>
-          {hasVisitorEmail && (
-            <a
-              href={`mailto:${conversation.visitorEmail}`}
-              style={styles.contactLink}
-            >
-              {conversation.visitorEmail}
-            </a>
-          )}
-
-          <AdminMetaChip>
-            {conversation.chatMode === "offline"
-              ? "Offline enquiry"
-              : "Live chat"}
-          </AdminMetaChip>
-
-          <AdminMetaChip>Source: {conversation.source}</AdminMetaChip>
-
-          <AdminMetaChip>
-            Last message: {formatAdminDateTime(conversation.lastMessageAt)}
-          </AdminMetaChip>
-
-          <AdminMetaChip>
-            Visitor ID: {conversation.visitorId.slice(0, 8)}
-          </AdminMetaChip>
-        </div>
+        <AdminChatHeaderMeta conversation={conversation} />
       </div>
 
       <div
@@ -193,22 +163,6 @@ const styles = {
     color: colors.text.muted,
     fontSize: "13px",
     margin: `${spacing.xs} 0 0 0`,
-  },
-
-  contactMeta: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-    marginTop: spacing.md,
-  },
-
-  contactLink: {
-    color: colors.accent.green,
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-    overflowWrap: "anywhere" as const,
   },
 
   headerActions: {
