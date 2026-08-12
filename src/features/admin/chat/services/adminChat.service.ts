@@ -1,17 +1,11 @@
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "../../../../lib/supabase";
 import type {
   AdminConversationChatMode,
   AdminConversation,
   AdminConversationStatus,
   AdminMessage,
   AdminMessageSender,
-} from "./adminChat.types";
-
-type VisitorProfileRow = {
-  display_name: string | null;
-  email: string | null;
-  chat_mode: AdminConversationChatMode | null;
-};
+} from "../adminChat.types";
 
 type ConversationRow = {
   id: string;
@@ -23,7 +17,23 @@ type ConversationRow = {
   updated_at: string;
   last_message_at: string;
   admin_last_read_at: string | null;
-  visitor_profiles: VisitorProfileRow | VisitorProfileRow[] | null;
+  visitor_profiles:
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }
+    | {
+        display_name: string | null;
+        email: string | null;
+        chat_mode: AdminConversationChatMode | null;
+      }[]
+    | null;
 };
 
 type MessageRow = {
@@ -41,12 +51,6 @@ type AdminTypingPayload = {
   isTyping: boolean;
 };
 
-type RealtimePresenceState = {
-  userId: string;
-  role: "visitor" | "admin";
-  onlineAt: string;
-};
-
 const requireSupabase = () => {
   if (!supabase) {
     throw new Error("Supabase is not configured.");
@@ -55,7 +59,7 @@ const requireSupabase = () => {
   return supabase;
 };
 
-const getVisitorProfile = (row: ConversationRow): VisitorProfileRow | null => {
+const getVisitorProfile = (row: ConversationRow) => {
   if (Array.isArray(row.visitor_profiles)) {
     return row.visitor_profiles[0] ?? null;
   }
@@ -87,19 +91,13 @@ const mapConversation = (
   };
 };
 
-const mapMessage = (row: MessageRow): AdminMessage => {
-  return {
-    id: row.id,
-    conversationId: row.conversation_id,
-    senderType: row.sender_type,
-    body: row.body,
-    createdAt: row.created_at,
-  };
-};
-
-/* -------------------------------------------------------------------------- */
-/* Conversations                                                              */
-/* -------------------------------------------------------------------------- */
+const mapMessage = (row: MessageRow): AdminMessage => ({
+  id: row.id,
+  conversationId: row.conversation_id,
+  senderType: row.sender_type,
+  body: row.body,
+  createdAt: row.created_at,
+});
 
 export const getAdminConversations = async (): Promise<AdminConversation[]> => {
   const client = requireSupabase();
@@ -107,21 +105,7 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
   const { data: conversations, error } = await client
     .from("conversations")
     .select(
-      `
-        id,
-        visitor_id,
-        status,
-        source,
-        created_at,
-        updated_at,
-        last_message_at,
-        admin_last_read_at,
-        visitor_profiles (
-          display_name,
-          email,
-          chat_mode
-        )
-      `,
+      `id, visitor_id, status, source, created_at, updated_at, last_message_at, admin_last_read_at, visitor_profiles ( display_name, email, chat_mode )`,
     )
     .order("last_message_at", { ascending: false })
     .returns<ConversationRow[]>();
@@ -138,15 +122,7 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
 
   const { data: messages, error: messagesError } = await client
     .from("messages")
-    .select(
-      `
-        id,
-        conversation_id,
-        sender_type,
-        body,
-        created_at
-      `,
-    )
+    .select("id, conversation_id, sender_type, body, created_at")
     .in("conversation_id", conversationIds)
     .order("created_at", { ascending: false })
     .returns<MessageRow[]>();
@@ -155,48 +131,38 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
     throw messagesError;
   }
 
-  const conversationsById = new Map(
-    conversations.map((conversation) => [conversation.id, conversation]),
-  );
-
   const latestMessageByConversation = new Map<string, string>();
   const unreadCountByConversation = new Map<string, number>();
 
-  for (const message of messages) {
+  messages.forEach((message) => {
     if (!latestMessageByConversation.has(message.conversation_id)) {
       latestMessageByConversation.set(message.conversation_id, message.body);
     }
 
-    const conversation = conversationsById.get(message.conversation_id);
+    const conversation = conversations.find(
+      (item) => item.id === message.conversation_id,
+    );
 
     if (!conversation) {
-      continue;
+      return;
     }
 
     const isVisitorMessage = message.sender_type === "visitor";
-
-    if (!isVisitorMessage) {
-      continue;
-    }
-
     const readAt = conversation.admin_last_read_at;
 
     const isUnread =
-      !readAt ||
-      new Date(message.created_at).getTime() > new Date(readAt).getTime();
+      isVisitorMessage &&
+      (!readAt || new Date(message.created_at) > new Date(readAt));
 
     if (!isUnread) {
-      continue;
+      return;
     }
-
-    const currentUnreadCount =
-      unreadCountByConversation.get(message.conversation_id) ?? 0;
 
     unreadCountByConversation.set(
       message.conversation_id,
-      currentUnreadCount + 1,
+      (unreadCountByConversation.get(message.conversation_id) ?? 0) + 1,
     );
-  }
+  });
 
   return conversations.map((conversation) =>
     mapConversation(
@@ -207,10 +173,6 @@ export const getAdminConversations = async (): Promise<AdminConversation[]> => {
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* Messages                                                                    */
-/* -------------------------------------------------------------------------- */
-
 export const getAdminConversationMessages = async (
   conversationId: string,
 ): Promise<AdminMessage[]> => {
@@ -218,15 +180,7 @@ export const getAdminConversationMessages = async (
 
   const { data, error } = await client
     .from("messages")
-    .select(
-      `
-        id,
-        conversation_id,
-        sender_type,
-        body,
-        created_at
-      `,
-    )
+    .select("id, conversation_id, sender_type, body, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true })
     .returns<MessageRow[]>();
@@ -254,15 +208,7 @@ export const sendAdminMessage = async ({
       sender_type: "admin",
       body,
     })
-    .select(
-      `
-        id,
-        conversation_id,
-        sender_type,
-        body,
-        created_at
-      `,
-    )
+    .select("id, conversation_id, sender_type, body, created_at")
     .single<MessageRow>();
 
   if (error) {
@@ -272,17 +218,13 @@ export const sendAdminMessage = async ({
   return mapMessage(data);
 };
 
-/* -------------------------------------------------------------------------- */
-/* Conversation actions                                                        */
-/* -------------------------------------------------------------------------- */
-
 export const updateConversationStatus = async ({
   conversationId,
   status,
 }: {
   conversationId: string;
   status: AdminConversationStatus;
-}): Promise<void> => {
+}) => {
   const client = requireSupabase();
 
   const { error } = await client.rpc("update_admin_conversation_status", {
@@ -297,9 +239,7 @@ export const updateConversationStatus = async ({
   window.dispatchEvent(new Event("admin-badges-changed"));
 };
 
-export const markConversationReadForAdmin = async (
-  conversationId: string,
-): Promise<void> => {
+export const markConversationReadForAdmin = async (conversationId: string) => {
   const client = requireSupabase();
 
   const { error } = await client.rpc("mark_conversation_read_for_admin", {
@@ -313,88 +253,62 @@ export const markConversationReadForAdmin = async (
   window.dispatchEvent(new Event("admin-badges-changed"));
 };
 
-/* -------------------------------------------------------------------------- */
-/* Realtime: conversation messages                                             */
-/* -------------------------------------------------------------------------- */
-
 export const subscribeToAdminConversationMessages = ({
   conversationId,
   onMessage,
 }: {
   conversationId: string;
   onMessage: (message: AdminMessage) => void;
-}): (() => void) => {
+}) => {
   const client = requireSupabase();
 
-  const channelName = `admin-chat-messages-${conversationId}-${Date.now()}`;
-
-  const channel = client.channel(channelName);
-
-  channel.on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "messages",
-      filter: `conversation_id=eq.${conversationId}`,
-    },
-    (payload) => {
-      onMessage(mapMessage(payload.new as MessageRow));
-    },
-  );
-
-  channel.subscribe();
+  const channel = client
+    .channel(`admin-chat-messages-${conversationId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        onMessage(mapMessage(payload.new as MessageRow));
+      },
+    )
+    .subscribe();
 
   return () => {
     client.removeChannel(channel);
   };
 };
-
-/* -------------------------------------------------------------------------- */
-/* Realtime: all admin messages                                                */
-/* -------------------------------------------------------------------------- */
 
 export const subscribeToAllAdminMessages = ({
   onMessage,
 }: {
   onMessage: () => void;
-}): (() => void) => {
+}) => {
   const client = requireSupabase();
 
-  /*
-   * Use a unique channel name for every subscription instance.
-   *
-   * This prevents React development-mode remounts / StrictMode cleanup
-   * cycles from accidentally reusing a previously subscribed channel.
-   */
-  const channelName = `admin-all-chat-messages-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}`;
-
-  const channel = client.channel(channelName);
-
-  channel.on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "messages",
-    },
-    () => {
-      onMessage();
-    },
-  );
-
-  channel.subscribe();
+  const channel = client
+    .channel("admin-all-chat-messages")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      },
+      () => {
+        onMessage();
+      },
+    )
+    .subscribe();
 
   return () => {
     client.removeChannel(channel);
   };
 };
-
-/* -------------------------------------------------------------------------- */
-/* Realtime: presence + typing                                                 */
-/* -------------------------------------------------------------------------- */
 
 export const createAdminRealtimeChannel = ({
   conversationId,
@@ -411,53 +325,52 @@ export const createAdminRealtimeChannel = ({
 
   const channel = client.channel(`live-chat-room-${conversationId}`, {
     config: {
-      broadcast: {
-        self: false,
-      },
-      presence: {
-        key: adminId,
-      },
+      broadcast: { self: false },
+      presence: { key: adminId },
     },
   });
 
-  channel.on("broadcast", { event: "typing" }, ({ payload }) => {
-    const typingPayload = payload as AdminTypingPayload;
+  channel
+    .on("broadcast", { event: "typing" }, ({ payload }) => {
+      const typingPayload = payload as AdminTypingPayload;
 
-    if (typingPayload.conversationId !== conversationId) {
-      return;
-    }
+      if (typingPayload.conversationId !== conversationId) {
+        return;
+      }
 
-    if (typingPayload.role !== "visitor") {
-      return;
-    }
+      if (typingPayload.role !== "visitor") {
+        return;
+      }
 
-    onVisitorTypingChange(Boolean(typingPayload.isTyping));
-  });
+      onVisitorTypingChange(Boolean(typingPayload.isTyping));
+    })
+    .on("presence", { event: "sync" }, () => {
+      const state = channel.presenceState<{
+        userId: string;
+        role: "visitor" | "admin";
+        onlineAt: string;
+      }>();
 
-  channel.on("presence", { event: "sync" }, () => {
-    const state = channel.presenceState<RealtimePresenceState>();
+      const presence = Object.values(state).flat();
 
-    const presence = Object.values(state).flat();
+      const isVisitorOnline = presence.some((item) => item.role === "visitor");
 
-    const isVisitorOnline = presence.some((item) => item.role === "visitor");
+      onPresenceChange(isVisitorOnline);
+    })
+    .subscribe(async (status) => {
+      if (status !== "SUBSCRIBED") {
+        return;
+      }
 
-    onPresenceChange(isVisitorOnline);
-  });
-
-  channel.subscribe(async (status) => {
-    if (status !== "SUBSCRIBED") {
-      return;
-    }
-
-    await channel.track({
-      userId: adminId,
-      role: "admin",
-      onlineAt: new Date().toISOString(),
+      await channel.track({
+        userId: adminId,
+        role: "admin",
+        onlineAt: new Date().toISOString(),
+      });
     });
-  });
 
   return {
-    sendTypingStatus: async (isTyping: boolean): Promise<void> => {
+    sendTypingStatus: async (isTyping: boolean) => {
       await channel.send({
         type: "broadcast",
         event: "typing",
@@ -470,7 +383,7 @@ export const createAdminRealtimeChannel = ({
       });
     },
 
-    unsubscribe: (): void => {
+    unsubscribe: () => {
       client.removeChannel(channel);
     },
   };
