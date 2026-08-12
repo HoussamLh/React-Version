@@ -6,7 +6,7 @@ import {
 } from "../services/adminChat.service";
 import type { AdminConversation } from "../types/adminChat.types";
 import { getAdminConversationSearchableText } from "../helpers/adminChat.helpers";
-import type { AdminConversationFilter } from "../components/ConversationList";
+import type { AdminConversationFilter } from "../components/ConversationListFilters";
 
 export const useAdminConversations = () => {
   const [conversations, setConversations] = useState<AdminConversation[]>([]);

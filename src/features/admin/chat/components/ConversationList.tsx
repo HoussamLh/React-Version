@@ -3,23 +3,19 @@ import {
   colors, 
   radius, 
   spacing, 
-  typography 
+  typography, 
 } from "../../../../design-system";
 import {
   AdminEmptyState,
   AdminErrorRecovery,
-  AdminSearchInput,
   AdminStatusBadge,
-  AdminFilterButton,
-  AdminResetButton,
   AdminLoadingText,
 } from "../../components";
 import { 
   formatAdminTimeWithDate 
 } from "../../utils";
 import type {
-  AdminConversation,
-  AdminConversationStatus,
+  AdminConversation
 } from "../types/adminChat.types";
 import {
   getConversationStatusTone,
@@ -28,12 +24,12 @@ import {
 import { 
   ConversationListHeader 
 } from "./ConversationListHeader";
-
-export type AdminConversationFilter =
-  | "all"
-  | AdminConversationStatus
-  | "unread"
-  | "offline";
+import { 
+  ConversationListFilters 
+} from "./ConversationListFilters";
+import type { 
+  AdminConversationFilter 
+} from "./ConversationListFilters";
 
 type ConversationListProps = {
   conversations: AdminConversation[];
@@ -56,18 +52,6 @@ type ConversationListProps = {
   onRefresh: () => void;
   onSelectConversation: (conversation: AdminConversation) => void;
 };
-
-const filterOptions: {
-  label: string;
-  value: AdminConversationFilter;
-}[] = [
-  { label: "All", value: "all" },
-  { label: "Open", value: "open" },
-  { label: "Pending", value: "pending" },
-  { label: "Closed", value: "closed" },
-  { label: "Unread", value: "unread" },
-  { label: "Offline", value: "offline" },
-];
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
@@ -105,41 +89,18 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         onMarkAllRead={onMarkAllRead}
         onRefresh={onRefresh}
       />
-      <div
-        style={{
-          ...styles.searchArea,
-          ...(isNarrowChat ? styles.searchAreaNarrow : {}),
-        }}
-      >
-        <AdminSearchInput
-          value={searchQuery}
-          placeholder="Search by name, email or phone number..."
-          onChange={onSearchChange}
-        />
-
-        {hasActiveFilters && (
-          <AdminResetButton isNarrow={isNarrowChat} onClick={onResetFilters} />
-        )}
-      </div>
-
-      <div style={styles.filters}>
-        {filterOptions.map((filter) => (
-          <AdminFilterButton
-            key={filter.value}
-            label={filter.label}
-            count={filterCounts[filter.value]}
-            isActive={conversationFilter === filter.value}
-            onClick={() => onFilterChange(filter.value)}
-          />
-        ))}
-      </div>
-
-      {hasActiveFilters && (
-        <p style={styles.activeFilterText}>
-          Showing {conversations.length} of {totalConversationCount}{" "}
-          conversations.
-        </p>
-      )}
+      <ConversationListFilters
+        totalConversationCount={totalConversationCount}
+        visibleConversationCount={conversations.length}
+        searchQuery={searchQuery}
+        conversationFilter={conversationFilter}
+        filterCounts={filterCounts}
+        hasActiveFilters={hasActiveFilters}
+        isNarrowChat={isNarrowChat}
+        onSearchChange={onSearchChange}
+        onFilterChange={onFilterChange}
+        onResetFilters={onResetFilters}
+      />
 
       {error && (
         <AdminErrorRecovery
@@ -251,34 +212,6 @@ const styles = {
     width: "100%",
     minWidth: 0,
     borderRight: "none",
-    borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  searchArea: {
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    gap: spacing.sm,
-  },
-
-  searchAreaNarrow: {
-    flexDirection: "column" as const,
-  },
-
-  filters: {
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-  },
-
-  activeFilterText: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    lineHeight: "18px",
-    margin: 0,
-    padding: `${spacing.sm} ${spacing.md}`,
     borderBottom: `1px solid ${colors.border.default}`,
   },
 
