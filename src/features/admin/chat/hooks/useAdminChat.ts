@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentAdminProfile } from "../../auth/adminAuth.service";
 import {
-  createAdminRealtimeChannel,
   getAdminConversationMessages,
   sendAdminMessage,
-  subscribeToAdminConversationMessages,
   updateConversationStatus,
 } from "../services/adminChat.service";
+import {
+  subscribeToAdminConversationMessages,
+  createAdminRealtimeChannel,
+} from "../services/adminChat.realtime.service";
 import type {
   AdminConversation,
   AdminConversationStatus,

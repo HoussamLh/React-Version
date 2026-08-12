@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getAdminConversations,
   markConversationReadForAdmin,
-  subscribeToAllAdminMessages,
 } from "../services/adminChat.service";
+import { subscribeToAllAdminMessages } from "../services/adminChat.realtime.service";
 import type { AdminConversation } from "../types/adminChat.types";
 import { getAdminConversationSearchableText } from "../helpers/adminChat.helpers";
 import type { AdminConversationFilter } from "../components/ConversationListFilters";
