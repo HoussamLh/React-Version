@@ -1,40 +1,29 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { colors } from "../../../design-system";
-import { useMediaQuery } from "../../../shared/hooks";
-import { AdminPanel } from "../components";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getAdminConversations,
   markConversationReadForAdmin,
-  subscribeToAllAdminMessages,
-} from "./adminChat.service";
-import type { AdminConversation } from "./adminChat.types";
-import { getAdminConversationSearchableText } from "./adminChat.helpers";
-import { AdminChatWindow } from "./AdminChatWindow";
-import {
-  ConversationList,
-  type AdminConversationFilter,
-} from "./ConversationList";
+} from "../services/adminChat.service";
+import { subscribeToAllAdminMessages } from "../services/adminChat.realtime.service";
+import type { AdminConversation } from "../types/adminChat.types";
+import { getAdminConversationSearchableText } from "../helpers/adminChat.helpers";
+import type { AdminConversationFilter } from "../components/ConversationListFilters";
 
-export const AdminChatPage: React.FC = () => {
-  const isCompactChat = useMediaQuery("(max-width: 1250px)");
-  const isNarrowChat = useMediaQuery("(max-width: 640px)");
-
+export const useAdminConversations = () => {
   const [conversations, setConversations] = useState<AdminConversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<AdminConversation | null>(null);
+
   const [conversationFilter, setConversationFilter] =
     useState<AdminConversationFilter>("all");
+
   const [searchQuery, setSearchQuery] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
   const [error, setError] = useState("");
 
   const selectedConversationId = selectedConversation?.id ?? null;
+
   const selectedConversationUnreadCount =
     selectedConversation?.unreadCount ?? 0;
 
@@ -70,18 +59,23 @@ export const AdminChatPage: React.FC = () => {
   const filterCounts = useMemo(() => {
     return {
       all: conversations.length,
+
       open: conversations.filter(
         (conversation) => conversation.status === "open",
       ).length,
+
       pending: conversations.filter(
         (conversation) => conversation.status === "pending",
       ).length,
+
       closed: conversations.filter(
         (conversation) => conversation.status === "closed",
       ).length,
+
       unread: conversations.filter(
         (conversation) => conversation.unreadCount > 0,
       ).length,
+
       offline: conversations.filter(
         (conversation) => conversation.chatMode === "offline",
       ).length,
@@ -118,12 +112,14 @@ export const AdminChatPage: React.FC = () => {
   const hasActiveFilters =
     conversationFilter !== "all" || searchQuery.trim().length > 0;
 
-  const handleMarkAllRead = async () => {
+  const handleMarkAllRead = useCallback(async () => {
     const unreadConversationIds = conversations
       .filter((conversation) => conversation.unreadCount > 0)
       .map((conversation) => conversation.id);
 
-    if (unreadConversationIds.length === 0) return;
+    if (unreadConversationIds.length === 0) {
+      return;
+    }
 
     setIsMarkingAllRead(true);
     setError("");
@@ -136,25 +132,28 @@ export const AdminChatPage: React.FC = () => {
       );
 
       await loadConversations();
+
       window.dispatchEvent(new Event("admin-badges-changed"));
     } catch {
       setError("Could not mark conversations as read.");
     } finally {
       setIsMarkingAllRead(false);
     }
-  };
+  }, [conversations, loadConversations]);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setConversationFilter("all");
     setSearchQuery("");
-  };
+  }, []);
 
+  // Initial conversation load.
   useEffect(() => {
     void Promise.resolve().then(() => {
       void loadConversations();
     });
   }, [loadConversations]);
 
+  // Keep the conversation inbox updated when a new message arrives.
   useEffect(() => {
     const unsubscribe = subscribeToAllAdminMessages({
       onMessage: () => {
@@ -165,6 +164,7 @@ export const AdminChatPage: React.FC = () => {
     return unsubscribe;
   }, [loadConversations]);
 
+  // Mark the selected conversation as read.
   useEffect(() => {
     if (!selectedConversationId || selectedConversationUnreadCount === 0) {
       return;
@@ -176,11 +176,13 @@ export const AdminChatPage: React.FC = () => {
       try {
         await markConversationReadForAdmin(selectedConversationId);
 
-        if (!isMounted) return;
+        if (!isMounted) {
+          return;
+        }
 
         await loadConversations();
       } catch {
-        // Keep the inbox usable even if read-state update fails.
+        // Keep the inbox usable if the read-state update fails.
       }
     });
 
@@ -193,57 +195,32 @@ export const AdminChatPage: React.FC = () => {
     loadConversations,
   ]);
 
-  return (
-    <AdminPanel
-      style={{
-        ...styles.shell,
-        ...(isCompactChat ? styles.shellCompact : {}),
-      }}
-    >
-      <ConversationList
-        conversations={filteredConversations}
-        totalConversationCount={conversations.length}
-        selectedConversationId={selectedConversationId}
-        isLoading={isLoading}
-        error={error}
-        searchQuery={searchQuery}
-        conversationFilter={conversationFilter}
-        filterCounts={filterCounts}
-        hasActiveFilters={hasActiveFilters}
-        hasUnreadConversations={hasUnreadConversations}
-        isCompactChat={isCompactChat}
-        isNarrowChat={isNarrowChat}
-        isMarkingAllRead={isMarkingAllRead}
-        onSearchChange={setSearchQuery}
-        onMarkAllRead={handleMarkAllRead}
-        onFilterChange={setConversationFilter}
-        onResetFilters={handleResetFilters}
-        onRefresh={loadConversations}
-        onSelectConversation={setSelectedConversation}
-      />
+  return {
+    conversations,
+    selectedConversation,
 
-      <AdminChatWindow
-        conversation={selectedConversation}
-        isCompactChat={isCompactChat}
-        isNarrowChat={isNarrowChat}
-        onConversationUpdated={loadConversations}
-      />
-    </AdminPanel>
-  );
-};
+    conversationFilter,
+    searchQuery,
 
-const styles = {
-  shell: {
-    height: "calc(100vh - 146px)",
-    minHeight: "620px",
-    display: "flex",
-    backgroundColor: colors.background.dark,
-  },
+    isLoading,
+    isMarkingAllRead,
+    error,
 
-  shellCompact: {
-    height: "auto",
-    minHeight: "auto",
-    flexDirection: "column" as const,
-    overflow: "visible",
-  },
+    filterCounts,
+    filteredConversations,
+
+    hasUnreadConversations,
+    hasActiveFilters,
+
+    selectedConversationId,
+    selectedConversationUnreadCount,
+
+    setSelectedConversation,
+    setConversationFilter,
+    setSearchQuery,
+
+    loadConversations,
+    handleMarkAllRead,
+    handleResetFilters,
+  };
 };

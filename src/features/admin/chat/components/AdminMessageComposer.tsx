@@ -1,6 +1,6 @@
 import React from "react";
 import { SendHorizontal } from "lucide-react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { colors, radius, spacing, typography } from "../../../../design-system";
 type AdminMessageComposerProps = {
   value: string;
   isSending: boolean;

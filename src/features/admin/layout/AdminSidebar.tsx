@@ -11,7 +11,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { getAdminConversations } from "../chat/adminChat.service";
+import { getAdminConversations } from "../chat/services/adminChat.service";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 
 type AdminSidebarProps = {
