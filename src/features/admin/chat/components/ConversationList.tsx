@@ -1,18 +1,22 @@
 import React from "react";
-import { colors, radius, spacing, typography } from "../../../../design-system";
+import { 
+  colors, 
+  radius, 
+  spacing, 
+  typography 
+} from "../../../../design-system";
 import {
-  AdminActionButton,
   AdminEmptyState,
   AdminErrorRecovery,
   AdminSearchInput,
   AdminStatusBadge,
   AdminFilterButton,
   AdminResetButton,
-  AdminCountBadge,
   AdminLoadingText,
-  AdminPanelHeader,
 } from "../../components";
-import { formatAdminTimeWithDate } from "../../utils";
+import { 
+  formatAdminTimeWithDate 
+} from "../../utils";
 import type {
   AdminConversation,
   AdminConversationStatus,
@@ -21,6 +25,9 @@ import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
 } from "../helpers/adminChat.helpers";
+import { 
+  ConversationListHeader 
+} from "./ConversationListHeader";
 
 export type AdminConversationFilter =
   | "all"
@@ -90,34 +97,13 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         ...(isCompactChat ? styles.panelCompact : {}),
       }}
     >
-      <AdminPanelHeader
-        title="Conversations"
-        subtitle="Live chat inbox"
-        actions={
-          <div style={styles.headerActions}>
-            <AdminCountBadge count={conversations.length} />
-
-            {hasUnreadConversations && (
-              <AdminActionButton
-                variant="successGhost"
-                size="sm"
-                disabled={isMarkingAllRead || isLoading}
-                onClick={onMarkAllRead}
-              >
-                {isMarkingAllRead ? "Marking..." : "Mark all read"}
-              </AdminActionButton>
-            )}
-
-            <AdminActionButton
-              variant="ghost"
-              size="sm"
-              disabled={isLoading}
-              onClick={onRefresh}
-            >
-              {isLoading ? "..." : "Refresh"}
-            </AdminActionButton>
-          </div>
-        }
+      <ConversationListHeader
+        conversationCount={conversations.length}
+        hasUnreadConversations={hasUnreadConversations}
+        isMarkingAllRead={isMarkingAllRead}
+        isLoading={isLoading}
+        onMarkAllRead={onMarkAllRead}
+        onRefresh={onRefresh}
       />
       <div
         style={{
@@ -266,15 +252,6 @@ const styles = {
     minWidth: 0,
     borderRight: "none",
     borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  headerActions: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-    flexShrink: 0,
   },
 
   searchArea: {
