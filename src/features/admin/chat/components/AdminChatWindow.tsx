@@ -1,12 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { colors, radius, spacing } from "../../../../design-system";
 import type { AdminConversation } from "../types/adminChat.types";
 import { useAdminChat } from "../hooks/useAdminChat";
-import {AdminSuccessMessage} from "../../components";
-import { AdminMessageBubble } from "./AdminMessageBubble";
 import { AdminMessageComposer } from "./AdminMessageComposer";
 import { AdminChatHeader } from "./AdminChatHeader";
-import { TypingIndicator } from "../../../../shared/components";
+import { AdminChatMessages } from "./AdminChatMessages";
 
 type AdminChatWindowProps = {
   conversation: AdminConversation | null;
@@ -15,41 +13,30 @@ type AdminChatWindowProps = {
   onConversationUpdated: () => void;
 };
 
-
 export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
   conversation,
   isCompactChat,
   isNarrowChat,
   onConversationUpdated,
 }) => {
-
-    const {
-      messages,
-      reply,
-      isLoading,
-      isSending,
-      isUpdatingStatus,
-      error,
-      successMessage,
-      isVisitorOnline,
-      isVisitorTyping,
-      setReply,
-      handleTypingChange,
-      handleStatusChange,
-      handleSubmit,
-    } = useAdminChat({
-      conversation,
-      onConversationUpdated,
-    });
-
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  }, [messages.length, isVisitorTyping]);
+  const {
+    messages,
+    reply,
+    isLoading,
+    isSending,
+    isUpdatingStatus,
+    error,
+    successMessage,
+    isVisitorOnline,
+    isVisitorTyping,
+    setReply,
+    handleTypingChange,
+    handleStatusChange,
+    handleSubmit,
+  } = useAdminChat({
+    conversation,
+    onConversationUpdated,
+  });
 
   if (!conversation) {
     return (
@@ -60,6 +47,7 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         }}
       >
         <h2 style={styles.emptyTitle}>Select a conversation</h2>
+
         <p style={styles.emptyText}>
           Choose a visitor conversation from the inbox to view messages and
           reply.
@@ -85,31 +73,14 @@ export const AdminChatWindow: React.FC<AdminChatWindowProps> = ({
         onStatusChange={handleStatusChange}
       />
 
-      <div
-        style={{
-          ...styles.body,
-          ...(isCompactChat ? styles.bodyCompact : {}),
-        }}
-      >
-        {isLoading && <p style={styles.stateText}>Loading messages...</p>}
-
-        {!isLoading && messages.length === 0 && (
-          <p style={styles.stateText}>No messages in this conversation yet.</p>
-        )}
-
-        {messages.map((message) => (
-          <AdminMessageBubble key={message.id} message={message} />
-        ))}
-
-        {isVisitorTyping && <TypingIndicator label="Visitor is typing" />}
-
-        {error && <p style={styles.error}>{error}</p>}
-        {successMessage && (
-          <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
-        )}
-
-        <div ref={bottomRef} />
-      </div>
+      <AdminChatMessages
+        messages={messages}
+        isLoading={isLoading}
+        isVisitorTyping={isVisitorTyping}
+        error={error}
+        successMessage={successMessage}
+        isCompactChat={isCompactChat}
+      />
 
       <AdminMessageComposer
         value={reply}
@@ -129,27 +100,6 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     backgroundColor: colors.background.dark,
-  },
-
-  body: {
-    flex: 1,
-    overflowY: "auto" as const,
-    padding: spacing.lg,
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: spacing.md,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: 0,
-  },
-
-  error: {
-    color: colors.accent.yellow,
-    fontSize: "13px",
-    margin: 0,
   },
 
   emptyState: {
@@ -181,10 +131,6 @@ const styles = {
 
   windowCompact: {
     minHeight: "620px",
-  },
-
-  bodyCompact: {
-    minHeight: "420px",
   },
 
   emptyStateCompact: {
