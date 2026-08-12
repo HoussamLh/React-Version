@@ -7,7 +7,7 @@ import {
   sendAdminMessage,
   subscribeToAdminConversationMessages,
   updateConversationStatus,
-} from "./adminChat.service";
+} from "./services/adminChat.service";
 import type {
   AdminConversation,
   AdminConversationStatus,

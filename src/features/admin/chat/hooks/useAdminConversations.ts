@@ -3,7 +3,7 @@ import {
   getAdminConversations,
   markConversationReadForAdmin,
   subscribeToAllAdminMessages,
-} from "../adminChat.service";
+} from "../services/adminChat.service";
 import type { AdminConversation } from "../adminChat.types";
 import { getAdminConversationSearchableText } from "../adminChat.helpers";
 import type { AdminConversationFilter } from "../ConversationList";
