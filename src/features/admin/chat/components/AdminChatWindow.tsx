@@ -21,7 +21,7 @@ import {
 } from "../../components";
 import { formatAdminDateTime } from "../../utils";
 import { AdminMessageBubble } from "./AdminMessageBubble";
-import { AdminMessageComposer } from "../AdminMessageComposer";
+import { AdminMessageComposer } from "./AdminMessageComposer";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
