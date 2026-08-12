@@ -1,5 +1,5 @@
 import React from "react";
-import { colors, radius, spacing, typography } from "../../../design-system";
+import { colors, radius, spacing, typography } from "../../../../design-system";
 import {
   AdminActionButton,
   AdminEmptyState,
@@ -11,16 +11,16 @@ import {
   AdminCountBadge,
   AdminLoadingText,
   AdminPanelHeader,
-} from "../components";
-import { formatAdminTimeWithDate } from "../utils";
+} from "../../components";
+import { formatAdminTimeWithDate } from "../../utils";
 import type {
   AdminConversation,
   AdminConversationStatus,
-} from "./types/adminChat.types";
+} from "../types/adminChat.types";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,
-} from "./helpers/adminChat.helpers";
+} from "../helpers/adminChat.helpers";
 
 export type AdminConversationFilter =
   | "all"
