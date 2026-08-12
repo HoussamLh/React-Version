@@ -12,7 +12,7 @@ import type {
   AdminConversation,
   AdminConversationStatus,
   AdminMessage,
-} from "./adminChat.types";
+} from "./types/adminChat.types";
 import {
   AdminActionButton,
   AdminStatusBadge,

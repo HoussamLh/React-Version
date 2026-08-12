@@ -12,7 +12,7 @@ import {
 import { formatAdminShortDateTime } from "../utils";
 import { getAdminConversationVisitorLabel } from "../chat/adminChat.helpers";
 import { getAdminConversations } from "../chat/services/adminChat.service";
-import type { AdminConversation } from "../chat/adminChat.types";
+import type { AdminConversation } from "../chat/types/adminChat.types";
 import { getContactSubmissions } from "../contacts/contactSubmissions.service";
 import type { ContactSubmission } from "../contacts/contactSubmissions.types";
 

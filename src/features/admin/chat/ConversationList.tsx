@@ -16,7 +16,7 @@ import { formatAdminTimeWithDate } from "../utils";
 import type {
   AdminConversation,
   AdminConversationStatus,
-} from "./adminChat.types";
+} from "./types/adminChat.types";
 import {
   getConversationStatusTone,
   getAdminConversationVisitorLabel,

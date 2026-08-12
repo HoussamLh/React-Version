@@ -5,7 +5,7 @@ import type {
   AdminConversationStatus,
   AdminMessage,
   AdminMessageSender,
-} from "../adminChat.types";
+} from "../types/adminChat.types";
 
 type VisitorProfileRow = {
   display_name: string | null;

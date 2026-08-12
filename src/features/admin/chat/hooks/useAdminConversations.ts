@@ -4,7 +4,7 @@ import {
   markConversationReadForAdmin,
   subscribeToAllAdminMessages,
 } from "../services/adminChat.service";
-import type { AdminConversation } from "../adminChat.types";
+import type { AdminConversation } from "../types/adminChat.types";
 import { getAdminConversationSearchableText } from "../adminChat.helpers";
 import type { AdminConversationFilter } from "../ConversationList";
 
