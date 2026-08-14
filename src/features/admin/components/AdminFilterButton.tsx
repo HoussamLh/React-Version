@@ -32,7 +32,9 @@ export const AdminFilterButton: React.FC<AdminFilterButtonProps> = ({
 
 const styles = {
   button: {
-    border: `1px solid ${colors.border.default}`,
+    borderWidth: "1px",
+    borderStyle: "solid" as const,
+    borderColor: colors.border.default,
     borderRadius: radius.pill,
     backgroundColor: "transparent",
     color: colors.text.muted,

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { getAdminConversations } from "../chat/services/adminChat.service";
-import { getContactSubmissions } from "../contacts/contactSubmissions.service";
+import { getContactSubmissions } from "../contacts/services/contactSubmissions.service";
 
 type AdminSidebarProps = {
   isCompactLayout?: boolean;

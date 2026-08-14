@@ -1,4 +1,4 @@
-import type { ContactSubmission } from "./contactSubmissions.types";
+import type { ContactSubmission } from "../types/contactSubmissions.types";
 
 export const getContactSubmissionMailtoHref = (
   submission: ContactSubmission,
