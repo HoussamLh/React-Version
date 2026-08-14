@@ -1,20 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React from "react";
 import { Code, Server, ShieldCheck, Smartphone } from "lucide-react";
 import { colors, radius, spacing, typography } from "../../../design-system";
 import { AdminServiceForm } from "./AdminServiceForm";
 import {
-  createAdminService,
-  deleteAdminService,
-  getAdminServices,
-  updateAdminService,
-} from "./servicesCms.service";
-import type {
-  AdminService,
-  AdminServiceFormValues,
-  ServiceStatus,
-} from "./servicesCms.types";
-
-type ServiceFilter = "all" | ServiceStatus;
+  getServiceFormValues,
+  useAdminServices,
+} from "./hooks/useAdminServices";
+import type { AdminService } from "./servicesCms.types";
 
 const serviceIconMap: Record<AdminService["icon"], React.ReactNode> = {
   code: <Code size={22} />,
@@ -23,7 +15,7 @@ const serviceIconMap: Record<AdminService["icon"], React.ReactNode> = {
   "shield-check": <ShieldCheck size={22} />,
 };
 
-const getServiceStatusStyle = (status: ServiceStatus) => {
+const getServiceStatusStyle = (status: AdminService["status"]) => {
   if (status === "published") {
     return styles.publishedBadge;
   }
@@ -31,190 +23,43 @@ const getServiceStatusStyle = (status: ServiceStatus) => {
   return styles.draftBadge;
 };
 
-const getServiceFormValues = (
-  service: AdminService,
-): AdminServiceFormValues => {
-  return {
-    title: service.title,
-    slug: service.slug,
-    text: service.text,
-
-    icon: service.icon,
-    imageUrl: service.imageUrl,
-
-    pills: service.pills,
-
-    span: service.span,
-    badge: service.badge,
-    monitoring: service.monitoring,
-
-    hoverAccent: service.hoverAccent,
-
-    status: service.status,
-    sortOrder: service.sortOrder,
-  };
-};
-
 export const AdminServicesPage: React.FC = () => {
+  const {
+    services,
+    filteredServices,
 
-  const [services, setServices] = useState<AdminService[]>([]);
-  const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [editingService, setEditingService] = useState<AdminService | null>(null,);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCreatingService, setIsCreatingService] = useState(false);
-  const [isUpdatingService, setIsUpdatingService] = useState(false);
-  const [isDeletingServiceId, setIsDeletingServiceId] = useState<string | null>(null,);
-  const [error, setError] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+    statusFilter,
+    searchQuery,
+    hasActiveFilters,
 
-  const loadServices = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    isCreateFormOpen,
+    editingService,
 
-    try {
-      const nextServices = await getAdminServices();
-      setServices(nextServices);
-    } catch (error) {
-      console.error("Could not load services:", error);
-      setError("Could not load services. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    isLoading,
+    isCreatingService,
+    isUpdatingService,
+    isDeletingServiceId,
 
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void loadServices();
-    }, 0);
+    error,
+    createError,
+    updateError,
+    deleteError,
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [loadServices]);
+    setStatusFilter,
+    setSearchQuery,
 
-  const filteredServices = useMemo(() => {
-    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+    loadServices,
+    resetFilters,
 
-    return services.filter((service) => {
-      const matchesStatus =
-        statusFilter === "all" || service.status === statusFilter;
+    handleCreateService,
+    handleUpdateService,
+    handleDeleteService,
 
-      const searchableText = [
-        service.title,
-        service.slug,
-        service.text,
-        service.icon,
-        service.span,
-        service.badge ?? "",
-        service.status,
-        service.hoverAccent,
-        service.pills.join(" "),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch =
-        !normalizedSearchQuery ||
-        searchableText.includes(normalizedSearchQuery);
-
-      return matchesStatus && matchesSearch;
-    });
-  }, [services, searchQuery, statusFilter]);
-
-  const hasActiveFilters = statusFilter !== "all" || searchQuery.trim();
-
-  const resetFilters = () => {
-    setStatusFilter("all");
-    setSearchQuery("");
-  };
-
-  const handleCreateService = async (values: AdminServiceFormValues) => {
-    setIsCreatingService(true);
-    setCreateError(null);
-
-    try {
-      await createAdminService(values);
-      setIsCreateFormOpen(false);
-      await loadServices();
-    } catch (error) {
-      console.error("Could not create service:", error);
-      setCreateError(
-        "Could not create service. Check the slug is unique and all required fields are valid.",
-      );
-    } finally {
-      setIsCreatingService(false);
-    }
-  };
-
-  const handleUpdateService = async (values: AdminServiceFormValues) => {
-    if (!editingService) return;
-
-    setIsUpdatingService(true);
-    setUpdateError(null);
-
-    try {
-      await updateAdminService({
-        serviceId: editingService.id,
-        values,
-      });
-
-      setEditingService(null);
-      await loadServices();
-    } catch (error) {
-      console.error("Could not update service:", error);
-      setUpdateError(
-        "Could not update service. Check the slug is unique and all required fields are valid.",
-      );
-    } finally {
-      setIsUpdatingService(false);
-    }
-  };
-
-  const handleDeleteService = async (service: AdminService) => {
-    const isConfirmed = window.confirm(
-      `Delete "${service.title}"? This cannot be undone.`,
-    );
-
-    if (!isConfirmed) return;
-
-    setIsDeletingServiceId(service.id);
-    setDeleteError(null);
-
-    try {
-      await deleteAdminService(service.id);
-
-      if (editingService?.id === service.id) {
-        setEditingService(null);
-      }
-
-      await loadServices();
-    } catch (error) {
-      console.error("Could not delete service:", error);
-      setDeleteError("Could not delete service. Please try again.");
-    } finally {
-      setIsDeletingServiceId(null);
-    }
-  };
-
-  const openCreateForm = () => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setEditingService(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
-  };
-
-  const openEditForm = (service: AdminService) => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setIsCreateFormOpen(false);
-    setEditingService(service);
-  };
+    openCreateForm,
+    openEditForm,
+    closeCreateForm,
+    closeEditForm,
+  } = useAdminServices();
 
   return (
     <section style={styles.page}>
@@ -266,10 +111,7 @@ export const AdminServicesPage: React.FC = () => {
               key="create-service"
               submitLabel="Create Service"
               isSubmitting={isCreatingService}
-              onCancel={() => {
-                setCreateError(null);
-                setIsCreateFormOpen(false);
-              }}
+              onCancel={closeCreateForm}
               onSubmit={handleCreateService}
             />
           </div>
@@ -294,10 +136,7 @@ export const AdminServicesPage: React.FC = () => {
               initialValues={getServiceFormValues(editingService)}
               submitLabel="Save Changes"
               isSubmitting={isUpdatingService}
-              onCancel={() => {
-                setUpdateError(null);
-                setEditingService(null);
-              }}
+              onCancel={closeEditForm}
               onSubmit={handleUpdateService}
             />
           </div>
