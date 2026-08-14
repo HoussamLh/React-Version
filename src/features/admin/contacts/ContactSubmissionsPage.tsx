@@ -1,30 +1,7 @@
-import React, { 
-  useCallback, 
-  useEffect, 
-  useMemo, 
-  useState 
-} from "react";
-import { 
-  colors, 
-  radius, 
-  spacing, 
-  typography 
-} from "../../../design-system";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { colors, spacing, radius } from "../../../design-system";
 import { useMediaQuery } from "../../../shared/hooks";
-import {
-  AdminActionButton,
-  AdminEmptyState,
-  AdminErrorRecovery,
-  AdminSearchInput,
-  AdminStatusBadge,
-  AdminPanel,
-  AdminFilterButton,
-  AdminResetButton,
-  AdminCountBadge,
-  AdminLoadingText,
-  AdminSuccessMessage,
-  AdminPanelHeader,
-} from "../components";
+import { AdminPanel, AdminSuccessMessage } from "../components";
 import { copyTextToClipboard, formatAdminDateTime } from "../utils";
 import {
   getContactSubmissions,
@@ -38,22 +15,12 @@ import {
   getContactSubmissionMailtoHref,
   getContactSubmissionSearchableText,
 } from "./contactSubmissions.helpers";
-
-type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
+import {
+  ContactSubmissionsList,
+  type SubmissionFilter,
+} from "./ContactSubmissionsList";
 
 const statusOptions: ContactSubmissionStatus[] = ["new", "contacted", "closed"];
-
-const filterOptions: {
-  label: string;
-  value: SubmissionFilter;
-}[] = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "New", value: "new" },
-  { label: "Contacted", value: "contacted" },
-  { label: "Closed", value: "closed" },
-];
-
 
 const statusMeta: Record<
   ContactSubmissionStatus,
@@ -74,20 +41,6 @@ const statusMeta: Record<
     label: "Closed",
     description: "No further action needed",
   },
-};
-
-const getSubmissionStatusTone = (
-  status: ContactSubmission["status"],
-): "success" | "warning" | "muted" => {
-  if (status === "new") {
-    return "warning";
-  }
-
-  if (status === "closed") {
-    return "muted";
-  }
-
-  return "success";
 };
 
 export const ContactSubmissionsPage: React.FC = () => {
@@ -186,7 +139,10 @@ export const ContactSubmissionsPage: React.FC = () => {
     let isMounted = true;
 
     window.setTimeout(() => {
-      if (!isMounted) return;
+      if (!isMounted) {
+        return;
+      }
+
       void loadSubmissions();
     }, 0);
 
@@ -212,7 +168,9 @@ export const ContactSubmissionsPage: React.FC = () => {
         "Are you sure you want to close this contact submission?",
       );
 
-      if (!confirmed) return;
+      if (!confirmed) {
+        return;
+      }
     }
 
     setIsUpdatingStatus(true);
@@ -226,6 +184,7 @@ export const ContactSubmissionsPage: React.FC = () => {
       });
 
       await loadSubmissions();
+
       showSuccessMessage(
         `Submission marked as ${statusMeta[status].label.toLowerCase()}.`,
       );
@@ -236,20 +195,20 @@ export const ContactSubmissionsPage: React.FC = () => {
     }
   };
 
-const handleCopy = async (value: string, field: "email" | "phone") => {
-  setError("");
+  const handleCopy = async (value: string, field: "email" | "phone") => {
+    setError("");
 
-  try {
-    await copyTextToClipboard(value);
-    setCopiedField(field);
+    try {
+      await copyTextToClipboard(value);
+      setCopiedField(field);
 
-    window.setTimeout(() => {
-      setCopiedField(null);
-    }, 1600);
-  } catch {
-    setError("Could not copy to clipboard.");
-  }
-};
+      window.setTimeout(() => {
+        setCopiedField(null);
+      }, 1600);
+    } catch {
+      setError("Could not copy to clipboard.");
+    }
+  };
 
   const handleResetFilters = () => {
     setSubmissionFilter("all");
@@ -263,134 +222,24 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
         ...(isCompactContacts ? styles.shellCompact : {}),
       }}
     >
-      <aside
-        style={{
-          ...styles.listPanel,
-          ...(isCompactContacts ? styles.listPanelCompact : {}),
-        }}
-      >
-        <AdminPanelHeader
-          title="Contact Submissions"
-          subtitle="Review website enquiries from the contact form."
-          isNarrow={isNarrowContacts}
-          actions={
-            <div style={styles.headerActions}>
-              <AdminCountBadge
-                count={filteredSubmissions.length}
-                variant="circle"
-              />
-
-              <AdminActionButton
-                variant="ghost"
-                size="sm"
-                disabled={isLoading}
-                onClick={loadSubmissions}
-              >
-                {isLoading ? "..." : "Refresh"}
-              </AdminActionButton>
-            </div>
-          }
-        />
-
-        <div
-          style={{
-            ...styles.searchArea,
-            ...(isNarrowContacts ? styles.searchAreaNarrow : {}),
-          }}
-        >
-          <AdminSearchInput
-            value={searchQuery}
-            placeholder="Search name, email, phone, service..."
-            onChange={setSearchQuery}
-          />
-
-          {hasActiveFilters && (
-            <AdminResetButton
-              isNarrow={isNarrowContacts}
-              onClick={handleResetFilters}
-            />
-          )}
-        </div>
-
-        <div style={styles.filters}>
-          {filterOptions.map((filter) => (
-            <AdminFilterButton
-              key={filter.value}
-              label={filter.label}
-              count={filterCounts[filter.value]}
-              isActive={submissionFilter === filter.value}
-              onClick={() => setSubmissionFilter(filter.value)}
-            />
-          ))}
-        </div>
-
-        {hasActiveFilters && (
-          <p style={styles.activeFilterText}>
-            Showing {filteredSubmissions.length} of {submissions.length}{" "}
-            submissions.
-          </p>
-        )}
-
-        {error && (
-          <AdminErrorRecovery
-            message={error}
-            isLoading={isLoading}
-            onRetry={loadSubmissions}
-          />
-        )}
-
-        {isLoading && (
-          <AdminLoadingText padded>Loading submissions...</AdminLoadingText>
-        )}
-
-        {!isLoading && !error && filteredSubmissions.length === 0 && (
-          <AdminEmptyState
-            title="No submissions found"
-            text="Try another search term or reset the filters."
-          />
-        )}
-
-        <div
-          style={{
-            ...styles.list,
-            ...(isCompactContacts ? styles.listCompact : {}),
-          }}
-        >
-          {filteredSubmissions.map((submission) => {
-            const isActive = submission.id === selectedSubmission?.id;
-
-            return (
-              <button
-                key={submission.id}
-                type="button"
-                style={{
-                  ...styles.submissionItem,
-                  ...(isActive ? styles.submissionItemActive : {}),
-                }}
-                onClick={() => setSelectedSubmission(submission)}
-              >
-                <div style={styles.itemTop}>
-                  <span style={styles.name}>{submission.name}</span>
-                  <span style={styles.date}>
-                    {formatAdminDateTime(submission.createdAt)}
-                  </span>
-                </div>
-
-                <p style={styles.preview}>{submission.message}</p>
-
-                <div style={styles.itemFooter}>
-                  <span style={styles.serviceBadge}>{submission.service}</span>
-                  <AdminStatusBadge
-                    tone={getSubmissionStatusTone(submission.status)}
-                  >
-                    {submission.status}
-                  </AdminStatusBadge>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
+      <ContactSubmissionsList
+        submissions={submissions}
+        filteredSubmissions={filteredSubmissions}
+        selectedSubmission={selectedSubmission}
+        submissionFilter={submissionFilter}
+        searchQuery={searchQuery}
+        filterCounts={filterCounts}
+        hasActiveFilters={hasActiveFilters}
+        isLoading={isLoading}
+        error={error}
+        isCompactContacts={isCompactContacts}
+        isNarrowContacts={isNarrowContacts}
+        onSearchChange={setSearchQuery}
+        onFilterChange={setSubmissionFilter}
+        onResetFilters={handleResetFilters}
+        onRefresh={loadSubmissions}
+        onSelectSubmission={setSelectedSubmission}
+      />
 
       <main
         style={{
@@ -402,6 +251,7 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
         {!selectedSubmission && (
           <div style={styles.emptyState}>
             <h3 style={styles.emptyTitle}>Select a submission</h3>
+
             <p style={styles.emptyText}>
               Choose an enquiry from the list to view its details.
             </p>
@@ -410,6 +260,8 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
 
         {selectedSubmission && (
           <>
+            {/* Contact submission details will be extracted next. */}
+
             <header
               style={{
                 ...styles.detailHeader,
@@ -417,27 +269,8 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
               }}
             >
               <div style={styles.detailHeaderContent}>
-                <AdminStatusBadge
-                  tone={getSubmissionStatusTone(selectedSubmission.status)}
-                >
-                  {selectedSubmission.status}
-                </AdminStatusBadge>
-
-                <h3
-                  style={{
-                    ...styles.detailTitle,
-                    ...(isNarrowContacts ? styles.detailTitleNarrow : {}),
-                  }}
-                >
-                  {selectedSubmission.name}
-                </h3>
-
                 <p style={styles.detailMeta}>
                   Submitted {formatAdminDateTime(selectedSubmission.createdAt)}
-                </p>
-
-                <p style={styles.statusDescription}>
-                  {statusMeta[selectedSubmission.status].description}
                 </p>
               </div>
 
@@ -468,169 +301,33 @@ const handleCopy = async (value: string, field: "email" | "phone") => {
                     </option>
                   ))}
                 </select>
-
-                <div
-                  style={{
-                    ...styles.quickStatusActions,
-                    ...(isCompactContacts
-                      ? styles.quickStatusActionsCompact
-                      : {}),
-                    ...(isNarrowContacts
-                      ? styles.quickStatusActionsNarrow
-                      : {}),
-                  }}
-                >
-                  {selectedSubmission.status !== "contacted" && (
-                    <AdminActionButton
-                      variant="primary"
-                      disabled={isUpdatingStatus}
-                      fullWidth={isNarrowContacts}
-                      onClick={() =>
-                        handleStatusChange(selectedSubmission.id, "contacted")
-                      }
-                    >
-                      Mark contacted
-                    </AdminActionButton>
-                  )}
-
-                  {selectedSubmission.status !== "closed" && (
-                    <AdminActionButton
-                      variant="secondary"
-                      disabled={isUpdatingStatus}
-                      fullWidth={isNarrowContacts}
-                      onClick={() =>
-                        handleStatusChange(selectedSubmission.id, "closed")
-                      }
-                    >
-                      Close
-                    </AdminActionButton>
-                  )}
-
-                  {selectedSubmission.status !== "new" && (
-                    <AdminActionButton
-                      variant="secondary"
-                      disabled={isUpdatingStatus}
-                      fullWidth={isNarrowContacts}
-                      onClick={() =>
-                        handleStatusChange(selectedSubmission.id, "new")
-                      }
-                    >
-                      Reopen
-                    </AdminActionButton>
-                  )}
-                </div>
               </div>
             </header>
 
-            <div
-              style={{
-                ...styles.infoGrid,
-                ...(isCompactContacts ? styles.infoGridCompact : {}),
-                ...(isNarrowContacts ? styles.infoGridNarrow : {}),
-              }}
-            >
-              <div style={styles.infoCard}>
-                <div style={styles.infoCardHeader}>
-                  <span style={styles.infoLabel}>Email</span>
+            <div style={styles.placeholderDetails}>
+              <p style={styles.placeholderText}>
+                Contact submission details remain here temporarily.
+              </p>
 
-                  <button
-                    type="button"
-                    style={{
-                      ...styles.copyButton,
-                      ...(copiedField === "email"
-                        ? styles.copyButtonSuccess
-                        : {}),
-                    }}
-                    onClick={() =>
-                      handleCopy(selectedSubmission.email, "email")
-                    }
-                  >
-                    {copiedField === "email" ? "Copied" : "Copy"}
-                  </button>
-                </div>
+              <p style={styles.placeholderText}>
+                The details section will be extracted into
+                ContactSubmissionDetails.tsx in the next step.
+              </p>
 
-                <a
-                  href={getContactSubmissionMailtoHref(selectedSubmission)}
-                  style={styles.infoValue}
-                >
-                  {selectedSubmission.email}
-                </a>
-
-                <a
-                  href={getContactSubmissionMailtoHref(selectedSubmission)}
-                  style={styles.contactActionLink}
-                >
-                  Send email
-                </a>
-              </div>
-
-              <div style={styles.infoCard}>
-                <div style={styles.infoCardHeader}>
-                  <span style={styles.infoLabel}>Phone</span>
-
-                  <button
-                    type="button"
-                    style={{
-                      ...styles.copyButton,
-                      ...(copiedField === "phone"
-                        ? styles.copyButtonSuccess
-                        : {}),
-                    }}
-                    onClick={() =>
-                      handleCopy(selectedSubmission.phone, "phone")
-                    }
-                  >
-                    {copiedField === "phone" ? "Copied" : "Copy"}
-                  </button>
-                </div>
-
-                <a
-                  href={`tel:${selectedSubmission.phone}`}
-                  style={styles.infoValue}
-                >
-                  {selectedSubmission.phone}
-                </a>
-
-                <a
-                  href={`tel:${selectedSubmission.phone}`}
-                  style={styles.contactActionLink}
-                >
-                  Call number
-                </a>
-              </div>
-
-              <div style={styles.infoCard}>
-                <span style={styles.infoLabel}>Service</span>
-                <span style={styles.infoValue}>
-                  {selectedSubmission.service}
-                </span>
-              </div>
-
-              <div style={styles.infoCard}>
-                <span style={styles.infoLabel}>Source</span>
-                <span style={styles.infoValue}>
-                  {selectedSubmission.source}
-                </span>
-              </div>
-            </div>
-
-            <article style={styles.messageCard}>
-              <div
-                style={{
-                  ...styles.messageHeader,
-                  ...(isNarrowContacts ? styles.messageHeaderNarrow : {}),
-                }}
+              <button
+                type="button"
+                onClick={() => handleCopy(selectedSubmission.email, "email")}
               >
-                <span style={styles.infoLabel}>Message</span>
-                <span style={styles.messageDate}>
-                  {formatAdminDateTime(selectedSubmission.createdAt)}
-                </span>
-              </div>
+                {copiedField === "email" ? "Email copied" : "Copy email"}
+              </button>
 
-              <p style={styles.messageText}>{selectedSubmission.message}</p>
-            </article>
+              <a href={getContactSubmissionMailtoHref(selectedSubmission)}>
+                {selectedSubmission.email}
+              </a>
+            </div>
           </>
         )}
+
         {successMessage && (
           <AdminSuccessMessage>{successMessage}</AdminSuccessMessage>
         )}
@@ -652,137 +349,6 @@ const styles = {
     minHeight: "auto",
     flexDirection: "column" as const,
     overflow: "visible",
-  },
-
-  listPanel: {
-    width: "380px",
-    minWidth: "320px",
-    borderRight: `1px solid ${colors.border.default}`,
-    backgroundColor: colors.background.card,
-    display: "flex",
-    flexDirection: "column" as const,
-  },
-
-  listPanelCompact: {
-    width: "100%",
-    minWidth: 0,
-    borderRight: "none",
-    borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  headerActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    flexShrink: 0,
-  },
-
-  disabledAction: {
-    opacity: 0.55,
-    cursor: "not-allowed",
-  },
-
-  searchArea: {
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    gap: spacing.sm,
-  },
-
-  searchAreaNarrow: {
-    flexDirection: "column" as const,
-  },
-
-  filters: {
-    padding: spacing.md,
-    borderBottom: `1px solid ${colors.border.default}`,
-    display: "flex",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-  },
-
-  activeFilterText: {
-    color: colors.text.muted,
-    fontSize: "12px",
-    lineHeight: "18px",
-    margin: 0,
-    padding: `${spacing.sm} ${spacing.md}`,
-    borderBottom: `1px solid ${colors.border.default}`,
-  },
-
-  list: {
-    flex: 1,
-    minHeight: 0,
-    overflowY: "auto" as const,
-  },
-
-  listCompact: {
-    flex: "none",
-    maxHeight: "420px",
-  },
-
-  submissionItem: {
-    width: "100%",
-    border: "none",
-    borderBottom: `1px solid ${colors.border.default}`,
-    backgroundColor: "transparent",
-    textAlign: "left" as const,
-    padding: spacing.lg,
-    cursor: "pointer",
-  },
-
-  submissionItemActive: {
-    backgroundColor: "rgba(147, 220, 92, 0.08)",
-  },
-
-  itemTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacing.md,
-    marginBottom: spacing.sm,
-  },
-
-  name: {
-    color: colors.text.main,
-    fontSize: "14px",
-    fontWeight: typography.fontWeight.bold,
-    overflow: "hidden",
-    whiteSpace: "nowrap" as const,
-    textOverflow: "ellipsis",
-    minWidth: 0,
-  },
-
-  date: {
-    color: colors.text.muted,
-    fontSize: "11px",
-    flexShrink: 0,
-  },
-
-  preview: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "18px",
-    margin: `0 0 ${spacing.sm} 0`,
-    overflow: "hidden",
-    whiteSpace: "nowrap" as const,
-    textOverflow: "ellipsis",
-  },
-
-  itemFooter: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-  },
-
-  serviceBadge: {
-    color: colors.text.main,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    padding: "5px 9px",
-    fontSize: "11px",
   },
 
   detailPanel: {
@@ -817,29 +383,10 @@ const styles = {
     minWidth: 0,
   },
 
-  detailTitle: {
-    color: colors.text.main,
-    fontSize: "28px",
-    fontWeight: typography.fontWeight.black,
-    margin: `${spacing.md} 0 0 0`,
-    overflowWrap: "anywhere" as const,
-  },
-
-  detailTitleNarrow: {
-    fontSize: "24px",
-  },
-
   detailMeta: {
     color: colors.text.muted,
     fontSize: "13px",
-    margin: `${spacing.sm} 0 0 0`,
-  },
-
-  statusDescription: {
-    color: colors.text.muted,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: `${spacing.sm} 0 0 0`,
+    margin: 0,
   },
 
   statusControls: {
@@ -857,7 +404,6 @@ const styles = {
 
   statusSelect: {
     border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
     backgroundColor: colors.background.card,
     color: colors.text.main,
     padding: `10px ${spacing.md}`,
@@ -869,127 +415,23 @@ const styles = {
     width: "100%",
   },
 
-  quickStatusActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    flexWrap: "wrap" as const,
-    justifyContent: "flex-end",
+  disabledAction: {
+    opacity: 0.55,
+    cursor: "not-allowed",
   },
 
-  quickStatusActionsCompact: {
-    justifyContent: "flex-start",
-  },
-
-  quickStatusActionsNarrow: {
-    width: "100%",
-    flexDirection: "column" as const,
-    alignItems: "stretch",
-  },
-
-  infoGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: spacing.md,
-    marginBottom: spacing.xl,
-  },
-
-  infoGridCompact: {
-    gridTemplateColumns: "1fr",
-  },
-
-  infoGridNarrow: {
-    gridTemplateColumns: "1fr",
-  },
-
-  infoCard: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    padding: spacing.lg,
-    minWidth: 0,
-  },
-
-  infoCardHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-    marginBottom: spacing.sm,
-  },
-
-  infoLabel: {
-    display: "block",
-    color: colors.text.muted,
-    fontSize: "12px",
-  },
-
-  infoValue: {
-    color: colors.text.main,
-    fontSize: "14px",
-    lineHeight: "22px",
-    textDecoration: "none",
-    overflowWrap: "anywhere" as const,
-    display: "block",
-  },
-
-  copyButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    backgroundColor: "transparent",
-    color: colors.text.muted,
-    padding: "5px 9px",
-    fontSize: "11px",
-    cursor: "pointer",
-  },
-
-  copyButtonSuccess: {
-    borderColor: colors.accent.green,
-    color: colors.accent.green,
-    backgroundColor: "rgba(147, 220, 92, 0.1)",
-  },
-
-  contactActionLink: {
-    display: "inline-flex",
-    marginTop: spacing.md,
-    color: colors.accent.green,
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
-
-  messageCard: {
+  placeholderDetails: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
     backgroundColor: colors.background.card,
     padding: spacing.lg,
   },
 
-  messageHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-
-  messageHeaderNarrow: {
-    flexDirection: "column" as const,
-    gap: spacing.xs,
-  },
-
-  messageDate: {
+  placeholderText: {
     color: colors.text.muted,
-    fontSize: "11px",
-    flexShrink: 0,
-  },
-
-  messageText: {
-    color: colors.text.main,
-    fontSize: "15px",
-    lineHeight: "24px",
-    margin: 0,
-    whiteSpace: "pre-line" as const,
-    overflowWrap: "anywhere" as const,
+    fontSize: "13px",
+    lineHeight: "20px",
+    margin: `0 0 ${spacing.sm} 0`,
   },
 
   emptyState: {
