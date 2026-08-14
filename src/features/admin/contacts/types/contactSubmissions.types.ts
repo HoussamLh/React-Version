@@ -12,3 +12,8 @@ export type ContactSubmission = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type SubmissionFilter = 
+  |"all" 
+  | "active" 
+  | ContactSubmissionStatus;

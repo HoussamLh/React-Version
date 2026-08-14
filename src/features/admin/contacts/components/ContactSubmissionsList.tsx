@@ -15,10 +15,9 @@ import {
 import { formatAdminDateTime } from "../../utils";
 import type {
   ContactSubmission,
-  ContactSubmissionStatus,
+  SubmissionFilter,
 } from "../types/contactSubmissions.types";
-
-export type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
+import { filterOptions } from "../configuration/contactSubmissions.status";
 
 type ContactSubmissionsListProps = {
   submissions: ContactSubmission[];
@@ -49,17 +48,6 @@ type ContactSubmissionsListProps = {
   onRefresh: () => void;
   onSelectSubmission: (submission: ContactSubmission) => void;
 };
-
-const filterOptions: {
-  label: string;
-  value: SubmissionFilter;
-}[] = [
-  { label: "All", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "New", value: "new" },
-  { label: "Contacted", value: "contacted" },
-  { label: "Closed", value: "closed" },
-];
 
 const getSubmissionStatusTone = (
   status: ContactSubmission["status"],

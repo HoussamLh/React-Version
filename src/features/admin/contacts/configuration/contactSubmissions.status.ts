@@ -1,4 +1,7 @@
-import type { ContactSubmissionStatus } from "../types/contactSubmissions.types";
+import type {
+  ContactSubmissionStatus,
+  SubmissionFilter,
+} from "../types/contactSubmissions.types";
 
 export const statusOptions: ContactSubmissionStatus[] = [
   "new",
@@ -26,3 +29,14 @@ export const statusMeta: Record<
     description: "No further action needed",
   },
 };
+
+export const filterOptions: {
+  label: string;
+  value: SubmissionFilter;
+}[] = [
+  { label: "All", value: "all" },
+  { label: "Active", value: "active" },
+  { label: "New", value: "new" },
+  { label: "Contacted", value: "contacted" },
+  { label: "Closed", value: "closed" },
+];
