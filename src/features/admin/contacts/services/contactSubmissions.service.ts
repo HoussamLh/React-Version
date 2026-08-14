@@ -1,8 +1,8 @@
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "../../../../lib/supabase";
 import type {
   ContactSubmission,
   ContactSubmissionStatus,
-} from "./contactSubmissions.types";
+} from "../types/contactSubmissions.types";
 
 type ContactSubmissionRow = {
   id: string;

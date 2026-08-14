@@ -1,5 +1,5 @@
 import React from "react";
-import { colors, spacing, typography, radius } from "../../../design-system";
+import { colors, spacing, typography, radius } from "../../../../design-system";
 import {
   AdminActionButton,
   AdminEmptyState,
@@ -11,12 +11,12 @@ import {
   AdminCountBadge,
   AdminLoadingText,
   AdminPanelHeader,
-} from "../components";
-import { formatAdminDateTime } from "../utils";
+} from "../../components";
+import { formatAdminDateTime } from "../../utils";
 import type {
   ContactSubmission,
   ContactSubmissionStatus,
-} from "./contactSubmissions.types";
+} from "../types/contactSubmissions.types";
 
 export type SubmissionFilter = "all" | "active" | ContactSubmissionStatus;
 

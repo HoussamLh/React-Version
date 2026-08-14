@@ -6,40 +6,21 @@ import { AdminPanel, AdminSuccessMessage } from "../components";
 import {
   getContactSubmissions,
   updateContactSubmissionStatus,
-} from "./contactSubmissions.service";
+} from "./services/contactSubmissions.service";
 import type {
   ContactSubmission,
   ContactSubmissionStatus,
-} from "./contactSubmissions.types";
-import { getContactSubmissionSearchableText } from "./contactSubmissions.helpers";
+} from "./types/contactSubmissions.types";
+import { getContactSubmissionSearchableText } from "./helpers/contactSubmissions.helpers";
 import {
   ContactSubmissionsList,
   type SubmissionFilter,
-} from "./ContactSubmissionsList";
-import { ContactSubmissionDetails } from "./ContactSubmissionDetails";
-
-const statusOptions: ContactSubmissionStatus[] = ["new", "contacted", "closed"];
-
-const statusMeta: Record<
-  ContactSubmissionStatus,
-  {
-    label: string;
-    description: string;
-  }
-> = {
-  new: {
-    label: "New",
-    description: "Needs first response",
-  },
-  contacted: {
-    label: "Contacted",
-    description: "Follow-up in progress",
-  },
-  closed: {
-    label: "Closed",
-    description: "No further action needed",
-  },
-};
+} from "./components/ContactSubmissionsList";
+import { ContactSubmissionDetails } from "./components/ContactSubmissionDetails";
+import {
+  statusMeta,
+  statusOptions,
+} from "./configuration/contactSubmissions.status";
 
 export const ContactSubmissionsPage: React.FC = () => {
   const isCompactContacts = useMediaQuery("(max-width: 1250px)");
@@ -263,8 +244,6 @@ export const ContactSubmissionsPage: React.FC = () => {
             isNarrowContacts={isNarrowContacts}
             isUpdatingStatus={isUpdatingStatus}
             copiedField={copiedField}
-            statusOptions={statusOptions}
-            statusMeta={statusMeta}
             onStatusChange={handleStatusChange}
             onCopy={handleCopy}
           />
