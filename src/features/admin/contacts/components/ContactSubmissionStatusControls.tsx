@@ -1,6 +1,10 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
 import type { ContactSubmissionStatus } from "../types/contactSubmissions.types";
+import {
+  statusMeta,
+  statusOptions,
+} from "../configuration/contactSubmissions.status";
 
 type ContactSubmissionStatusControlsProps = {
   submissionId: string;
@@ -8,14 +12,6 @@ type ContactSubmissionStatusControlsProps = {
   isCompactContacts: boolean;
   isNarrowContacts: boolean;
   isUpdatingStatus: boolean;
-  statusOptions: ContactSubmissionStatus[];
-  statusMeta: Record<
-    ContactSubmissionStatus,
-    {
-      label: string;
-      description: string;
-    }
-  >;
   onStatusChange: (
     submissionId: string,
     status: ContactSubmissionStatus,
@@ -30,8 +26,6 @@ export const ContactSubmissionStatusControls: React.FC<
   isCompactContacts,
   isNarrowContacts,
   isUpdatingStatus,
-  statusOptions,
-  statusMeta,
   onStatusChange,
 }) => {
   return (

@@ -3,10 +3,7 @@ import { colors, radius, spacing, typography } from "../../../../design-system";
 import { formatAdminDateTime } from "../../utils";
 import type { ContactSubmissionStatus } from "../types/contactSubmissions.types";
 import { ContactSubmissionStatusControls } from "./ContactSubmissionStatusControls";
-import {
-  statusMeta,
-  statusOptions,
-} from "../configuration/contactSubmissions.status";
+import { statusMeta } from "../configuration/contactSubmissions.status";
 
 type ContactSubmissionHeaderProps = {
   submissionId: string;
@@ -91,8 +88,6 @@ export const ContactSubmissionHeader: React.FC<
         isCompactContacts={isCompactContacts}
         isNarrowContacts={isNarrowContacts}
         isUpdatingStatus={isUpdatingStatus}
-        statusOptions={statusOptions}
-        statusMeta={statusMeta}
         onStatusChange={onStatusChange}
       />
     </header>
