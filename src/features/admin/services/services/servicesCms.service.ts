@@ -1,5 +1,5 @@
-import { requireSupabase } from "../../../lib/supabase";
-import type { AdminService, AdminServiceFormValues } from "./servicesCms.types";
+import { requireSupabase } from "../../../../lib/supabase";
+import type { AdminService, AdminServiceFormValues } from "../types/servicesCms.types";
 
 type ServiceRow = {
   id: string;

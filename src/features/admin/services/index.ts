@@ -8,11 +8,11 @@ export type {
   ServiceIcon,
   ServiceSpan,
   ServiceStatus,
-} from "./servicesCms.types";
+} from "./types/servicesCms.types";
 
 export {
   createAdminService,
   deleteAdminService,
   getAdminServices,
   updateAdminService,
-} from "./servicesCms.service";
+} from "./services/servicesCms.service";
