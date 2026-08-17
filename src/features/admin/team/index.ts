@@ -6,11 +6,11 @@ export type {
   AdminTeamMember,
   AdminTeamMemberFormValues,
   AdminTeamStatus,
-} from "./teamCms.types";
+} from "./types/teamCms.types";
 
 export {
   createAdminTeamMember,
   deleteAdminTeamMember,
   getAdminTeamMembers,
   updateAdminTeamMember,
-} from "./teamCms.service";
+} from "./services/teamCms.service";
