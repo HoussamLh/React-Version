@@ -6,12 +6,12 @@ export type {
   AdminProjectRequestStatus,
   AdminProjectRequestType,
   AdminProjectRequestUpdateValues,
-} from "./adminProjectRequests.types";
+} from "./types/adminProjectRequests.types";
 
 export {
   deleteAdminProjectRequest,
   getAdminProjectRequests,
   updateAdminProjectRequest,
-} from "./adminProjectRequests.service";
+} from "./services/adminProjectRequests.service";
 
-export { AdminProjectMessagesPanel } from "./messages/components/AdminProjectMessagesPanel";
+export { AdminProjectMessagesPanel } from "./messages";
