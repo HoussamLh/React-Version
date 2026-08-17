@@ -1,8 +1,8 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
   AdminProjectRequest,
   AdminProjectRequestUpdateValues,
-} from "./adminProjectRequests.types";
+} from "../types/adminProjectRequests.types";
 
 type ProjectRequestRow = {
   id: string;

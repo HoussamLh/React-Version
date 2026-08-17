@@ -1,4 +1,4 @@
-import type { AdminProjectMessage } from "./adminProjectMessages.service";
+import type { AdminProjectMessage } from "../services/adminProjectMessages.service";
 
 export const countUnreadCustomerMessages = (
   messages: AdminProjectMessage[],

@@ -6,9 +6,9 @@ import {
   getAdminProjectMessages,
   sendAdminProjectMessage,
   markAdminProjectMessagesAsRead,
-} from "../adminProjectMessages.service";
+} from "../services/adminProjectMessages.service";
 
-import type { AdminProjectMessage } from "../adminProjectMessages.service";
+import type { AdminProjectMessage } from "../services/adminProjectMessages.service";
 
 type AdminProjectMessagesPanelProps = {
   projectRequestId: string;
