@@ -1,8 +1,8 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
   AdminTeamMember,
   AdminTeamMemberFormValues,
-} from "./teamCms.types";
+} from "../types/teamCms.types";
 
 type TeamMemberRow = {
   id: string;
@@ -23,44 +23,40 @@ type TeamMemberRow = {
   updated_at: string;
 };
 
-const mapTeamMemberRow = (row: TeamMemberRow): AdminTeamMember => {
-  return {
-    id: row.id,
+const mapTeamMemberRow = (row: TeamMemberRow): AdminTeamMember => ({
+  id: row.id,
 
-    name: row.name,
-    role: row.role,
-    description: row.description,
+  name: row.name,
+  role: row.role,
+  description: row.description,
 
-    imageUrl: row.image_url,
-    imageAlt: row.image_alt,
+  imageUrl: row.image_url,
+  imageAlt: row.image_alt,
 
-    hoverAccent: row.hover_accent,
+  hoverAccent: row.hover_accent,
 
-    status: row.status,
-    sortOrder: row.sort_order,
+  status: row.status,
+  sortOrder: row.sort_order,
 
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-};
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
-const mapTeamMemberFormValues = (values: AdminTeamMemberFormValues) => {
-  return {
-    name: values.name,
-    role: values.role,
-    description: values.description,
+const mapTeamMemberFormValues = (values: AdminTeamMemberFormValues) => ({
+  name: values.name,
+  role: values.role,
+  description: values.description,
 
-    image_url: values.imageUrl,
-    image_alt: values.imageAlt,
+  image_url: values.imageUrl,
+  image_alt: values.imageAlt,
 
-    hover_accent: values.hoverAccent,
+  hover_accent: values.hoverAccent,
 
-    status: values.status,
-    sort_order: values.sortOrder,
-  };
-};
+  status: values.status,
+  sort_order: values.sortOrder,
+});
 
-export const getAdminTeamMembers = async () => {
+export const getAdminTeamMembers = async (): Promise<AdminTeamMember[]> => {
   const client = requireSupabase();
 
   const { data, error } = await client
@@ -78,7 +74,7 @@ export const getAdminTeamMembers = async () => {
 
 export const createAdminTeamMember = async (
   values: AdminTeamMemberFormValues,
-) => {
+): Promise<AdminTeamMember> => {
   const client = requireSupabase();
 
   const { data, error } = await client
@@ -100,7 +96,7 @@ export const updateAdminTeamMember = async ({
 }: {
   memberId: string;
   values: AdminTeamMemberFormValues;
-}) => {
+}): Promise<AdminTeamMember> => {
   const client = requireSupabase();
 
   const { data, error } = await client
