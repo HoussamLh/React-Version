@@ -1,4 +1,4 @@
-export { CustomerDashboardPage } from "./dashboard";
+export { CustomerDashboardPage } from "./dashboard/CustomerDashboardPage.tsx";
 export { CustomerProfileForm, CustomerAccountSettings } from "./account";
 
 export {
