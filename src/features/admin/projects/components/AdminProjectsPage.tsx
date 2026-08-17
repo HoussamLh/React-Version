@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import { AdminProjectForm } from "./AdminProjectForm";
+import { AdminProjectFormPanel } from "./AdminProjectFormPanel";
 import { AdminProjectGrid } from "./AdminProjectGrid";
-import { AdminProjectFilters, type ProjectFilter } from "./AdminProjectFilters";
+import { AdminProjectsStates } from "./AdminProjectsStates";
+import { AdminProjectsToolbar } from "./AdminProjectsToolbar";
 import {
   createAdminProject,
   deleteAdminProject,
@@ -12,7 +13,10 @@ import {
 import type {
   AdminProject,
   AdminProjectFormValues,
+  ProjectStatus,
 } from "../types/projectsCms.types";
+
+type ProjectFilter = "all" | ProjectStatus;
 
 const getProjectFormValues = (
   project: AdminProject,
@@ -51,12 +55,14 @@ export const AdminProjectsPage: React.FC = () => {
   const [editingProject, setEditingProject] = useState<AdminProject | null>(
     null,
   );
+
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [isUpdatingProject, setIsUpdatingProject] = useState(false);
   const [isDeletingProjectId, setIsDeletingProjectId] = useState<string | null>(
     null,
   );
+
   const [error, setError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -115,7 +121,8 @@ export const AdminProjectsPage: React.FC = () => {
     });
   }, [projects, searchQuery, statusFilter]);
 
-  const hasActiveFilters = statusFilter !== "all" || searchQuery.trim();
+  const hasActiveFilters =
+    statusFilter !== "all" || Boolean(searchQuery.trim());
 
   const resetFilters = () => {
     setStatusFilter("all");
@@ -211,7 +218,9 @@ export const AdminProjectsPage: React.FC = () => {
       <div style={styles.header}>
         <div>
           <p style={styles.eyebrow}>Admin CMS</p>
+
           <h1 style={styles.title}>Projects</h1>
+
           <p style={styles.subtitle}>
             Manage project cards with image or video media, titles, subtitles,
             pills, layout spans, and publish status.
@@ -238,106 +247,54 @@ export const AdminProjectsPage: React.FC = () => {
       </div>
 
       {isCreateFormOpen && (
-        <div style={styles.createPanel}>
-          <div style={styles.createPanelHeader}>
-            <div>
-              <h2 style={styles.createPanelTitle}>Create project</h2>
-              <p style={styles.createPanelText}>
-                Add a new project card to the CMS. Draft projects stay hidden
-                from the public projects page.
-              </p>
-            </div>
-          </div>
-
-          {createError && <div style={styles.errorBox}>{createError}</div>}
-
-          <AdminProjectForm
-            key="create-project"
-            submitLabel="Create Project"
-            isSubmitting={isCreatingProject}
-            onCancel={() => {
-              setCreateError(null);
-              setIsCreateFormOpen(false);
-            }}
-            onSubmit={handleCreateProject}
-          />
-        </div>
+        <AdminProjectFormPanel
+          mode="create"
+          error={createError}
+          isSubmitting={isCreatingProject}
+          onCancel={() => {
+            setCreateError(null);
+            setIsCreateFormOpen(false);
+          }}
+          onSubmit={handleCreateProject}
+        />
       )}
 
       {editingProject && (
-        <div style={styles.createPanel}>
-          <div style={styles.createPanelHeader}>
-            <div>
-              <h2 style={styles.createPanelTitle}>Edit project</h2>
-              <p style={styles.createPanelText}>
-                Update project content, media, layout, tags, and publish status.
-              </p>
-            </div>
-          </div>
-
-          {updateError && <div style={styles.errorBox}>{updateError}</div>}
-
-          <AdminProjectForm
-            key={editingProject.id}
-            initialValues={getProjectFormValues(editingProject)}
-            submitLabel="Save Changes"
-            isSubmitting={isUpdatingProject}
-            onCancel={() => {
-              setUpdateError(null);
-              setEditingProject(null);
-            }}
-            onSubmit={handleUpdateProject}
-          />
-        </div>
+        <AdminProjectFormPanel
+          mode="edit"
+          initialValues={getProjectFormValues(editingProject)}
+          error={updateError}
+          isSubmitting={isUpdatingProject}
+          onCancel={() => {
+            setUpdateError(null);
+            setEditingProject(null);
+          }}
+          onSubmit={handleUpdateProject}
+        />
       )}
 
       {deleteError && <div style={styles.errorBox}>{deleteError}</div>}
 
       <div style={styles.panel}>
-        <AdminProjectFilters
+        <AdminProjectsToolbar
           searchQuery={searchQuery}
           statusFilter={statusFilter}
-          hasActiveFilters={Boolean(hasActiveFilters)}
+          hasActiveFilters={hasActiveFilters}
+          projectCount={filteredProjects.length}
           onSearchChange={setSearchQuery}
-          onStatusChange={setStatusFilter}
-          onReset={resetFilters}
+          onStatusFilterChange={setStatusFilter}
+          onResetFilters={resetFilters}
         />
 
-        <div style={styles.countRow}>
-          <span style={styles.countBadge}>{filteredProjects.length}</span>
-          <span style={styles.countText}>
-            {filteredProjects.length === 1 ? "project" : "projects"} shown
-          </span>
-        </div>
-
-        {isLoading && projects.length === 0 && (
-          <p style={styles.stateText}>Loading projects...</p>
-        )}
-
-        {error && (
-          <div style={styles.errorBox}>
-            <p style={styles.errorText}>{error}</p>
-
-            <button
-              type="button"
-              style={styles.retryButton}
-              onClick={loadProjects}
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {!isLoading && !error && filteredProjects.length === 0 && (
-          <div style={styles.emptyState}>
-            <h2 style={styles.emptyTitle}>No projects found</h2>
-            <p style={styles.emptyText}>
-              {hasActiveFilters
-                ? "Try changing your search or filters."
-                : "Projects created in the CMS will appear here."}
-            </p>
-          </div>
-        )}
+        <AdminProjectsStates
+          isLoading={isLoading}
+          hasProjects={projects.length > 0}
+          hasError={Boolean(error)}
+          hasFilteredProjects={filteredProjects.length > 0}
+          hasActiveFilters={hasActiveFilters}
+          error={error}
+          onRetry={loadProjects}
+        />
 
         {filteredProjects.length > 0 && (
           <AdminProjectGrid
@@ -418,32 +375,6 @@ const styles = {
     fontWeight: typography.fontWeight.bold,
   },
 
-  createPanel: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.xl,
-    backgroundColor: colors.background.card,
-    padding: spacing.xl,
-  },
-
-  createPanelHeader: {
-    marginBottom: spacing.lg,
-  },
-
-  createPanelTitle: {
-    color: colors.text.main,
-    fontSize: "22px",
-    lineHeight: "28px",
-    margin: 0,
-    fontWeight: typography.fontWeight.black,
-  },
-
-  createPanelText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: `${spacing.sm} 0 0 0`,
-  },
-
   panel: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.xl,
@@ -451,75 +382,12 @@ const styles = {
     padding: spacing.xl,
   },
 
-  countRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-
-  countBadge: {
-    minWidth: "28px",
-    height: "24px",
-    borderRadius: "999px",
-    backgroundColor: "rgba(116, 245, 66, 0.12)",
-    color: colors.accent.green,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-  },
-
-  countText: {
-    color: colors.text.muted,
-    fontSize: "13px",
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: 0,
-  },
-
   errorBox: {
     border: `1px solid rgba(255, 193, 7, 0.35)`,
     borderRadius: radius.lg,
     backgroundColor: "rgba(255, 193, 7, 0.08)",
     padding: spacing.lg,
-  },
-
-  errorText: {
     color: colors.accent.yellow,
     fontSize: "14px",
-    margin: `0 0 ${spacing.md} 0`,
-  },
-
-  retryButton: {
-    border: `1px solid rgba(255, 193, 7, 0.45)`,
-    borderRadius: radius.md,
-    backgroundColor: "transparent",
-    color: colors.accent.yellow,
-    padding: `${spacing.sm} ${spacing.md}`,
-    cursor: "pointer",
-  },
-
-  emptyState: {
-    border: `1px dashed ${colors.border.default}`,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    textAlign: "center" as const,
-  },
-
-  emptyTitle: {
-    color: colors.text.main,
-    fontSize: "18px",
-    margin: 0,
-  },
-
-  emptyText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    margin: `${spacing.sm} 0 0 0`,
   },
 };
