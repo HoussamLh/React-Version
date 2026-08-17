@@ -1,29 +1,11 @@
-import { Link } from "react-router-dom";
-import React, { useCallback, useEffect, useState } from "react";
-import { supabase } from "../../../../lib/supabase";
-import { colors, radius, spacing, typography } from "../../../../design-system";
+import React from "react";
 import { CustomerProjectRequestForm } from "./ProjectRequestForm";
-import {
-  createCustomerProjectRequest,
-  getCustomerProjectRequests,
-} from "../services/projectRequests.service";
-import { getCustomerUnreadMessageCounts } from "../messages/ProjectRequestsUnread.service";
-import type {
-  ProjectRequest,
-  ProjectRequestFormValues,
-} from "../types/projectRequests.types";
-
-const formatDate = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
-};
-
-const formatLabel = (value: string) => {
-  return value.replaceAll("_", " ");
-};
+import { ProjectRequestCard } from "./ProjectRequestCard";
+import { ProjectRequestsHeader } from "./ProjectRequestsHeader";
+import { ProjectRequestsState } from "./ProjectRequestsState";
+import { projectRequestsPanelStyles as styles } from "./projectRequestsPanel.styles";
+import { useCustomerProjectRequests } from "../hooks/useCustomerProjectRequests";
+import type { ProjectRequestFormValues } from "../types/projectRequests.types";
 
 type CustomerProjectRequestsPanelProps = {
   initialRequestValues?: Partial<ProjectRequestFormValues>;
@@ -32,154 +14,26 @@ type CustomerProjectRequestsPanelProps = {
 
 export const CustomerProjectRequestsPanel: React.FC<
   CustomerProjectRequestsPanelProps
-> = ({ initialRequestValues, onClearInitialRequestIntent }) => {
-  const [requests, setRequests] = useState<ProjectRequest[]>([]);
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(
-    Boolean(initialRequestValues?.selectedPackage),
-  );
-  const [isCreatingRequest, setIsCreatingRequest] = useState(false);
-  const [loadError, setLoadError] = useState("");
-  const [formError, setFormError] = useState("");
-
-  const loadUnreadCounts = useCallback(async () => {
-    try {
-      const counts = await getCustomerUnreadMessageCounts();
-
-      setUnreadCounts(counts);
-    } catch (error) {
-      console.error("Failed to load unread message counts:", error);
-    }
-  }, []);
-
-  const loadRequests = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError("");
-
-    try {
-      const results = await getCustomerProjectRequests();
-
-      setRequests(results);
-
-      await loadUnreadCounts();
-    } catch {
-      setLoadError("Could not load your project requests.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [loadUnreadCounts]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    window.setTimeout(() => {
-      if (!isMounted) return;
-      void loadRequests();
-    }, 0);
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadRequests]);
-
-  useEffect(() => {
-    if (!supabase) {
-      return;
-    }
-
-    const client = supabase;
-
-    const channel = client
-      .channel("customer-project-message-badges")
-
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "project_messages",
-          filter: "sender_type=eq.admin",
-        },
-        () => {
-          void loadUnreadCounts();
-        },
-      )
-
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "project_messages",
-          filter: "sender_type=eq.admin",
-        },
-        () => {
-          void loadUnreadCounts();
-        },
-      )
-
-      .subscribe();
-
-    return () => {
-      void client.removeChannel(channel);
-    };
-  }, [loadUnreadCounts]);
-
-  const handleCreateRequest = async (
-    values: ProjectRequestFormValues,
-  ) => {
-    setIsCreatingRequest(true);
-    setFormError("");
-
-    try {
-      await createCustomerProjectRequest(values);
-      setIsFormOpen(false);
-      onClearInitialRequestIntent?.();
-      await loadRequests();
-    } catch {
-      setFormError("Could not submit your project request. Please try again.");
-    } finally {
-      setIsCreatingRequest(false);
-    }
-  };
+> = (props) => {
+  const {
+    requests,
+    unreadCounts,
+    isLoading,
+    isFormOpen,
+    isCreatingRequest,
+    loadError,
+    formError,
+    toggleForm,
+    handleCreateRequest,
+  } = useCustomerProjectRequests(props);
 
   return (
     <section style={styles.panel}>
-      <header style={styles.header}>
-        <div>
-          <p style={styles.eyebrow}>Project Requests</p>
-
-          <h2 style={styles.title}>Start your project request</h2>
-
-          <p style={styles.subtitle}>
-            Submit your project details so DevBySam can review your goals,
-            timeline, and package requirements.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          style={styles.primaryButton}
-          onClick={() => {
-            setFormError("");
-
-            if (isFormOpen) {
-              setIsFormOpen(false);
-              onClearInitialRequestIntent?.();
-              return;
-            }
-
-            setIsFormOpen(true);
-          }}
-        >
-          {isFormOpen ? "Close Form" : "New Request"}
-        </button>
-      </header>
+      <ProjectRequestsHeader isFormOpen={isFormOpen} onToggleForm={toggleForm} />
 
       {isFormOpen && (
         <CustomerProjectRequestForm
-          initialValues={initialRequestValues}
+          initialValues={props.initialRequestValues}
           isSubmitting={isCreatingRequest}
           error={formError}
           onSubmit={handleCreateRequest}
@@ -189,272 +43,30 @@ export const CustomerProjectRequestsPanel: React.FC<
       {loadError && <p style={styles.error}>{loadError}</p>}
 
       {isLoading && (
-        <div style={styles.stateBox}>
-          <p style={styles.stateText}>Loading project requests...</p>
-        </div>
+        <ProjectRequestsState
+          title=""
+          text="Loading project requests..."
+        />
       )}
 
       {!isLoading && requests.length === 0 && (
-        <div style={styles.stateBox}>
-          <h3 style={styles.stateTitle}>No project requests yet</h3>
-
-          <p style={styles.stateText}>
-            Create your first request when you are ready to start a project.
-          </p>
-        </div>
+        <ProjectRequestsState
+          title="No project requests yet"
+          text="Create your first request when you are ready to start a project."
+        />
       )}
 
       {!isLoading && requests.length > 0 && (
-        <div style={styles.requestList}>
+        <div style={styles.list}>
           {requests.map((request) => (
-            <article key={request.id} style={styles.requestCard}>
-              <div style={styles.requestTop}>
-                <div>
-                  <p style={styles.requestType}>
-                    {formatLabel(request.projectType)}
-                  </p>
-
-                  <h3 style={styles.requestTitle}>{request.title}</h3>
-                </div>
-                <div style={styles.badges}>
-                  <span style={styles.statusBadge}>
-                    {formatLabel(request.status)}
-                  </span>
-
-                  {unreadCounts[request.id] > 0 && (
-                    <span style={styles.messageBadge}>
-                      {unreadCounts[request.id]} new message
-                      {unreadCounts[request.id] > 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <p style={styles.requestText}>{request.description}</p>
-
-              <div style={styles.metaGrid}>
-                <span style={styles.metaItem}>
-                  Package: {request.selectedPackage || "Not selected"}
-                </span>
-
-                <span style={styles.metaItem}>
-                  Budget: {request.budgetRange || "Not provided"}
-                </span>
-
-                <span style={styles.metaItem}>
-                  Timeline: {request.timeline || "Not provided"}
-                </span>
-
-                <span style={styles.metaItem}>
-                  Submitted: {formatDate(request.createdAt)}
-                </span>
-              </div>
-              <Link
-                to={`/customer/projects/${request.id}`}
-                style={styles.detailsLink}
-              >
-                View Details →
-              </Link>
-            </article>
+            <ProjectRequestCard
+              key={request.id}
+              request={request}
+              unreadCount={unreadCounts[request.id] ?? 0}
+            />
           ))}
         </div>
       )}
     </section>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  panel: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius["2xl"],
-    backgroundColor: colors.background.card,
-    padding: spacing["2xl"],
-    display: "flex",
-    flexDirection: "column",
-    gap: spacing.xl,
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: spacing.xl,
-    alignItems: "flex-start",
-    flexWrap: "wrap",
-  },
-
-  eyebrow: {
-    color: colors.accent.green,
-    fontSize: "11px",
-    lineHeight: "16px",
-    fontWeight: typography.fontWeight.black,
-    textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    margin: `0 0 ${spacing.sm} 0`,
-  },
-
-  title: {
-    color: colors.text.main,
-    fontSize: "24px",
-    lineHeight: "32px",
-    margin: `0 0 ${spacing.sm} 0`,
-    fontWeight: typography.fontWeight.black,
-  },
-
-  subtitle: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-    maxWidth: "720px",
-  },
-
-  primaryButton: {
-    border: "none",
-    borderRadius: radius.md,
-    backgroundColor: colors.accent.green,
-    color: colors.background.dark,
-    padding: "13px 18px",
-    fontWeight: typography.fontWeight.black,
-    cursor: "pointer",
-  },
-
-  formBox: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.xl,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    padding: spacing.xl,
-  },
-
-  error: {
-    border: "1px solid rgba(255, 90, 90, 0.45)",
-    borderRadius: radius.md,
-    backgroundColor: "rgba(255, 90, 90, 0.08)",
-    color: "#ff7777",
-    padding: spacing.md,
-    fontSize: "13px",
-    lineHeight: "20px",
-    margin: 0,
-  },
-
-  stateBox: {
-    border: `1px dashed ${colors.border.default}`,
-    borderRadius: radius.xl,
-    backgroundColor: colors.background.dark,
-    padding: spacing.xl,
-    textAlign: "center",
-  },
-
-  stateTitle: {
-    color: colors.text.main,
-    fontSize: "18px",
-    lineHeight: "24px",
-    margin: `0 0 ${spacing.sm} 0`,
-    fontWeight: typography.fontWeight.black,
-  },
-
-  stateText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: 0,
-  },
-
-  requestList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: spacing.md,
-  },
-
-  requestCard: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.xl,
-    backgroundColor: colors.background.dark,
-    padding: spacing.xl,
-  },
-
-  requestTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: spacing.lg,
-    alignItems: "flex-start",
-    marginBottom: spacing.md,
-  },
-
-  requestType: {
-    color: colors.accent.green,
-    fontSize: "11px",
-    lineHeight: "16px",
-    fontWeight: typography.fontWeight.black,
-    textTransform: "uppercase",
-    letterSpacing: "0.12em",
-    margin: `0 0 ${spacing.xs} 0`,
-  },
-
-  requestTitle: {
-    color: colors.text.main,
-    fontSize: "20px",
-    lineHeight: "26px",
-    margin: 0,
-    fontWeight: typography.fontWeight.black,
-  },
-
-  statusBadge: {
-    borderRadius: radius.md,
-    backgroundColor: "rgba(116, 245, 66, 0.08)",
-    border: `1px solid ${colors.accent.green}`,
-    color: colors.accent.green,
-    padding: "8px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-    textTransform: "capitalize",
-    whiteSpace: "nowrap",
-  },
-
-  badges: {
-    display: "flex",
-    gap: spacing.sm,
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-
-  messageBadge: {
-    borderRadius: radius.md,
-    backgroundColor: "rgba(116,245,66,0.12)",
-    border: `1px solid ${colors.accent.pink}`,
-    color: colors.accent.pink,
-    padding: "8px 12px",
-    fontSize: "12px",
-    fontWeight: typography.fontWeight.bold,
-  },
-
-  requestText: {
-    color: colors.text.muted,
-    fontSize: "14px",
-    lineHeight: "22px",
-    margin: `0 0 ${spacing.md} 0`,
-  },
-
-  metaGrid: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-
-  metaItem: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.pill,
-    color: colors.text.muted,
-    fontSize: "12px",
-    lineHeight: "16px",
-    padding: "8px 12px",
-  },
-
-  detailsLink: {
-    display: "inline-flex",
-    marginTop: spacing.md,
-    color: colors.accent.green,
-    fontSize: "14px",
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
 };
