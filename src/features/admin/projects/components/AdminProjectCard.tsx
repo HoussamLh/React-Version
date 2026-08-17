@@ -1,20 +1,14 @@
 import React from "react";
+
 import { colors, radius, spacing, typography } from "../../../../design-system";
 import type { AdminProject, ProjectStatus } from "../types/projectsCms.types";
+import { AdminProjectCardMediaPreview } from "./AdminProjectCardMediaPreview";
 
 type AdminProjectCardProps = {
   project: AdminProject;
   isDeleting: boolean;
   onEdit: (project: AdminProject) => void;
   onDelete: (project: AdminProject) => void;
-};
-
-const getProjectMediaPreview = (project: AdminProject) => {
-  if (project.mediaType === "video") {
-    return project.videoPosterUrl ?? project.imageUrl;
-  }
-
-  return project.imageUrl ?? project.videoPosterUrl;
 };
 
 const getProjectStatusStyle = (status: ProjectStatus) => {
@@ -31,25 +25,9 @@ export const AdminProjectCard: React.FC<AdminProjectCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const mediaPreview = getProjectMediaPreview(project);
-
   return (
     <article style={styles.projectCard}>
-      <div style={styles.mediaWrap}>
-        {mediaPreview ? (
-          <img
-            src={mediaPreview}
-            alt={project.title}
-            style={styles.mediaImage}
-          />
-        ) : (
-          <div style={styles.mediaPlaceholder}>No media preview</div>
-        )}
-
-        {project.mediaType === "video" && (
-          <span style={styles.videoBadge}>Video</span>
-        )}
-      </div>
+      <AdminProjectCardMediaPreview project={project} />
 
       <div style={styles.projectContent}>
         <div style={styles.projectTopRow}>
@@ -135,40 +113,6 @@ const styles = {
     borderRadius: radius.xl,
     backgroundColor: colors.background.dark,
     overflow: "hidden",
-  },
-
-  mediaWrap: {
-    height: "180px",
-    position: "relative" as const,
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-  },
-
-  mediaImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-    display: "block",
-  },
-
-  mediaPlaceholder: {
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: colors.text.muted,
-    fontSize: "13px",
-  },
-
-  videoBadge: {
-    position: "absolute" as const,
-    right: spacing.md,
-    top: spacing.md,
-    borderRadius: "999px",
-    backgroundColor: "rgba(0, 0, 0, 0.62)",
-    color: colors.text.main,
-    padding: "5px 9px",
-    fontSize: "11px",
-    fontWeight: typography.fontWeight.bold,
   },
 
   projectContent: {
