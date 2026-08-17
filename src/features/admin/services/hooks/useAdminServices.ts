@@ -4,12 +4,12 @@ import {
   deleteAdminService,
   getAdminServices,
   updateAdminService,
-} from "../servicesCms.service";
+} from "../services/servicesCms.service";
 import type {
   AdminService,
   AdminServiceFormValues,
   ServiceStatus,
-} from "../servicesCms.types";
+} from "../types/servicesCms.types";
 
 export type ServiceFilter = "all" | ServiceStatus;
 
