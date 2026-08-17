@@ -151,16 +151,6 @@ const styles = {
     fontSize: "13px",
   },
 
-  refreshButton: {
-    border: `1px solid ${colors.border.default}`,
-    borderRadius: radius.md,
-    backgroundColor: colors.background.card,
-    color: colors.text.main,
-    padding: `${spacing.sm} ${spacing.md}`,
-    cursor: "pointer",
-    fontWeight: typography.fontWeight.bold,
-  },
-
   countRow: {
     display: "flex",
     alignItems: "center",
