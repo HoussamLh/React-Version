@@ -1,8 +1,8 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
   AdminEmergencyRestoration,
   AdminEmergencyRestorationFormValues,
-} from "./pricingCms.types";
+} from "../types/pricingCms.types";
 
 type EmergencyRestorationRow = {
   id: string;

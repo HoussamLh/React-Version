@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminComparisonRowForm } from "../hooks/useAdminComparisonRowForm";
 import type {
   AdminComparisonRow,
   AdminComparisonRowFormValues,
   AdminPricingStatus,
-} from "../pricingCms.types";
+} from "../types/pricingCms.types";
 
 type AdminComparisonRowFormProps = {
   initialRow?: AdminComparisonRow | null;
@@ -15,15 +16,6 @@ type AdminComparisonRowFormProps = {
   onSubmit: (values: AdminComparisonRowFormValues) => Promise<void>;
 };
 
-const defaultComparisonRowValues: AdminComparisonRowFormValues = {
-  feature: "",
-  standard: "",
-  advanced: "",
-  premium: "",
-  status: "draft",
-  sortOrder: 0,
-};
-
 export const AdminComparisonRowForm: React.FC<AdminComparisonRowFormProps> = ({
   initialRow,
   isSubmitting = false,
@@ -32,65 +24,8 @@ export const AdminComparisonRowForm: React.FC<AdminComparisonRowFormProps> = ({
   onCancel,
   onSubmit,
 }) => {
-  const initialValues = useMemo<AdminComparisonRowFormValues>(() => {
-    if (!initialRow) {
-      return defaultComparisonRowValues;
-    }
-
-    return {
-      feature: initialRow.feature,
-      standard: initialRow.standard,
-      advanced: initialRow.advanced,
-      premium: initialRow.premium,
-      status: initialRow.status,
-      sortOrder: initialRow.sortOrder,
-    };
-  }, [initialRow]);
-
-  const [feature, setFeature] = useState(initialValues.feature);
-  const [standard, setStandard] = useState(initialValues.standard);
-  const [advanced, setAdvanced] = useState(initialValues.advanced);
-  const [premium, setPremium] = useState(initialValues.premium);
-  const [status, setStatus] = useState<AdminPricingStatus>(
-    initialValues.status,
-  );
-  const [sortOrder, setSortOrder] = useState(String(initialValues.sortOrder));
-  const [validationError, setValidationError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!feature.trim()) {
-      setValidationError("Feature name is required.");
-      return;
-    }
-
-    if (!standard.trim()) {
-      setValidationError("Standard value is required.");
-      return;
-    }
-
-    if (!advanced.trim()) {
-      setValidationError("Advanced value is required.");
-      return;
-    }
-
-    if (!premium.trim()) {
-      setValidationError("Premium value is required.");
-      return;
-    }
-
-    setValidationError(null);
-
-    await onSubmit({
-      feature: feature.trim(),
-      standard: standard.trim(),
-      advanced: advanced.trim(),
-      premium: premium.trim(),
-      status,
-      sortOrder: Number(sortOrder) || 0,
-    });
-  };
+  const form = useAdminComparisonRowForm(initialRow, onSubmit);
+  const { feature, setFeature, standard, setStandard, advanced, setAdvanced, premium, setPremium, status, setStatus, sortOrder, setSortOrder, validationError, handleSubmit } = form;
 
   return (
     <form style={styles.form} onSubmit={handleSubmit}>

@@ -1,31 +1,31 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
-  AdminPricingPlan,
-  AdminPricingPlanFormValues,
-} from "./pricingCms.types";
+  AdminMaintenancePlan,
+  AdminMaintenancePlanFormValues,
+} from "../types/pricingCms.types";
 
-type PricingPlanRow = {
+type MaintenancePlanRow = {
   id: string;
   name: string;
-  label: string;
   price: string;
-  suffix: string | null;
+  suffix: string;
   description: string;
   features: string[];
   cta_label: string;
   cta_to: string;
   recommended: boolean;
-  status: AdminPricingPlan["status"];
+  status: AdminMaintenancePlan["status"];
   sort_order: number;
   created_at: string;
   updated_at: string;
 };
 
-const mapPricingPlanRow = (row: PricingPlanRow): AdminPricingPlan => {
+const mapMaintenancePlanRow = (
+  row: MaintenancePlanRow,
+): AdminMaintenancePlan => {
   return {
     id: row.id,
     name: row.name,
-    label: row.label,
     price: row.price,
     suffix: row.suffix,
     description: row.description,
@@ -40,10 +40,11 @@ const mapPricingPlanRow = (row: PricingPlanRow): AdminPricingPlan => {
   };
 };
 
-const mapPricingPlanFormValues = (values: AdminPricingPlanFormValues) => {
+const mapMaintenancePlanFormValues = (
+  values: AdminMaintenancePlanFormValues,
+) => {
   return {
     name: values.name,
-    label: values.label,
     price: values.price,
     suffix: values.suffix,
     description: values.description,
@@ -56,11 +57,11 @@ const mapPricingPlanFormValues = (values: AdminPricingPlanFormValues) => {
   };
 };
 
-export const getAdminPricingPlans = async () => {
+export const getAdminMaintenancePlans = async () => {
   const client = requireSupabase();
 
   const { data, error } = await client
-    .from("pricing_plans")
+    .from("maintenance_plans")
     .select("*")
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
@@ -69,17 +70,17 @@ export const getAdminPricingPlans = async () => {
     throw error;
   }
 
-  return ((data ?? []) as PricingPlanRow[]).map(mapPricingPlanRow);
+  return ((data ?? []) as MaintenancePlanRow[]).map(mapMaintenancePlanRow);
 };
 
-export const createAdminPricingPlan = async (
-  values: AdminPricingPlanFormValues,
+export const createAdminMaintenancePlan = async (
+  values: AdminMaintenancePlanFormValues,
 ) => {
   const client = requireSupabase();
 
   const { data, error } = await client
-    .from("pricing_plans")
-    .insert(mapPricingPlanFormValues(values))
+    .from("maintenance_plans")
+    .insert(mapMaintenancePlanFormValues(values))
     .select("*")
     .single();
 
@@ -87,21 +88,21 @@ export const createAdminPricingPlan = async (
     throw error;
   }
 
-  return mapPricingPlanRow(data as PricingPlanRow);
+  return mapMaintenancePlanRow(data as MaintenancePlanRow);
 };
 
-export const updateAdminPricingPlan = async ({
+export const updateAdminMaintenancePlan = async ({
   planId,
   values,
 }: {
   planId: string;
-  values: AdminPricingPlanFormValues;
+  values: AdminMaintenancePlanFormValues;
 }) => {
   const client = requireSupabase();
 
   const { data, error } = await client
-    .from("pricing_plans")
-    .update(mapPricingPlanFormValues(values))
+    .from("maintenance_plans")
+    .update(mapMaintenancePlanFormValues(values))
     .eq("id", planId)
     .select("*")
     .single();
@@ -110,14 +111,14 @@ export const updateAdminPricingPlan = async ({
     throw error;
   }
 
-  return mapPricingPlanRow(data as PricingPlanRow);
+  return mapMaintenancePlanRow(data as MaintenancePlanRow);
 };
 
-export const deleteAdminPricingPlan = async (planId: string) => {
+export const deleteAdminMaintenancePlan = async (planId: string) => {
   const client = requireSupabase();
 
   const { error } = await client
-    .from("pricing_plans")
+    .from("maintenance_plans")
     .delete()
     .eq("id", planId);
 

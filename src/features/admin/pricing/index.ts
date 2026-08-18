@@ -24,32 +24,32 @@ export type {
   AdminPricingPlan,
   AdminPricingPlanFormValues,
   AdminPricingStatus,
-} from "./pricingCms.types";
+} from "./types/pricingCms.types";
 
 export {
   createAdminComparisonRow,
   deleteAdminComparisonRow,
   getAdminComparisonRows,
   updateAdminComparisonRow,
-} from "./comparisonRows.service";
+} from "./services/comparisonRows.service";
 
 export {
   createAdminEmergencyRestoration,
   deleteAdminEmergencyRestoration,
   getAdminEmergencyRestorations,
   updateAdminEmergencyRestoration,
-} from "./emergencyRestoration.service";
+} from "./services/emergencyRestoration.service";
 
 export {
   createAdminMaintenancePlan,
   deleteAdminMaintenancePlan,
   getAdminMaintenancePlans,
   updateAdminMaintenancePlan,
-} from "./maintenancePlans.service";
+} from "./services/maintenancePlans.service";
 
 export {
   createAdminPricingPlan,
   deleteAdminPricingPlan,
   getAdminPricingPlans,
   updateAdminPricingPlan,
-} from "./pricingPlans.service";
+} from "./services/pricingPlans.service";

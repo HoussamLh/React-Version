@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminMaintenancePlanForm } from "../hooks/useAdminMaintenancePlanForm";
 import type {
   AdminMaintenancePlan,
   AdminMaintenancePlanFormValues,
   AdminPricingStatus,
-} from "../pricingCms.types";
-import { parseFeatureInput } from "./pricingForm.helpers";
+} from "../types/pricingCms.types";
 
 type AdminMaintenancePlanFormProps = {
   initialPlan?: AdminMaintenancePlan | null;
@@ -16,22 +16,7 @@ type AdminMaintenancePlanFormProps = {
   onSubmit: (values: AdminMaintenancePlanFormValues) => Promise<void>;
 };
 
-const defaultMaintenancePlanValues: AdminMaintenancePlanFormValues = {
-  name: "",
-  price: "",
-  suffix: "/mo",
-  description: "",
-  features: [],
-  ctaLabel: "Contact",
-  ctaTo: "/contact",
-  recommended: false,
-  status: "draft",
-  sortOrder: 0,
-};
-
-export const AdminMaintenancePlanForm: React.FC<
-  AdminMaintenancePlanFormProps
-> = ({
+export const AdminMaintenancePlanForm: React.FC<AdminMaintenancePlanFormProps> = ({
   initialPlan,
   isSubmitting = false,
   error,
@@ -39,79 +24,31 @@ export const AdminMaintenancePlanForm: React.FC<
   onCancel,
   onSubmit,
 }) => {
-  const initialValues = useMemo<AdminMaintenancePlanFormValues>(() => {
-    if (!initialPlan) {
-      return defaultMaintenancePlanValues;
-    }
-
-    return {
-      name: initialPlan.name,
-      price: initialPlan.price,
-      suffix: initialPlan.suffix,
-      description: initialPlan.description,
-      features: initialPlan.features,
-      ctaLabel: initialPlan.ctaLabel,
-      ctaTo: initialPlan.ctaTo,
-      recommended: initialPlan.recommended,
-      status: initialPlan.status,
-      sortOrder: initialPlan.sortOrder,
-    };
-  }, [initialPlan]);
-
-  const [name, setName] = useState(initialValues.name);
-  const [price, setPrice] = useState(initialValues.price);
-  const [suffix, setSuffix] = useState(initialValues.suffix);
-  const [description, setDescription] = useState(initialValues.description);
-  const [featuresInput, setFeaturesInput] = useState(
-    initialValues.features.join(", "),
-  );
-  const [ctaLabel, setCtaLabel] = useState(initialValues.ctaLabel);
-  const [ctaTo, setCtaTo] = useState(initialValues.ctaTo);
-  const [recommended, setRecommended] = useState(initialValues.recommended);
-  const [status, setStatus] = useState<AdminPricingStatus>(
-    initialValues.status,
-  );
-  const [sortOrder, setSortOrder] = useState(String(initialValues.sortOrder));
-  const [validationError, setValidationError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!name.trim()) {
-      setValidationError("Maintenance plan name is required.");
-      return;
-    }
-
-    if (!price.trim()) {
-      setValidationError("Maintenance plan price is required.");
-      return;
-    }
-
-    if (!suffix.trim()) {
-      setValidationError("Suffix is required.");
-      return;
-    }
-
-    if (!description.trim()) {
-      setValidationError("Description is required.");
-      return;
-    }
-
-    setValidationError(null);
-
-    await onSubmit({
-      name: name.trim(),
-      price: price.trim(),
-      suffix: suffix.trim(),
-      description: description.trim(),
-      features: parseFeatureInput(featuresInput),
-      ctaLabel: ctaLabel.trim() || "Contact",
-      ctaTo: ctaTo.trim() || "/contact",
-      recommended,
-      status,
-      sortOrder: Number(sortOrder) || 0,
-    });
-  };
+  const form = useAdminMaintenancePlanForm(initialPlan, onSubmit);
+  const { 
+    name, 
+    setName, 
+    price, 
+    setPrice, 
+    suffix, 
+    setSuffix, 
+    description, 
+    setDescription, 
+    featuresInput, 
+    setFeaturesInput, 
+    ctaLabel, 
+    setCtaLabel, 
+    ctaTo, 
+    setCtaTo, 
+    recommended, 
+    setRecommended, 
+    status, 
+    setStatus, 
+    sortOrder, 
+    setSortOrder, 
+    validationError, 
+    handleSubmit 
+  } = form;
 
   return (
     <form style={styles.form} onSubmit={handleSubmit}>

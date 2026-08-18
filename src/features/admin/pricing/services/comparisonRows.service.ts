@@ -1,8 +1,8 @@
-import { requireSupabase } from "../../../lib/supabase";
+import { requireSupabase } from "../../../../lib/supabase";
 import type {
   AdminComparisonRow,
   AdminComparisonRowFormValues,
-} from "./pricingCms.types";
+} from "../types/pricingCms.types";
 
 type ComparisonRowRecord = {
   id: string;
