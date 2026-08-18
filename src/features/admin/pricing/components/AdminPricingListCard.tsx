@@ -1,6 +1,6 @@
 import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { AdminPricingStatus } from "../pricingCms.types";
+import type { AdminPricingStatus } from "../types/pricingCms.types";
 import { AdminPricingStatusBadge } from "./AdminPricingStatusBadge";
 
 type AdminPricingListCardProps = {
