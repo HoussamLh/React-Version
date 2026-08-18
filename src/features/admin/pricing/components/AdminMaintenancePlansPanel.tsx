@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminPricingCrudPanel } from "../hooks/useAdminPricingCrudPanel";
 import {
   createAdminMaintenancePlan,
   deleteAdminMaintenancePlan,
   updateAdminMaintenancePlan,
-} from "../maintenancePlans.service";
+} from "../services/maintenancePlans.service";
 import type {
   AdminMaintenancePlan,
   AdminMaintenancePlanFormValues,
-} from "../pricingCms.types";
+} from "../types/pricingCms.types";
 import { AdminMaintenancePlanForm } from "./AdminMaintenancePlanForm";
 import { AdminPricingCardActions } from "./AdminPricingCardActions";
 import { AdminPricingEmptyState } from "./AdminPricingEmptyState";
@@ -24,96 +25,35 @@ type AdminMaintenancePlansPanelProps = {
 export const AdminMaintenancePlansPanel: React.FC<
   AdminMaintenancePlansPanelProps
 > = ({ plans, onRefresh }) => {
-  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<AdminMaintenancePlan | null>(
-    null,
-  );
-  const [isCreatingPlan, setIsCreatingPlan] = useState(false);
-  const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
-  const [isDeletingPlanId, setIsDeletingPlanId] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const openCreateForm = () => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setEditingPlan(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
-  };
-
-  const openEditForm = (plan: AdminMaintenancePlan) => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setIsCreateFormOpen(false);
-    setEditingPlan(plan);
-  };
-
-  const handleCreatePlan = async (values: AdminMaintenancePlanFormValues) => {
-    setIsCreatingPlan(true);
-    setCreateError(null);
-
-    try {
-      await createAdminMaintenancePlan(values);
-      setIsCreateFormOpen(false);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not create maintenance plan:", error);
-      setCreateError("Could not create maintenance plan. Please try again.");
-    } finally {
-      setIsCreatingPlan(false);
-    }
-  };
-
-  const handleUpdatePlan = async (values: AdminMaintenancePlanFormValues) => {
-    if (!editingPlan) return;
-
-    setIsUpdatingPlan(true);
-    setUpdateError(null);
-
-    try {
-      await updateAdminMaintenancePlan({
-        planId: editingPlan.id,
-        values,
-      });
-
-      setEditingPlan(null);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not update maintenance plan:", error);
-      setUpdateError("Could not update maintenance plan. Please try again.");
-    } finally {
-      setIsUpdatingPlan(false);
-    }
-  };
-
-  const handleDeletePlan = async (plan: AdminMaintenancePlan) => {
-    const isConfirmed = window.confirm(
-      `Delete "${plan.name}"? This cannot be undone.`,
-    );
-
-    if (!isConfirmed) return;
-
-    setIsDeletingPlanId(plan.id);
-    setDeleteError(null);
-
-    try {
-      await deleteAdminMaintenancePlan(plan.id);
-
-      if (editingPlan?.id === plan.id) {
-        setEditingPlan(null);
-      }
-
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not delete maintenance plan:", error);
-      setDeleteError("Could not delete maintenance plan. Please try again.");
-    } finally {
-      setIsDeletingPlanId(null);
-    }
-  };
+  const {
+    isCreateFormOpen,
+    editingItem: editingPlan,
+    isCreating: isCreatingPlan,
+    isUpdating: isUpdatingPlan,
+    isDeletingId: isDeletingPlanId,
+    createError,
+    updateError,
+    deleteError,
+    openCreateForm,
+    openEditForm,
+    setIsCreateFormOpen,
+    setEditingItem: setEditingPlan,
+    handleCreate: handleCreatePlan,
+    handleUpdate: handleUpdatePlan,
+    handleDelete: handleDeletePlan,
+  } = useAdminPricingCrudPanel<AdminMaintenancePlan, AdminMaintenancePlanFormValues>({
+    onRefresh,
+    create: createAdminMaintenancePlan,
+    update: ({ itemId, values }) => updateAdminMaintenancePlan({ planId: itemId, values }),
+    remove: deleteAdminMaintenancePlan,
+    deleteLabel: (plan) => plan.name,
+    createErrorMessage: "Could not create maintenance plan. Please try again.",
+    updateErrorMessage: "Could not update maintenance plan. Please try again.",
+    deleteErrorMessage: "Could not delete maintenance plan. Please try again.",
+    createLogMessage: "Could not create maintenance plan:",
+    updateLogMessage: "Could not update maintenance plan:",
+    deleteLogMessage: "Could not delete maintenance plan:",
+  });
 
   return (
     <AdminPricingSectionPanel
