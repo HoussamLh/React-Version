@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
-import type { CustomerProfile } from "../../auth/customerAuth.types";
+import type { CustomerProfile } from "../../auth/types/customerAuth.types";
 import { CustomerProfileForm } from "./CustomerProfileForm";
 import { CustomerPasswordForm } from "./CustomerPasswordForm";
 import { updateCustomerPassword } from "../../auth";

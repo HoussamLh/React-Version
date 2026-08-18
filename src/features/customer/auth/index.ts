@@ -10,7 +10,7 @@ export type {
   CustomerSignInValues,
   CustomerSignUpResult,
   CustomerSignUpValues,
-} from "./customerAuth.types";
+} from "./types/customerAuth.types";
 
 export {
   getCurrentCustomerProfile,
@@ -20,4 +20,4 @@ export {
   subscribeToCustomerAuthChanges,
   updateCurrentCustomerProfile,
   updateCustomerPassword,
-} from "./customerAuth.service";
+} from "./services/customerAuth.service";

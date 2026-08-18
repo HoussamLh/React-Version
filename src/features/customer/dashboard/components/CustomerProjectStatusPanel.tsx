@@ -1,5 +1,5 @@
 import React from "react";
-import type { CustomerProfile } from "../../auth/customerAuth.types";
+import type { CustomerProfile } from "../../auth/types/customerAuth.types";
 import { colors, radius, spacing, typography } from "../../../../design-system";
 
 type CustomerProjectStatusPanelProps = {
