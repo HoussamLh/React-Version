@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   getCurrentCustomerProfile,
   signOutCustomer,
-} from "../../auth/customerAuth.service";
-import type { CustomerProfile } from "../../auth/customerAuth.types";
+} from "../../auth/services/customerAuth.service";
+import type { CustomerProfile } from "../../auth/types/customerAuth.types";
 
 type UseCustomerDashboardResult = {
   profile: CustomerProfile | null;
