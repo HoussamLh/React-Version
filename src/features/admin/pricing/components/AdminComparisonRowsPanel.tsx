@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminPricingCrudPanel } from "../hooks/useAdminPricingCrudPanel";
 import {
   createAdminComparisonRow,
   deleteAdminComparisonRow,
   updateAdminComparisonRow,
-} from "../comparisonRows.service";
+} from "../services/comparisonRows.service";
 import type {
   AdminComparisonRow,
   AdminComparisonRowFormValues,
-} from "../pricingCms.types";
+} from "../types/pricingCms.types";
 import { AdminComparisonRowForm } from "./AdminComparisonRowForm";
 import { AdminPricingCardActions } from "./AdminPricingCardActions";
 import { AdminPricingEmptyState } from "./AdminPricingEmptyState";
@@ -23,94 +24,35 @@ type AdminComparisonRowsPanelProps = {
 export const AdminComparisonRowsPanel: React.FC<
   AdminComparisonRowsPanelProps
 > = ({ rows, onRefresh }) => {
-  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [editingRow, setEditingRow] = useState<AdminComparisonRow | null>(null);
-  const [isCreatingRow, setIsCreatingRow] = useState(false);
-  const [isUpdatingRow, setIsUpdatingRow] = useState(false);
-  const [isDeletingRowId, setIsDeletingRowId] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const openCreateForm = () => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setEditingRow(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
-  };
-
-  const openEditForm = (row: AdminComparisonRow) => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setIsCreateFormOpen(false);
-    setEditingRow(row);
-  };
-
-  const handleCreateRow = async (values: AdminComparisonRowFormValues) => {
-    setIsCreatingRow(true);
-    setCreateError(null);
-
-    try {
-      await createAdminComparisonRow(values);
-      setIsCreateFormOpen(false);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not create comparison row:", error);
-      setCreateError("Could not create comparison row. Please try again.");
-    } finally {
-      setIsCreatingRow(false);
-    }
-  };
-
-  const handleUpdateRow = async (values: AdminComparisonRowFormValues) => {
-    if (!editingRow) return;
-
-    setIsUpdatingRow(true);
-    setUpdateError(null);
-
-    try {
-      await updateAdminComparisonRow({
-        rowId: editingRow.id,
-        values,
-      });
-
-      setEditingRow(null);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not update comparison row:", error);
-      setUpdateError("Could not update comparison row. Please try again.");
-    } finally {
-      setIsUpdatingRow(false);
-    }
-  };
-
-const handleDeleteRow = async (row: AdminComparisonRow) => {
-  const isConfirmed = window.confirm(
-    `Delete "${row.feature}"? This cannot be undone.`,
-  );
-
-  if (!isConfirmed) return;
-
-  setIsDeletingRowId(row.id);
-  setDeleteError(null);
-
-  try {
-    await deleteAdminComparisonRow(row.id);
-
-    if (editingRow?.id === row.id) {
-      setEditingRow(null);
-    }
-
-    await onRefresh();
-  } catch (error) {
-    console.error("Could not delete comparison row:", error);
-    setDeleteError("Could not delete comparison row. Please try again.");
-  } finally {
-    setIsDeletingRowId(null);
-  }
-};
+  const {
+    isCreateFormOpen,
+    editingItem: editingRow,
+    isCreating: isCreatingRow,
+    isUpdating: isUpdatingRow,
+    isDeletingId: isDeletingRowId,
+    createError,
+    updateError,
+    deleteError,
+    openCreateForm,
+    openEditForm,
+    setIsCreateFormOpen,
+    setEditingItem: setEditingRow,
+    handleCreate: handleCreateRow,
+    handleUpdate: handleUpdateRow,
+    handleDelete: handleDeleteRow,
+  } = useAdminPricingCrudPanel<AdminComparisonRow, AdminComparisonRowFormValues>({
+    onRefresh,
+    create: createAdminComparisonRow,
+    update: ({ itemId, values }) => updateAdminComparisonRow({ rowId: itemId, values }),
+    remove: deleteAdminComparisonRow,
+    deleteLabel: (row) => row.feature,
+    createErrorMessage: "Could not create comparison row. Please try again.",
+    updateErrorMessage: "Could not update comparison row. Please try again.",
+    deleteErrorMessage: "Could not delete comparison row. Please try again.",
+    createLogMessage: "Could not create comparison row:",
+    updateLogMessage: "Could not update comparison row:",
+    deleteLogMessage: "Could not delete comparison row:",
+  });
 
   return (
     <AdminPricingSectionPanel

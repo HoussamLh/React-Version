@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminPricingCrudPanel } from "../hooks/useAdminPricingCrudPanel";
 import {
   createAdminEmergencyRestoration,
   deleteAdminEmergencyRestoration,
   updateAdminEmergencyRestoration,
-} from "../emergencyRestoration.service";
+} from "../services/emergencyRestoration.service";
 import type {
   AdminEmergencyRestoration,
   AdminEmergencyRestorationFormValues,
-} from "../pricingCms.types";
+} from "../types/pricingCms.types";
 import { AdminEmergencyRestorationForm } from "./AdminEmergencyRestorationForm";
 import { AdminPricingCardActions } from "./AdminPricingCardActions";
 import { AdminPricingEmptyState } from "./AdminPricingEmptyState";
@@ -23,109 +24,35 @@ type AdminEmergencyRestorationPanelProps = {
 export const AdminEmergencyRestorationPanel: React.FC<
   AdminEmergencyRestorationPanelProps
 > = ({ restorations, onRefresh }) => {
-  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [editingRestoration, setEditingRestoration] =
-    useState<AdminEmergencyRestoration | null>(null);
-  const [isCreatingRestoration, setIsCreatingRestoration] = useState(false);
-  const [isUpdatingRestoration, setIsUpdatingRestoration] = useState(false);
-  const [isDeletingRestorationId, setIsDeletingRestorationId] = useState<
-    string | null
-  >(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const openCreateForm = () => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setEditingRestoration(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
-  };
-
-  const openEditForm = (restoration: AdminEmergencyRestoration) => {
-    setCreateError(null);
-    setUpdateError(null);
-    setDeleteError(null);
-    setIsCreateFormOpen(false);
-    setEditingRestoration(restoration);
-  };
-
-  const handleCreateRestoration = async (
-    values: AdminEmergencyRestorationFormValues,
-  ) => {
-    setIsCreatingRestoration(true);
-    setCreateError(null);
-
-    try {
-      await createAdminEmergencyRestoration(values);
-      setIsCreateFormOpen(false);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not create emergency restoration:", error);
-      setCreateError(
-        "Could not create emergency restoration. Please try again.",
-      );
-    } finally {
-      setIsCreatingRestoration(false);
-    }
-  };
-
-  const handleUpdateRestoration = async (
-    values: AdminEmergencyRestorationFormValues,
-  ) => {
-    if (!editingRestoration) return;
-
-    setIsUpdatingRestoration(true);
-    setUpdateError(null);
-
-    try {
-      await updateAdminEmergencyRestoration({
-        restorationId: editingRestoration.id,
-        values,
-      });
-
-      setEditingRestoration(null);
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not update emergency restoration:", error);
-      setUpdateError(
-        "Could not update emergency restoration. Please try again.",
-      );
-    } finally {
-      setIsUpdatingRestoration(false);
-    }
-  };
-
-  const handleDeleteRestoration = async (
-    restoration: AdminEmergencyRestoration,
-  ) => {
-    const isConfirmed = window.confirm(
-      `Delete "${restoration.title}"? This cannot be undone.`,
-    );
-
-    if (!isConfirmed) return;
-
-    setIsDeletingRestorationId(restoration.id);
-    setDeleteError(null);
-
-    try {
-      await deleteAdminEmergencyRestoration(restoration.id);
-
-      if (editingRestoration?.id === restoration.id) {
-        setEditingRestoration(null);
-      }
-
-      await onRefresh();
-    } catch (error) {
-      console.error("Could not delete emergency restoration:", error);
-      setDeleteError(
-        "Could not delete emergency restoration. Please try again.",
-      );
-    } finally {
-      setIsDeletingRestorationId(null);
-    }
-  };
+  const {
+    isCreateFormOpen,
+    editingItem: editingRestoration,
+    isCreating: isCreatingRestoration,
+    isUpdating: isUpdatingRestoration,
+    isDeletingId: isDeletingRestorationId,
+    createError,
+    updateError,
+    deleteError,
+    openCreateForm,
+    openEditForm,
+    setIsCreateFormOpen,
+    setEditingItem: setEditingRestoration,
+    handleCreate: handleCreateRestoration,
+    handleUpdate: handleUpdateRestoration,
+    handleDelete: handleDeleteRestoration,
+  } = useAdminPricingCrudPanel<AdminEmergencyRestoration, AdminEmergencyRestorationFormValues>({
+    onRefresh,
+    create: createAdminEmergencyRestoration,
+    update: ({ itemId, values }) => updateAdminEmergencyRestoration({ restorationId: itemId, values }),
+    remove: deleteAdminEmergencyRestoration,
+    deleteLabel: (restoration) => restoration.title,
+    createErrorMessage: "Could not create emergency restoration. Please try again.",
+    updateErrorMessage: "Could not update emergency restoration. Please try again.",
+    deleteErrorMessage: "Could not delete emergency restoration. Please try again.",
+    createLogMessage: "Could not create emergency restoration:",
+    updateLogMessage: "Could not update emergency restoration:",
+    deleteLogMessage: "Could not delete emergency restoration:",
+  });
 
   return (
     <AdminPricingSectionPanel

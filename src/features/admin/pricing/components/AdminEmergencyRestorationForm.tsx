@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { useAdminEmergencyRestorationForm } from "../hooks/useAdminEmergencyRestorationForm";
 import type {
   AdminEmergencyRestoration,
   AdminEmergencyRestorationFormValues,
   AdminPricingStatus,
-} from "../pricingCms.types";
+} from "../types/pricingCms.types";
 
 type AdminEmergencyRestorationFormProps = {
   initialRestoration?: AdminEmergencyRestoration | null;
@@ -15,17 +16,7 @@ type AdminEmergencyRestorationFormProps = {
   onSubmit: (values: AdminEmergencyRestorationFormValues) => Promise<void>;
 };
 
-const defaultEmergencyRestorationValues: AdminEmergencyRestorationFormValues = {
-  title: "",
-  price: "",
-  suffix: "one-time",
-  text: "",
-  status: "draft",
-};
-
-export const AdminEmergencyRestorationForm: React.FC<
-  AdminEmergencyRestorationFormProps
-> = ({
+export const AdminEmergencyRestorationForm: React.FC<AdminEmergencyRestorationFormProps> = ({
   initialRestoration,
   isSubmitting = false,
   error,
@@ -33,62 +24,8 @@ export const AdminEmergencyRestorationForm: React.FC<
   onCancel,
   onSubmit,
 }) => {
-  const initialValues = useMemo<AdminEmergencyRestorationFormValues>(() => {
-    if (!initialRestoration) {
-      return defaultEmergencyRestorationValues;
-    }
-
-    return {
-      title: initialRestoration.title,
-      price: initialRestoration.price,
-      suffix: initialRestoration.suffix,
-      text: initialRestoration.text,
-      status: initialRestoration.status,
-    };
-  }, [initialRestoration]);
-
-  const [title, setTitle] = useState(initialValues.title);
-  const [price, setPrice] = useState(initialValues.price);
-  const [suffix, setSuffix] = useState(initialValues.suffix);
-  const [text, setText] = useState(initialValues.text);
-  const [status, setStatus] = useState<AdminPricingStatus>(
-    initialValues.status,
-  );
-  const [validationError, setValidationError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!title.trim()) {
-      setValidationError("Emergency restoration title is required.");
-      return;
-    }
-
-    if (!price.trim()) {
-      setValidationError("Emergency restoration price is required.");
-      return;
-    }
-
-    if (!suffix.trim()) {
-      setValidationError("Suffix is required.");
-      return;
-    }
-
-    if (!text.trim()) {
-      setValidationError("Text is required.");
-      return;
-    }
-
-    setValidationError(null);
-
-    await onSubmit({
-      title: title.trim(),
-      price: price.trim(),
-      suffix: suffix.trim(),
-      text: text.trim(),
-      status,
-    });
-  };
+  const form = useAdminEmergencyRestorationForm(initialRestoration, onSubmit);
+  const { title, setTitle, price, setPrice, suffix, setSuffix, text, setText, status, setStatus, validationError, handleSubmit } = form;
 
   return (
     <form style={styles.form} onSubmit={handleSubmit}>
