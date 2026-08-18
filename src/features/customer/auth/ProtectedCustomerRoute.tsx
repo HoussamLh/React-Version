@@ -1,15 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { colors, spacing, typography } from "../../../design-system";
-import {
-  getCurrentCustomerProfile,
-  subscribeToCustomerAuthChanges,
-} from "./customerAuth.service";
+import { getCurrentCustomerProfile, subscribeToCustomerAuthChanges } from "./services/customerAuth.service";
+import { useEffect, useState } from "react";
 
-type ProtectedCustomerRouteProps = {
-  children: React.ReactNode;
-};
-
+type ProtectedCustomerRouteProps = { children: React.ReactNode };
 type CustomerAuthState = "loading" | "authorized" | "unauthorized";
 
 export const ProtectedCustomerRoute: React.FC<ProtectedCustomerRouteProps> = ({
@@ -23,33 +18,23 @@ export const ProtectedCustomerRoute: React.FC<ProtectedCustomerRouteProps> = ({
 
     const checkCustomer = async () => {
       if (!isMounted) return;
-
       setAuthState("loading");
 
       try {
         const profile = await getCurrentCustomerProfile();
-
         if (!isMounted) return;
-
         setAuthState(
           profile && profile.accountStatus === "active"
             ? "authorized"
             : "unauthorized",
         );
       } catch {
-        if (!isMounted) return;
-
-        setAuthState("unauthorized");
+        if (isMounted) setAuthState("unauthorized");
       }
     };
 
-    window.setTimeout(() => {
-      void checkCustomer();
-    }, 0);
-
-    const unsubscribe = subscribeToCustomerAuthChanges(() => {
-      void checkCustomer();
-    });
+    window.setTimeout(() => void checkCustomer(), 0);
+    const unsubscribe = subscribeToCustomerAuthChanges(() => void checkCustomer());
 
     return () => {
       isMounted = false;
@@ -70,9 +55,7 @@ export const ProtectedCustomerRoute: React.FC<ProtectedCustomerRouteProps> = ({
       <Navigate
         to="/sign-in"
         replace
-        state={{
-          from: `${location.pathname}${location.search}`,
-        }}
+        state={{ from: `${location.pathname}${location.search}` }}
       />
     );
   }
@@ -89,10 +72,9 @@ const styles = {
     justifyContent: "center",
     padding: spacing.xl,
   },
-
   loadingText: {
     color: colors.text.muted,
     fontSize: "14px",
     fontWeight: typography.fontWeight.bold,
   },
-};
+} satisfies Record<string, React.CSSProperties>;
