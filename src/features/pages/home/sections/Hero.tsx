@@ -1,5 +1,4 @@
 import React from "react";
-import heroImg from "../../../../Assets/heroImg.png";
 import {
   AccentText,
   Card,
@@ -8,6 +7,8 @@ import {
   SharedHero,
 } from "../../../../design-system";
 import { HeroTerminalCard } from "../components/HeroTerminalCard";
+
+const heroHome ="https://res.cloudinary.com/pekcmwlo/image/upload/v1787091789/heroHome.jpg";
 
 export const Hero: React.FC = () => {
   return (
@@ -44,7 +45,7 @@ export const Hero: React.FC = () => {
           <Card interactive hoverAccent="green" style={styles.imageWindow}>
             <div style={styles.heroMedia}>
               <img
-                src={heroImg}
+                src={heroHome}
                 alt="Devbysam Hero Image"
                 className="ds-card-image ds-zoom-image"
                 style={styles.imageRender}
