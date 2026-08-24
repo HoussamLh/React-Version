@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { colors, radius, spacing } from "../../../design-system";
+import { deleteAdminImageFromCloudinary } from "../../../shared/services/cloudinaryUpload.service";
 
 import { AdminServiceFormActions } from "./components/AdminServiceFormActions";
 import { AdminServiceFormFields } from "./components/AdminServiceFormFields";
@@ -13,6 +14,7 @@ type AdminServiceFormProps = {
   submitLabel: string;
   isSubmitting?: boolean;
   onCancel: () => void;
+  serviceId: string;
   onSubmit: (values: AdminServiceFormValues) => void | Promise<void>;
 };
 
@@ -23,6 +25,7 @@ const defaultServiceFormValues: AdminServiceFormValues = {
 
   icon: "code",
   imageUrl: null,
+  imagePublicId: null,
 
   pills: [],
 
@@ -63,6 +66,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
   submitLabel,
   isSubmitting = false,
   onCancel,
+  serviceId,
   onSubmit,
 }) => {
   const [values, setValues] = useState<AdminServiceFormValues>(
@@ -72,6 +76,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
   const [pillsInput, setPillsInput] = useState(values.pills.join(", "));
   const [hasEditedSlug, setHasEditedSlug] = useState(Boolean(values.slug));
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [uploadedPublicIds, setUploadedPublicIds] = useState<string[]>([]);
 
   const updateValue = <Key extends keyof AdminServiceFormValues>(
     key: Key,
@@ -96,6 +101,32 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
     updateValue("slug", createSlug(nextSlug));
   };
 
+  const handleImageChange = (nextValue: {
+    secureUrl: string | null;
+    publicId: string | null;
+  }) => {
+    if (nextValue.publicId) {
+      setUploadedPublicIds((currentIds) =>
+        currentIds.includes(nextValue.publicId!)
+          ? currentIds
+          : [...currentIds, nextValue.publicId!],
+      );
+    }
+
+    updateValue("imageUrl", nextValue.secureUrl);
+    updateValue("imagePublicId", nextValue.publicId);
+  };
+
+  const handleCancel = async () => {
+    await Promise.allSettled(
+      uploadedPublicIds.map((publicId) =>
+        deleteAdminImageFromCloudinary(publicId),
+      ),
+    );
+
+    onCancel();
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -105,6 +136,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
       slug: values.slug.trim(),
       text: values.text.trim(),
       imageUrl: getNullableTextValue(values.imageUrl ?? ""),
+      imagePublicId: getNullableTextValue(values.imagePublicId ?? ""),
       pills: parsePillsInput(pillsInput),
       badge: getNullableTextValue(values.badge ?? ""),
       sortOrder: Number(values.sortOrder) || 0,
@@ -128,6 +160,18 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
     setValidationError(null);
 
     await onSubmit(nextValues);
+
+    const uploadedIdsToClean = uploadedPublicIds.filter(
+      (publicId) => publicId !== nextValues.imagePublicId,
+    );
+
+    if (uploadedIdsToClean.length > 0) {
+      await Promise.allSettled(
+        uploadedIdsToClean.map((publicId) =>
+          deleteAdminImageFromCloudinary(publicId),
+        ),
+      );
+    }
   };
 
   return (
@@ -139,6 +183,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
         pillsInput={pillsInput}
         onPillsInputChange={setPillsInput}
         onTitleChange={handleTitleChange}
+        imageFolder={`devbysam/services/${serviceId}/images`}
         onValueChange={(key, value) => {
           if (key === "slug") {
             handleSlugChange(String(value));
@@ -147,6 +192,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
 
           updateValue(key, value);
         }}
+        onImageChange={handleImageChange}
       />
 
       <AdminServiceFormPreview
@@ -157,7 +203,7 @@ export const AdminServiceForm: React.FC<AdminServiceFormProps> = ({
       <AdminServiceFormActions
         submitLabel={submitLabel}
         isSubmitting={isSubmitting}
-        onCancel={onCancel}
+        onCancel={() => void handleCancel()}
       />
     </form>
   );

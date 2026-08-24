@@ -23,6 +23,7 @@ export const getServiceFormValues = (
 
     icon: service.icon,
     imageUrl: service.imageUrl,
+    imagePublicId: service.imagePublicId,
 
     pills: service.pills,
 
@@ -42,6 +43,7 @@ export const useAdminServices = () => {
   const [statusFilter, setStatusFilter] = useState<ServiceFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [createServiceId, setCreateServiceId] = useState<string | null>(null);
   const [editingService, setEditingService] = useState<AdminService | null>(
     null,
   );
@@ -126,7 +128,7 @@ export const useAdminServices = () => {
       setCreateError(null);
 
       try {
-        await createAdminService(values);
+        await createAdminService(values, createServiceId ?? undefined);
         setIsCreateFormOpen(false);
         await loadServices();
       } catch (error) {
@@ -138,7 +140,7 @@ export const useAdminServices = () => {
         setIsCreatingService(false);
       }
     },
-    [loadServices],
+    [createServiceId, loadServices],
   );
 
   const handleUpdateService = useCallback(
@@ -206,7 +208,14 @@ export const useAdminServices = () => {
     setUpdateError(null);
     setDeleteError(null);
     setEditingService(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
+
+    setIsCreateFormOpen((currentValue) => {
+      const nextValue = !currentValue;
+
+      setCreateServiceId(nextValue ? crypto.randomUUID() : null);
+
+      return nextValue;
+    });
   }, []);
 
   const openEditForm = useCallback((service: AdminService) => {
@@ -220,6 +229,7 @@ export const useAdminServices = () => {
   const closeCreateForm = useCallback(() => {
     setCreateError(null);
     setIsCreateFormOpen(false);
+    setCreateServiceId(null);
   }, []);
 
   const closeEditForm = useCallback(() => {
@@ -236,6 +246,7 @@ export const useAdminServices = () => {
     hasActiveFilters,
 
     isCreateFormOpen,
+    createServiceId,
     editingService,
 
     isLoading,

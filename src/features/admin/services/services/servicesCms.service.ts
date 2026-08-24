@@ -1,4 +1,8 @@
 import { requireSupabase } from "../../../../lib/supabase";
+import {
+  deleteAdminImageFromCloudinary,
+  getCloudinaryImagePublicId,
+} from "../../../../shared/services/cloudinaryUpload.service";
 import type { AdminService, AdminServiceFormValues } from "../types/servicesCms.types";
 
 type ServiceRow = {
@@ -10,6 +14,7 @@ type ServiceRow = {
 
   icon: AdminService["icon"];
   image_url: string | null;
+  image_public_id: string | null;
 
   pills: string[];
 
@@ -36,6 +41,7 @@ const mapServiceRow = (row: ServiceRow): AdminService => {
 
     icon: row.icon,
     imageUrl: row.image_url,
+    imagePublicId: row.image_public_id,
 
     pills: row.pills ?? [],
 
@@ -61,6 +67,7 @@ const mapServiceFormValues = (values: AdminServiceFormValues) => {
 
     icon: values.icon,
     image_url: values.imageUrl,
+    image_public_id: values.imagePublicId,
 
     pills: values.pills,
 
@@ -73,6 +80,30 @@ const mapServiceFormValues = (values: AdminServiceFormValues) => {
     status: values.status,
     sort_order: values.sortOrder,
   };
+};
+
+const getStoredImagePublicId = (imageUrl: string | null, imagePublicId: string | null) => {
+  return imagePublicId || getCloudinaryImagePublicId(imageUrl);
+};
+
+const cleanupCloudinaryImage = async ({
+  imageUrl,
+  imagePublicId,
+}: {
+  imageUrl: string | null;
+  imagePublicId: string | null;
+}) => {
+  const publicId = getStoredImagePublicId(imageUrl, imagePublicId);
+
+  if (!publicId) {
+    return;
+  }
+
+  try {
+    await deleteAdminImageFromCloudinary(publicId);
+  } catch (error) {
+    console.error("Could not clean up Cloudinary image:", error);
+  }
 };
 
 export const getAdminServices = async () => {
@@ -91,12 +122,18 @@ export const getAdminServices = async () => {
   return ((data ?? []) as ServiceRow[]).map(mapServiceRow);
 };
 
-export const createAdminService = async (values: AdminServiceFormValues) => {
+export const createAdminService = async (
+  values: AdminServiceFormValues,
+  serviceId?: string,
+) => {
   const client = requireSupabase();
 
   const { data, error } = await client
     .from("services")
-    .insert(mapServiceFormValues(values))
+    .insert({
+      ...(serviceId ? { id: serviceId } : {}),
+      ...mapServiceFormValues(values),
+    })
     .select("*")
     .single();
 
@@ -116,6 +153,16 @@ export const updateAdminService = async ({
 }) => {
   const client = requireSupabase();
 
+  const { data: previousService, error: previousServiceError } = await client
+    .from("services")
+    .select("image_url, image_public_id")
+    .eq("id", serviceId)
+    .single();
+
+  if (previousServiceError) {
+    throw previousServiceError;
+  }
+
   const { data, error } = await client
     .from("services")
     .update(mapServiceFormValues(values))
@@ -127,15 +174,43 @@ export const updateAdminService = async ({
     throw error;
   }
 
+  const previousPublicId = getStoredImagePublicId(
+    previousService.image_url,
+    previousService.image_public_id,
+  );
+  const nextPublicId = values.imagePublicId;
+
+  if (previousPublicId && previousPublicId !== nextPublicId) {
+    await cleanupCloudinaryImage({
+      imageUrl: previousService.image_url,
+      imagePublicId: previousPublicId,
+    });
+  }
+
   return mapServiceRow(data as ServiceRow);
 };
 
 export const deleteAdminService = async (serviceId: string) => {
   const client = requireSupabase();
 
+  const { data: service, error: serviceError } = await client
+    .from("services")
+    .select("image_url, image_public_id")
+    .eq("id", serviceId)
+    .single();
+
+  if (serviceError) {
+    throw serviceError;
+  }
+
   const { error } = await client.from("services").delete().eq("id", serviceId);
 
   if (error) {
     throw error;
   }
+
+  await cleanupCloudinaryImage({
+    imageUrl: service.image_url,
+    imagePublicId: service.image_public_id,
+  });
 };

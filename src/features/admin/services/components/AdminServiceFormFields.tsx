@@ -1,6 +1,7 @@
 import React from "react";
 
 import { colors, radius, spacing, typography } from "../../../../design-system";
+import { CloudinaryImageUpload } from "../../../../shared/components/media/CloudinaryImageUpload";
 
 import type {
   AdminServiceFormValues,
@@ -19,6 +20,11 @@ type AdminServiceFormFieldsProps = {
     key: Key,
     value: AdminServiceFormValues[Key],
   ) => void;
+  imageFolder: string;
+  onImageChange: (value: {
+    secureUrl: string | null;
+    publicId: string | null;
+  }) => void;
 };
 
 const iconOptions: ServiceIcon[] = [
@@ -47,6 +53,8 @@ export const AdminServiceFormFields: React.FC<AdminServiceFormFieldsProps> = ({
   onPillsInputChange,
   onTitleChange,
   onValueChange,
+  imageFolder,
+  onImageChange,
 }) => {
   return (
     <>
@@ -106,17 +114,15 @@ export const AdminServiceFormFields: React.FC<AdminServiceFormFieldsProps> = ({
           </select>
         </label>
 
-        <label style={styles.field}>
-          <span style={styles.label}>Image URL</span>
-
-          <input
-            type="url"
-            value={values.imageUrl ?? ""}
-            onChange={(event) => onValueChange("imageUrl", event.target.value)}
-            placeholder="https://..."
-            style={styles.input}
+        <div style={styles.field}>
+          <CloudinaryImageUpload
+            value={values.imageUrl}
+            publicId={values.imagePublicId}
+            folder={imageFolder}
+            label="Service image"
+            onChange={onImageChange}
           />
-        </label>
+        </div>
 
         <label style={styles.field}>
           <span style={styles.label}>Pills</span>

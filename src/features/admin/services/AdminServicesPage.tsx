@@ -20,6 +20,7 @@ export const AdminServicesPage: React.FC = () => {
 
     isCreateFormOpen,
     editingService,
+    createServiceId,
 
     isLoading,
     isCreatingService,
@@ -74,6 +75,7 @@ export const AdminServicesPage: React.FC = () => {
 
             <AdminServiceForm
               key="create-service"
+              serviceId={createServiceId ?? ""}
               submitLabel="Create Service"
               isSubmitting={isCreatingService}
               onCancel={closeCreateForm}
@@ -100,6 +102,7 @@ export const AdminServicesPage: React.FC = () => {
             <AdminServiceForm
               key={editingService.id}
               initialValues={getServiceFormValues(editingService)}
+              serviceId={editingService.id}
               submitLabel="Save Changes"
               isSubmitting={isUpdatingService}
               onCancel={closeEditForm}
