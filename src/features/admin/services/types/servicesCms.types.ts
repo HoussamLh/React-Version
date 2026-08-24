@@ -21,6 +21,7 @@ export type AdminService = {
 
   icon: ServiceIcon;
   imageUrl: string | null;
+  imagePublicId: string | null;
 
   pills: string[];
 
@@ -44,6 +45,7 @@ export type AdminServiceFormValues = {
 
   icon: ServiceIcon;
   imageUrl: string | null;
+  imagePublicId: string | null;
 
   pills: string[];
 
