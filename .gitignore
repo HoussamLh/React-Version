@@ -71,3 +71,4 @@ coverage/
 # Supabase / Database
 # =========================
 .supabase/
+.env*
