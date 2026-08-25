@@ -45,17 +45,6 @@ export const AdminTeamFormFields: React.FC<AdminTeamFormFieldsProps> = ({
       </label>
 
       <label style={styles.field}>
-        <span style={styles.label}>Image URL</span>
-        <input
-          type="url"
-          style={styles.input}
-          value={values.imageUrl}
-          onChange={(event) => onValueChange("imageUrl", event.target.value)}
-          placeholder="/team/sam-lahlah.png"
-        />
-      </label>
-
-      <label style={styles.field}>
         <span style={styles.label}>Image alt</span>
         <input
           style={styles.input}
@@ -110,7 +99,6 @@ export const AdminTeamFormFields: React.FC<AdminTeamFormFieldsProps> = ({
           }
         />
       </label>
-
     </div>
   );
 };

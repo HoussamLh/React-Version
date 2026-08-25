@@ -104,19 +104,29 @@ export const useAdminTeam = () => {
     setEditingMember(null);
   };
 
-  const handleCreateMember = async (values: AdminTeamMemberFormValues) => {
+  const handleCreateMember = async (
+    values: AdminTeamMemberFormValues,
+    memberId: string,
+  ) => {
     setIsCreatingMember(true);
     setCreateError(null);
 
     try {
-      await createAdminTeamMember(values);
+      await createAdminTeamMember(values, memberId);
       setIsCreateFormOpen(false);
-      await loadMembers();
     } catch (error) {
       console.error("Could not create team member:", error);
       setCreateError("Could not create team member. Please try again.");
+      throw error;
     } finally {
       setIsCreatingMember(false);
+    }
+
+    try {
+      await loadMembers();
+    } catch (error) {
+      console.error("Could not refresh team members:", error);
+      setError("Team member was saved, but the list could not be refreshed.");
     }
   };
 
@@ -133,12 +143,19 @@ export const useAdminTeam = () => {
       });
 
       setEditingMember(null);
-      await loadMembers();
     } catch (error) {
       console.error("Could not update team member:", error);
       setUpdateError("Could not update team member. Please try again.");
+      throw error;
     } finally {
       setIsUpdatingMember(false);
+    }
+
+    try {
+      await loadMembers();
+    } catch (error) {
+      console.error("Could not refresh team members:", error);
+      setError("Team member was saved, but the list could not be refreshed.");
     }
   };
 

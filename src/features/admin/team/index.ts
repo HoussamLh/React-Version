@@ -1,4 +1,5 @@
 export { AdminTeamMemberForm } from "./AdminTeamMemberForm";
+export { AdminTeamFormMedia } from "./components/AdminTeamFormMedia";
 export { AdminTeamPage } from "./AdminTeamPage";
 
 export type {

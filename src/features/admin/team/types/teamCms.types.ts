@@ -10,6 +10,7 @@ export type AdminTeamMember = {
   description: string;
 
   imageUrl: string;
+  imagePublicId: string | null;
   imageAlt: string;
 
   hoverAccent: AdminTeamAccent;
@@ -27,6 +28,7 @@ export type AdminTeamMemberFormValues = {
   description: string;
 
   imageUrl: string;
+  imagePublicId: string | null;
   imageAlt: string;
 
   hoverAccent: AdminTeamAccent;

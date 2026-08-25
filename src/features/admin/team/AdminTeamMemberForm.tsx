@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { radius, spacing } from "../../../design-system";
+import {
+  cleanupAdminCloudinaryFolder,
+  deleteAdminImageFromCloudinary,
+} from "../../../shared/services/cloudinaryUpload.service";
 
 import { AdminTeamFormActions } from "./components/AdminTeamFormActions";
 import { AdminTeamFormDescription } from "./components/AdminTeamFormDescription";
 import { AdminTeamFormFields } from "./components/AdminTeamFormFields";
-import { AdminTeamFormPreview } from "./components/AdminTeamFormPreview";
+import { AdminTeamFormMedia } from "./components/AdminTeamFormMedia";
 import {
   defaultTeamMemberFormValues,
   getTeamMemberFormValues,
@@ -21,7 +25,10 @@ type AdminTeamMemberFormProps = {
   error?: string | null;
   submitLabel: string;
   onCancel: () => void;
-  onSubmit: (values: AdminTeamMemberFormValues) => Promise<void>;
+  onSubmit: (
+    values: AdminTeamMemberFormValues,
+    memberId: string,
+  ) => Promise<void>;
 };
 
 export const AdminTeamMemberForm: React.FC<AdminTeamMemberFormProps> = ({
@@ -38,6 +45,14 @@ export const AdminTeamMemberForm: React.FC<AdminTeamMemberFormProps> = ({
       : defaultTeamMemberFormValues,
   );
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [uploadedPublicIds, setUploadedPublicIds] = useState<string[]>([]);
+
+  const mediaFolderId = useMemo(
+    () => initialMember?.id ?? globalThis.crypto.randomUUID(),
+    [initialMember?.id],
+  );
+
+  const mediaFolder = `devbysam/team/${mediaFolderId}/images`;
 
   const updateValue = <Key extends keyof AdminTeamMemberFormValues>(
     key: Key,
@@ -47,6 +62,29 @@ export const AdminTeamMemberForm: React.FC<AdminTeamMemberFormProps> = ({
       ...currentValues,
       [key]: value,
     }));
+
+    if (key === "imagePublicId" && typeof value === "string" && value) {
+      setUploadedPublicIds((currentIds) =>
+        currentIds.includes(value) ? currentIds : [...currentIds, value],
+      );
+    }
+  };
+
+  const cleanupUploadedAssets = async (publicIds: string[]) => {
+    await Promise.allSettled(
+      publicIds.map((publicId) => deleteAdminImageFromCloudinary(publicId)),
+    );
+  };
+
+  const cleanupFolder = async () => {
+    try {
+      await cleanupAdminCloudinaryFolder(`devbysam/team/${mediaFolderId}`);
+    } catch (cleanupError) {
+      console.error(
+        "Could not clean up empty Cloudinary team folders:",
+        cleanupError,
+      );
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -77,17 +115,50 @@ export const AdminTeamMemberForm: React.FC<AdminTeamMemberFormProps> = ({
       return;
     }
 
-    if (!nextValues.imageUrl) {
-      setValidationError("Image URL is required.");
+    if (!nextValues.imageUrl || !nextValues.imagePublicId) {
+      setValidationError("Team photo is required.");
       return;
     }
 
     setValidationError(null);
-    await onSubmit(nextValues);
+
+    try {
+      await onSubmit(nextValues, mediaFolderId);
+
+      const retainedPublicId = nextValues.imagePublicId;
+      const cleanupIds = uploadedPublicIds.filter(
+        (publicId) => publicId !== retainedPublicId,
+      );
+
+      if (cleanupIds.length > 0) {
+        await cleanupUploadedAssets(cleanupIds);
+      }
+
+      setUploadedPublicIds([]);
+      await cleanupFolder();
+    } catch (submitError) {
+      if (uploadedPublicIds.length > 0) {
+        await cleanupUploadedAssets(uploadedPublicIds);
+      }
+
+      await cleanupFolder();
+      setUploadedPublicIds([]);
+      throw submitError;
+    }
+  };
+
+  const handleCancel = async () => {
+    if (uploadedPublicIds.length > 0) {
+      await cleanupUploadedAssets(uploadedPublicIds);
+    }
+
+    await cleanupFolder();
+    setUploadedPublicIds([]);
+    onCancel();
   };
 
   return (
-    <form style={styles.form} onSubmit={handleSubmit}>
+    <form style={styles.form} onSubmit={(event) => void handleSubmit(event)}>
       {(validationError || error) && (
         <div style={styles.errorBox}>{validationError || error}</div>
       )}
@@ -99,15 +170,18 @@ export const AdminTeamMemberForm: React.FC<AdminTeamMemberFormProps> = ({
         onChange={(value) => updateValue("description", value)}
       />
 
-      <AdminTeamFormPreview
-        imageUrl={values.imageUrl}
-        imageAlt={values.imageAlt || values.name}
+      <AdminTeamFormMedia
+        values={values}
+        folder={mediaFolder}
+        disabled={isSubmitting}
+        onValueChange={updateValue}
       />
+
 
       <AdminTeamFormActions
         submitLabel={submitLabel}
         isSubmitting={isSubmitting}
-        onCancel={onCancel}
+        onCancel={() => void handleCancel()}
       />
     </form>
   );
