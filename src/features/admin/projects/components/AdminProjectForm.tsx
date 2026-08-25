@@ -145,7 +145,10 @@ export const AdminProjectForm: React.FC<AdminProjectFormProps> = ({
   };
 
   return (
-    <form style={styles.form} onSubmit={(event) => void handleFormSubmit(event)}>
+    <form
+      style={styles.form}
+      onSubmit={(event) => void handleFormSubmit(event)}
+    >
       {validationError && <div style={styles.errorBox}>{validationError}</div>}
 
       <AdminProjectFormFields
@@ -169,7 +172,12 @@ export const AdminProjectForm: React.FC<AdminProjectFormProps> = ({
 
       <AdminProjectSettingsFields values={values} onUpdateValue={updateValue} />
 
-      <AdminProjectFormMediaPreview mediaPreview={mediaPreview} title={values.title} />
+      <AdminProjectFormMediaPreview
+        mediaType={values.mediaType}
+        mediaUrl={mediaPreview.mediaUrl}
+        posterUrl={mediaPreview.posterUrl}
+        title={values.title}
+      />
 
       <AdminProjectFormActions
         submitLabel={submitLabel}
