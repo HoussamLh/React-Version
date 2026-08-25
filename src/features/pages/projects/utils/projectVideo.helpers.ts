@@ -1,3 +1,5 @@
+import { getCloudinaryVideoDeliveryUrl } from "../../../../shared/utils/cloudinaryMedia.helpers";
+
 const cleanVideoId = (value: string | null | undefined) => {
   if (!value) return null;
 
@@ -69,3 +71,7 @@ export const getProjectVideoEmbedUrl = (
 
   return null;
 };
+
+export const getProjectCloudinaryVideoUrl = (
+  videoUrl: string | null | undefined,
+) => getCloudinaryVideoDeliveryUrl(videoUrl);
