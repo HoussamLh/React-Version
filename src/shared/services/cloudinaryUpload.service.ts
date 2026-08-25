@@ -1,5 +1,15 @@
 import { requireSupabase } from "../../lib/supabase";
 
+export type CloudinaryResourceType = "image" | "video";
+
+export type CloudinaryMediaUploadResult = {
+  secure_url: string;
+  public_id: string;
+  resource_type: CloudinaryResourceType;
+};
+
+export type CloudinaryImageUploadResult = CloudinaryMediaUploadResult;
+
 type CloudinaryUploadSignature = {
   cloudName: string;
   apiKey: string;
@@ -7,22 +17,7 @@ type CloudinaryUploadSignature = {
   signature: string;
   publicId: string;
   assetFolder: string;
-};
-
-export type CloudinaryImageUploadResult = {
-  secure_url: string;
-  public_id: string;
-  resource_type: string;
-};
-
-const requireCloudinaryUploadResponse = (
-  response: CloudinaryImageUploadResult,
-) => {
-  if (!response.secure_url || !response.public_id) {
-    throw new Error("Cloudinary returned an incomplete upload response.");
-  }
-
-  return response;
+  resourceType: CloudinaryResourceType;
 };
 
 const getAuthenticatedSession = async () => {
@@ -32,13 +27,8 @@ const getAuthenticatedSession = async () => {
     error: sessionError,
   } = await client.auth.getSession();
 
-  if (sessionError) {
-    throw sessionError;
-  }
-
-  if (!session?.access_token) {
-    throw new Error("Admin session required.");
-  }
+  if (sessionError) throw sessionError;
+  if (!session?.access_token) throw new Error("Admin session required.");
 
   return session;
 };
@@ -57,15 +47,17 @@ const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   }
 };
 
-export const uploadAdminImageToCloudinary = async ({
+export const uploadAdminMediaToCloudinary = async ({
   file,
   folder,
   fileBaseName,
+  resourceType,
 }: {
   file: File;
   folder: string;
   fileBaseName?: string;
-}) => {
+  resourceType: CloudinaryResourceType;
+}): Promise<CloudinaryMediaUploadResult> => {
   const session = await getAuthenticatedSession();
 
   const signResponse = await fetch("/api/cloudinary/sign", {
@@ -74,10 +66,7 @@ export const uploadAdminImageToCloudinary = async ({
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({
-      folder,
-      fileBaseName,
-    }),
+    body: JSON.stringify({ folder, fileBaseName, resourceType }),
   });
 
   const signData = await parseJsonResponse<{
@@ -99,74 +88,110 @@ export const uploadAdminImageToCloudinary = async ({
   formData.append("asset_folder", signData.upload.assetFolder);
 
   const uploadResponse = await fetch(
-    `https://api.cloudinary.com/v1_1/${signData.upload.cloudName}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    },
+    `https://api.cloudinary.com/v1_1/${signData.upload.cloudName}/${resourceType}/upload`,
+    { method: "POST", body: formData },
   );
 
   const uploadData = await parseJsonResponse<
-    | CloudinaryImageUploadResult
+    | CloudinaryMediaUploadResult
     | { error?: { message?: string } }
   >(uploadResponse);
 
   if (!uploadResponse.ok) {
     throw new Error(
       "error" in uploadData
-        ? uploadData.error?.message || "Cloudinary image upload failed."
-        : "Cloudinary image upload failed.",
+        ? uploadData.error?.message || `Cloudinary ${resourceType} upload failed.`
+        : `Cloudinary ${resourceType} upload failed.`,
     );
   }
 
-  return requireCloudinaryUploadResponse(
-    uploadData as CloudinaryImageUploadResult,
-  );
-};
-
-export const deleteAdminImageFromCloudinary = async (publicId: string) => {
-  const normalizedPublicId = publicId.trim();
-
-  if (!normalizedPublicId) {
-    return;
+  if (!("secure_url" in uploadData) || !("public_id" in uploadData) || !uploadData.secure_url || !uploadData.public_id) {
+    throw new Error("Cloudinary returned an incomplete upload response.");
   }
 
-  const session = await getAuthenticatedSession();
+  return uploadData;
+};
 
+export const uploadAdminImageToCloudinary = async (options: {
+  file: File;
+  folder: string;
+  fileBaseName?: string;
+}) => uploadAdminMediaToCloudinary({ ...options, resourceType: "image" });
+
+export const uploadAdminVideoToCloudinary = async (options: {
+  file: File;
+  folder: string;
+  fileBaseName?: string;
+}) => uploadAdminMediaToCloudinary({ ...options, resourceType: "video" });
+
+export const deleteAdminMediaFromCloudinary = async (
+  publicId: string,
+  resourceType: CloudinaryResourceType,
+) => {
+  const normalizedPublicId = publicId.trim();
+  if (!normalizedPublicId) return;
+
+  const session = await getAuthenticatedSession();
   const deleteResponse = await fetch("/api/cloudinary/delete", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({
-      publicId: normalizedPublicId,
-    }),
+    body: JSON.stringify({ publicId: normalizedPublicId, resourceType }),
   });
 
-  const deleteData = await parseJsonResponse<{
-    success?: boolean;
-    message?: string;
-  }>(deleteResponse);
+  const deleteData = await parseJsonResponse<{ success?: boolean; message?: string }>(
+    deleteResponse,
+  );
 
   if (!deleteResponse.ok || !deleteData.success) {
-    throw new Error(deleteData.message || "Could not delete Cloudinary image.");
+    throw new Error(deleteData.message || "Could not delete Cloudinary media.");
   }
 };
 
-export const getCloudinaryImagePublicId = (imageUrl: string | null) => {
-  if (!imageUrl || !imageUrl.includes("res.cloudinary.com/")) {
-    return null;
+export const deleteAdminImageFromCloudinary = async (publicId: string) =>
+  deleteAdminMediaFromCloudinary(publicId, "image");
+
+export const deleteAdminVideoFromCloudinary = async (publicId: string) =>
+  deleteAdminMediaFromCloudinary(publicId, "video");
+
+export const cleanupAdminCloudinaryFolder = async (folder: string) => {
+  const normalizedFolder = folder.trim().replace(/\/+$/, "");
+  if (!normalizedFolder) return;
+
+  const session = await getAuthenticatedSession();
+  const cleanupResponse = await fetch("/api/cloudinary/folders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ folder: normalizedFolder }),
+  });
+
+  const cleanupData = await parseJsonResponse<{
+    success?: boolean;
+    message?: string;
+  }>(cleanupResponse);
+
+  if (!cleanupResponse.ok || !cleanupData.success) {
+    throw new Error(cleanupData.message || "Could not clean up Cloudinary folders.");
   }
+};
+
+export const getCloudinaryPublicId = (
+  mediaUrl: string | null,
+  resourceType: CloudinaryResourceType,
+) => {
+  if (!mediaUrl || !mediaUrl.includes("res.cloudinary.com/")) return null;
 
   try {
-    const url = new URL(imageUrl);
-    const uploadMarker = "/image/upload/";
+    const url = new URL(mediaUrl);
+    const uploadMarker = `/${resourceType}/upload/`;
     const uploadIndex = url.pathname.indexOf(uploadMarker);
 
-    if (uploadIndex === -1) {
-      return null;
-    }
+    if (uploadIndex === -1) return null;
 
     let publicId = url.pathname.slice(uploadIndex + uploadMarker.length);
     publicId = publicId.replace(/^v\d+\//, "");
@@ -177,3 +202,9 @@ export const getCloudinaryImagePublicId = (imageUrl: string | null) => {
     return null;
   }
 };
+
+export const getCloudinaryImagePublicId = (imageUrl: string | null) =>
+  getCloudinaryPublicId(imageUrl, "image");
+
+export const getCloudinaryVideoPublicId = (videoUrl: string | null) =>
+  getCloudinaryPublicId(videoUrl, "video");

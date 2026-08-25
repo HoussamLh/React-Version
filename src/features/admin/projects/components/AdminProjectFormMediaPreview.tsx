@@ -1,16 +1,22 @@
 import React from "react";
 
 import { colors, radius, spacing } from "../../../../design-system";
+import { getCloudinaryVideoDeliveryUrl } from "../../../../shared/utils/cloudinaryMedia.helpers";
 
 type AdminProjectFormMediaPreviewProps = {
-  mediaPreview: string | null;
+  mediaType: "image" | "video";
+  mediaUrl: string | null;
+  posterUrl: string | null;
   title: string;
 };
 
 export const AdminProjectFormMediaPreview: React.FC<
   AdminProjectFormMediaPreviewProps
-> = ({ mediaPreview, title }) => {
-  if (!mediaPreview) {
+> = ({ mediaType, mediaUrl, posterUrl, title }) => {
+  const videoUrl =
+    mediaType === "video" ? getCloudinaryVideoDeliveryUrl(mediaUrl) : null;
+
+  if (!mediaUrl && !posterUrl) {
     return null;
   }
 
@@ -18,7 +24,23 @@ export const AdminProjectFormMediaPreview: React.FC<
     <div style={styles.previewBox}>
       <span style={styles.previewLabel}>Media preview</span>
 
-      <img src={mediaPreview} alt={title} style={styles.preview} />
+      {mediaType === "video" && videoUrl ? (
+        <video
+          src={videoUrl}
+          poster={posterUrl ?? undefined}
+          controls
+          playsInline
+          preload="metadata"
+          aria-label={`${title || "Project"} video preview`}
+          style={styles.preview}
+        />
+      ) : (
+        <img
+          src={mediaUrl ?? posterUrl ?? ""}
+          alt={title || "Project media preview"}
+          style={styles.preview}
+        />
+      )}
     </div>
   );
 };
@@ -40,9 +62,10 @@ const styles = {
 
   preview: {
     width: "100%",
-    maxHeight: "220px",
+    maxHeight: "320px",
     borderRadius: radius.md,
-    objectFit: "cover" as const,
+    objectFit: "contain" as const,
     display: "block",
+    backgroundColor: "#000",
   },
 };

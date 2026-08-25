@@ -26,8 +26,11 @@ const getProjectFormValues = (
 
     mediaType: project.mediaType,
     imageUrl: project.imageUrl,
+    imagePublicId: project.imagePublicId,
     videoUrl: project.videoUrl,
+    videoPublicId: project.videoPublicId,
     videoPosterUrl: project.videoPosterUrl,
+    videoPosterPublicId: project.videoPosterPublicId,
 
     span: project.span,
     imageHeight: project.imageHeight,
@@ -47,6 +50,7 @@ export const useAdminProjects = () => {
   const [statusFilter, setStatusFilter] = useState<ProjectFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [createProjectId, setCreateProjectId] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<AdminProject | null>(
     null,
   );
@@ -130,14 +134,15 @@ export const useAdminProjects = () => {
       setCreateError(null);
 
       try {
-        await createAdminProject(values);
+        await createAdminProject(values, createProjectId ?? undefined);
         setIsCreateFormOpen(false);
-        await loadProjects();
+        void loadProjects();
       } catch (error) {
         console.error("Could not create project:", error);
         setCreateError(
           "Could not create project. Check the slug is unique and all required fields are valid.",
         );
+        throw error;
       } finally {
         setIsCreatingProject(false);
       }
@@ -159,12 +164,13 @@ export const useAdminProjects = () => {
         });
 
         setEditingProject(null);
-        await loadProjects();
+        void loadProjects();
       } catch (error) {
         console.error("Could not update project:", error);
         setUpdateError(
           "Could not update project. Check the slug is unique and all required fields are valid.",
         );
+        throw error;
       } finally {
         setIsUpdatingProject(false);
       }
@@ -206,7 +212,11 @@ export const useAdminProjects = () => {
     setUpdateError(null);
     setDeleteError(null);
     setEditingProject(null);
-    setIsCreateFormOpen((currentValue) => !currentValue);
+    setIsCreateFormOpen((currentValue) => {
+      const nextValue = !currentValue;
+      setCreateProjectId(nextValue ? crypto.randomUUID() : null);
+      return nextValue;
+    });
   }, []);
 
   const openEditForm = useCallback((project: AdminProject) => {
@@ -220,6 +230,7 @@ export const useAdminProjects = () => {
   const cancelCreateForm = useCallback(() => {
     setCreateError(null);
     setIsCreateFormOpen(false);
+    setCreateProjectId(null);
   }, []);
 
   const cancelEditForm = useCallback(() => {
@@ -239,6 +250,7 @@ export const useAdminProjects = () => {
     resetFilters,
 
     isCreateFormOpen,
+    createProjectId,
     editingProject,
 
     isLoading,

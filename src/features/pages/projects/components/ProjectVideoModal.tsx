@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { colors, radius, spacing, typography } from "../../../../design-system";
 import type { Project } from "../data/projects.data";
-import { getProjectVideoEmbedUrl } from "../utils";
+import {
+  getProjectCloudinaryVideoUrl,
+  getProjectVideoEmbedUrl,
+} from "../utils/projectVideo.helpers";
 
 type ProjectVideoModalProps = {
   project: Project | null;
@@ -13,6 +16,7 @@ export const ProjectVideoModal: React.FC<ProjectVideoModalProps> = ({
   onClose,
 }) => {
   const embedUrl = getProjectVideoEmbedUrl(project?.videoUrl);
+  const cloudinaryVideoUrl = getProjectCloudinaryVideoUrl(project?.videoUrl);
 
   useEffect(() => {
     if (!project) return;
@@ -50,29 +54,27 @@ export const ProjectVideoModal: React.FC<ProjectVideoModalProps> = ({
           </button>
         </div>
 
-        {embedUrl ? (
-          <>
-            <div style={styles.videoFrameWrap}>
-              <iframe
-                src={embedUrl}
-                title={`${project.title} video demo`}
-                style={styles.videoFrame}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-
-            {project.videoUrl && (
-              <a
-                href={project.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                style={styles.watchOnPlatformLink}
-              >
-                Open video in new tab
-              </a>
-            )}
-          </>
+        {cloudinaryVideoUrl ? (
+          <div style={styles.videoFrameWrap}>
+            <video
+              src={cloudinaryVideoUrl}
+              poster={project.videoPosterUrl ?? undefined}
+              controls
+              playsInline
+              preload="metadata"
+              style={styles.video}
+            />
+          </div>
+        ) : embedUrl ? (
+          <div style={styles.videoFrameWrap}>
+            <iframe
+              src={embedUrl}
+              title={`${project.title} video demo`}
+              style={styles.videoFrame}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
         ) : (
           <div style={styles.fallbackBox}>
             <p style={styles.fallbackText}>
@@ -161,6 +163,14 @@ const styles = {
     backgroundColor: "#000",
   },
 
+  video: {
+    width: "100%",
+    height: "100%",
+    display: "block",
+    objectFit: "contain" as const,
+    backgroundColor: "#000",
+  },
+
   videoFrame: {
     width: "100%",
     height: "100%",
@@ -183,14 +193,6 @@ const styles = {
   },
 
   externalLink: {
-    color: colors.accent.green,
-    fontWeight: typography.fontWeight.bold,
-    textDecoration: "none",
-  },
-
-  watchOnPlatformLink: {
-    display: "inline-flex",
-    marginTop: spacing.md,
     color: colors.accent.green,
     fontWeight: typography.fontWeight.bold,
     textDecoration: "none",

@@ -1,45 +1,65 @@
 import React from "react";
 
 import { colors, spacing, typography } from "../../../../design-system";
+import { getCloudinaryVideoDeliveryUrl } from "../../../../shared/utils/cloudinaryMedia.helpers";
 import type { AdminProject } from "../types/projectsCms.types";
 
 type AdminProjectCardMediaPreviewProps = {
   project: AdminProject;
 };
 
-const getProjectMediaPreview = (project: AdminProject) => {
-  if (project.mediaType === "video") {
-    return project.videoPosterUrl ?? project.imageUrl;
-  }
-
-  return project.imageUrl ?? project.videoPosterUrl;
-};
-
 export const AdminProjectCardMediaPreview: React.FC<
   AdminProjectCardMediaPreviewProps
 > = ({ project }) => {
-  const mediaPreview = getProjectMediaPreview(project);
+  const videoUrl =
+    project.mediaType === "video"
+      ? getCloudinaryVideoDeliveryUrl(project.videoUrl)
+      : null;
 
   return (
     <div style={styles.mediaWrap}>
-      {mediaPreview ? (
-        <img src={mediaPreview} alt={project.title} style={styles.mediaImage} />
+      {project.mediaType === "video" && videoUrl ? (
+        <video
+          src={videoUrl}
+          poster={project.videoPosterUrl ?? project.imageUrl ?? undefined}
+          controls
+          muted
+          playsInline
+          preload="metadata"
+          aria-label={`${project.title} video`}
+          style={styles.mediaVideo}
+        />
+      ) : project.imageUrl ? (
+        <img
+          src={project.imageUrl}
+          alt={project.title}
+          style={styles.mediaImage}
+        />
       ) : (
         <div style={styles.mediaPlaceholder}>No media preview</div>
       )}
 
-      {project.mediaType === "video" && (
-        <span style={styles.videoBadge}>Video</span>
-      )}
+      <span style={styles.mediaBadge}>
+        {project.mediaType === "video" ? "Video" : "Image"}
+      </span>
     </div>
   );
 };
 
 const styles = {
   mediaWrap: {
-    height: "180px",
+    height: "220px",
     position: "relative" as const,
     backgroundColor: "rgba(255, 255, 255, 0.03)",
+    overflow: "hidden",
+  },
+
+  mediaVideo: {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain" as const,
+    display: "block",
+    backgroundColor: "#000",
   },
 
   mediaImage: {
@@ -58,15 +78,16 @@ const styles = {
     fontSize: "13px",
   },
 
-  videoBadge: {
+  mediaBadge: {
     position: "absolute" as const,
     right: spacing.md,
     top: spacing.md,
     borderRadius: "999px",
-    backgroundColor: "rgba(0, 0, 0, 0.62)",
+    backgroundColor: "rgba(0, 0, 0, 0.72)",
     color: colors.text.main,
     padding: "5px 9px",
     fontSize: "11px",
     fontWeight: typography.fontWeight.bold,
+    pointerEvents: "none" as const,
   },
 };

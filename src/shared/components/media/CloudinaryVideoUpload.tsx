@@ -1,23 +1,28 @@
 import React, { useRef, useState } from "react";
 import { colors, radius, spacing, typography } from "../../../design-system";
-import { uploadAdminImageToCloudinary } from "../../services/cloudinaryUpload.service";
+import { uploadAdminVideoToCloudinary } from "../../services/cloudinaryUpload.service";
+import { getCloudinaryVideoDeliveryUrl } from "../../utils/cloudinaryMedia.helpers";
 
-type CloudinaryImageUploadProps = {
+type CloudinaryVideoUploadProps = {
   value: string | null;
   publicId: string | null;
   folder: string;
   label?: string;
   disabled?: boolean;
-  onChange: (value: { secureUrl: string; publicId: string } | { secureUrl: null; publicId: null }) => void;
+  onChange: (
+    value:
+      | { secureUrl: string; publicId: string }
+      | { secureUrl: null; publicId: null },
+  ) => void;
 };
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
-export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
+export const CloudinaryVideoUpload: React.FC<CloudinaryVideoUploadProps> = ({
   value,
   publicId,
   folder,
-  label = "Image",
+  label = "Video",
   disabled = false,
   onChange,
 }) => {
@@ -25,24 +30,23 @@ export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const previewUrl = getCloudinaryVideoDeliveryUrl(value) ?? value;
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
-
     event.target.value = "";
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setError("Please choose an image file.");
+    if (!file.type.startsWith("video/")) {
+      setError("Please choose a video file.");
       return;
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError("Image must be smaller than 10 MB.");
+      setError("Video must be smaller than 100 MB.");
       return;
     }
 
@@ -50,39 +54,37 @@ export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
     setError(null);
 
     try {
-      const result = await uploadAdminImageToCloudinary({
+      const result = await uploadAdminVideoToCloudinary({
         file,
         folder,
         fileBaseName: file.name.replace(/\.[^/.]+$/, ""),
       });
 
-      onChange({
-        secureUrl: result.secure_url,
-        publicId: result.public_id,
-      });
+      onChange({ secureUrl: result.secure_url, publicId: result.public_id });
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : "Could not upload image.",
+          : "Could not upload video.",
       );
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleRemove = () => {
-    setError(null);
-    onChange({ secureUrl: null, publicId: null });
-  };
-
   return (
     <div style={styles.wrapper}>
       <span style={styles.label}>{label}</span>
 
-      {value && (
+      {previewUrl && (
         <div style={styles.previewBox}>
-          <img src={value} alt="Uploaded preview" style={styles.preview} />
+          <video
+            src={previewUrl}
+            controls
+            playsInline
+            preload="metadata"
+            style={styles.preview}
+          />
         </div>
       )}
 
@@ -96,7 +98,11 @@ export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
           disabled={isUploading || disabled}
           onClick={() => inputRef.current?.click()}
         >
-          {isUploading ? "Uploading..." : value ? "Replace Image" : "Upload Image"}
+          {isUploading
+            ? "Uploading..."
+            : value
+              ? "Replace Video"
+              : "Upload Video"}
         </button>
 
         {value && (
@@ -104,7 +110,10 @@ export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
             type="button"
             style={styles.clearButton}
             disabled={isUploading || disabled}
-            onClick={handleRemove}
+            onClick={() => {
+              setError(null);
+              onChange({ secureUrl: null, publicId: null });
+            }}
           >
             Remove
           </button>
@@ -114,17 +123,17 @@ export const CloudinaryImageUpload: React.FC<CloudinaryImageUploadProps> = ({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="video/*"
         style={styles.hiddenInput}
         onChange={(event) => void handleFileChange(event)}
       />
 
       <span style={styles.helper}>
-        Images are uploaded to Cloudinary and the delivery URL is saved with the media record.
+        Videos are uploaded to Cloudinary and delivered in a browser-compatible
+        format.
       </span>
 
       {publicId && <span style={styles.assetInfo}>Cloudinary asset linked.</span>}
-
       {error && <p style={styles.error}>{error}</p>}
     </div>
   );
@@ -136,36 +145,31 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     gap: spacing.sm,
   },
-
   label: {
     color: colors.text.muted,
     fontSize: "12px",
     fontWeight: typography.fontWeight.bold,
   },
-
   previewBox: {
     width: "100%",
-    maxWidth: "360px",
+    maxWidth: "520px",
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
     backgroundColor: colors.background.dark,
     overflow: "hidden",
   },
-
   preview: {
     display: "block",
     width: "100%",
-    maxHeight: "220px",
-    objectFit: "cover",
+    maxHeight: "280px",
+    backgroundColor: "#000",
   },
-
   actions: {
     display: "flex",
     alignItems: "center",
     gap: spacing.sm,
     flexWrap: "wrap",
   },
-
   button: {
     border: "none",
     borderRadius: radius.md,
@@ -176,7 +180,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "13px",
     fontWeight: typography.fontWeight.black,
   },
-
   clearButton: {
     border: `1px solid ${colors.border.default}`,
     borderRadius: radius.md,
@@ -187,27 +190,22 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "13px",
     fontWeight: typography.fontWeight.bold,
   },
-
   disabled: {
     opacity: 0.55,
     cursor: "not-allowed",
   },
-
   hiddenInput: {
     display: "none",
   },
-
   helper: {
     color: colors.text.muted,
     fontSize: "11px",
     lineHeight: "17px",
   },
-
   assetInfo: {
     color: colors.text.muted,
     fontSize: "11px",
   },
-
   error: {
     color: colors.accent.yellow,
     fontSize: "12px",

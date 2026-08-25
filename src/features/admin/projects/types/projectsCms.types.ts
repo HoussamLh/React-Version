@@ -32,8 +32,11 @@ export type AdminProject = {
 
   mediaType: ProjectMediaType;
   imageUrl: string | null;
+  imagePublicId: string | null;
   videoUrl: string | null;
+  videoPublicId: string | null;
   videoPosterUrl: string | null;
+  videoPosterPublicId: string | null;
 
   span: ProjectSpan;
   imageHeight: string;
@@ -60,8 +63,11 @@ export type AdminProjectFormValues = {
 
   mediaType: ProjectMediaType;
   imageUrl: string | null;
+  imagePublicId: string | null;
   videoUrl: string | null;
+  videoPublicId: string | null;
   videoPosterUrl: string | null;
+  videoPosterPublicId: string | null;
 
   span: ProjectSpan;
   imageHeight: string;

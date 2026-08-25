@@ -44,6 +44,9 @@ const createSignature = (params) => {
     .digest("hex");
 };
 
+const isAllowedFolder = (folder) =>
+  /^devbysam\/(services|projects|team)\/[a-z0-9_-]+\/(images|videos)$/.test(folder);
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, message: "Method not allowed." });
@@ -82,17 +85,26 @@ export default async function handler(req, res) {
     }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    const requestedFolder = String(body?.folder || "").trim();
-    const fileBaseName = sanitizePathSegment(body?.fileBaseName || "image");
+    const requestedFolder = String(body?.folder || "").trim().replace(/\/+$/, "");
+    const resourceType = body?.resourceType === "video" ? "video" : "image";
+    const fileBaseName = sanitizePathSegment(body?.fileBaseName || resourceType);
 
-    if (!requestedFolder.startsWith("devbysam/services/")) {
-      return res.status(400).json({ success: false, message: "Invalid Cloudinary service folder." });
+    if (!isAllowedFolder(requestedFolder)) {
+      return res.status(400).json({ success: false, message: "Invalid Cloudinary media folder." });
     }
 
-    const folder = requestedFolder.replace(/\/+$/, "");
+    const expectedFolderType = requestedFolder.endsWith("/videos") ? "video" : "image";
+
+    if (resourceType !== expectedFolderType) {
+      return res.status(400).json({
+        success: false,
+        message: "Cloudinary resource type does not match the requested folder.",
+      });
+    }
+
     const timestamp = Math.floor(Date.now() / 1000);
-    const publicId = `${folder}/${fileBaseName}-${timestamp}`;
-    const signatureParams = { asset_folder: folder, public_id: publicId, timestamp };
+    const publicId = `${requestedFolder}/${fileBaseName}-${timestamp}`;
+    const signatureParams = { asset_folder: requestedFolder, public_id: publicId, timestamp };
 
     return res.status(200).json({
       success: true,
@@ -102,7 +114,8 @@ export default async function handler(req, res) {
         timestamp,
         signature: createSignature(signatureParams),
         publicId,
-        assetFolder: folder,
+        assetFolder: requestedFolder,
+        resourceType,
       },
     });
   } catch (error) {

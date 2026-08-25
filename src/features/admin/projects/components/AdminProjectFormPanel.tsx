@@ -8,6 +8,7 @@ type AdminProjectFormPanelProps = {
   initialValues?: AdminProjectFormValues;
   error: string | null;
   isSubmitting: boolean;
+  projectId: string;
   onCancel: () => void;
   onSubmit: (values: AdminProjectFormValues) => void | Promise<void>;
 };
@@ -17,6 +18,7 @@ export const AdminProjectFormPanel: React.FC<AdminProjectFormPanelProps> = ({
   initialValues,
   error,
   isSubmitting,
+  projectId,
   onCancel,
   onSubmit,
 }) => {
@@ -45,6 +47,7 @@ export const AdminProjectFormPanel: React.FC<AdminProjectFormPanelProps> = ({
         initialValues={initialValues}
         submitLabel={isEditMode ? "Save Changes" : "Create Project"}
         isSubmitting={isSubmitting}
+        projectId={projectId}
         onCancel={onCancel}
         onSubmit={onSubmit}
       />
