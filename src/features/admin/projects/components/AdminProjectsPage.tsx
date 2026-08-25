@@ -22,6 +22,7 @@ export const AdminProjectsPage: React.FC = () => {
     resetFilters,
 
     isCreateFormOpen,
+    createProjectId,
     editingProject,
 
     isLoading,
@@ -85,6 +86,7 @@ export const AdminProjectsPage: React.FC = () => {
           mode="create"
           error={createError}
           isSubmitting={isCreatingProject}
+          projectId={createProjectId ?? ""}
           onCancel={cancelCreateForm}
           onSubmit={handleCreateProject}
         />
@@ -96,6 +98,7 @@ export const AdminProjectsPage: React.FC = () => {
           initialValues={getProjectFormValues(editingProject)}
           error={updateError}
           isSubmitting={isUpdatingProject}
+          projectId={editingProject.id}
           onCancel={cancelEditForm}
           onSubmit={handleUpdateProject}
         />

@@ -17,8 +17,11 @@ const defaultProjectFormValues: AdminProjectFormValues = {
 
   mediaType: "image",
   imageUrl: null,
+  imagePublicId: null,
   videoUrl: null,
+  videoPublicId: null,
   videoPosterUrl: null,
+  videoPosterPublicId: null,
 
   span: "span 6",
   imageHeight: "320px",
@@ -69,11 +72,22 @@ export const useAdminProjectForm = ({
 
   const mediaPreview = useMemo(() => {
     if (values.mediaType === "video") {
-      return values.videoPosterUrl ?? values.imageUrl;
+      return {
+        mediaUrl: values.videoUrl,
+        posterUrl: values.videoPosterUrl ?? values.imageUrl,
+      };
     }
 
-    return values.imageUrl ?? values.videoPosterUrl;
-  }, [values.imageUrl, values.mediaType, values.videoPosterUrl]);
+    return {
+      mediaUrl: values.imageUrl,
+      posterUrl: values.videoPosterUrl,
+    };
+  }, [
+    values.imageUrl,
+    values.mediaType,
+    values.videoPosterUrl,
+    values.videoUrl,
+  ]);
 
   const updateValue = useCallback(
     <Key extends keyof AdminProjectFormValues>(
@@ -107,6 +121,35 @@ export const useAdminProjectForm = ({
     [updateValue],
   );
 
+  const handleMediaTypeChange = useCallback(
+    (nextMediaType: AdminProjectFormValues["mediaType"]) => {
+      setValues((currentValues) => {
+        if (currentValues.mediaType === nextMediaType) {
+          return currentValues;
+        }
+
+        if (nextMediaType === "image") {
+          return {
+            ...currentValues,
+            mediaType: nextMediaType,
+            videoUrl: null,
+            videoPublicId: null,
+            videoPosterUrl: null,
+            videoPosterPublicId: null,
+          };
+        }
+
+        return {
+          ...currentValues,
+          mediaType: nextMediaType,
+          imageUrl: null,
+          imagePublicId: null,
+        };
+      });
+    },
+    [],
+  );
+
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -118,8 +161,11 @@ export const useAdminProjectForm = ({
         text: values.text.trim(),
         tags: parseTagsInput(tagsInput),
         imageUrl: getNullableTextValue(values.imageUrl ?? ""),
+        imagePublicId: getNullableTextValue(values.imagePublicId ?? ""),
         videoUrl: getNullableTextValue(values.videoUrl ?? ""),
+        videoPublicId: getNullableTextValue(values.videoPublicId ?? ""),
         videoPosterUrl: getNullableTextValue(values.videoPosterUrl ?? ""),
+        videoPosterPublicId: getNullableTextValue(values.videoPosterPublicId ?? ""),
         demoUrl: getNullableTextValue(values.demoUrl ?? ""),
         githubUrl: getNullableTextValue(values.githubUrl ?? ""),
         imageHeight: values.imageHeight.trim() || "320px",
@@ -128,32 +174,33 @@ export const useAdminProjectForm = ({
 
       if (!nextValues.title) {
         setValidationError("Project title is required.");
-        return;
+        return false;
       }
 
       if (!nextValues.slug) {
         setValidationError("Project slug is required.");
-        return;
+        return false;
       }
 
       if (!nextValues.text) {
         setValidationError("Project text is required.");
-        return;
+        return false;
       }
 
       if (nextValues.mediaType === "image" && !nextValues.imageUrl) {
-        setValidationError("Image URL is required when media type is image.");
-        return;
+        setValidationError("Image is required when media type is image.");
+        return false;
       }
 
       if (nextValues.mediaType === "video" && !nextValues.videoUrl) {
-        setValidationError("Video URL is required when media type is video.");
-        return;
+        setValidationError("Video is required when media type is video.");
+        return false;
       }
 
       setValidationError(null);
 
       await onSubmit(nextValues);
+      return true;
     },
     [onSubmit, tagsInput, values],
   );
@@ -171,6 +218,7 @@ export const useAdminProjectForm = ({
     updateValue,
     handleTitleChange,
     handleSlugChange,
+    handleMediaTypeChange,
     handleSubmit,
   };
 };
