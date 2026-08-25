@@ -1,4 +1,9 @@
 import { requireSupabase } from "../../../../lib/supabase";
+import {
+  cleanupAdminCloudinaryFolder,
+  deleteAdminImageFromCloudinary,
+  getCloudinaryImagePublicId,
+} from "../../../../shared/services/cloudinaryUpload.service";
 import type {
   AdminTeamMember,
   AdminTeamMemberFormValues,
@@ -12,6 +17,7 @@ type TeamMemberRow = {
   description: string;
 
   image_url: string;
+  image_public_id: string | null;
   image_alt: string;
 
   hover_accent: AdminTeamMember["hoverAccent"];
@@ -31,6 +37,7 @@ const mapTeamMemberRow = (row: TeamMemberRow): AdminTeamMember => ({
   description: row.description,
 
   imageUrl: row.image_url,
+  imagePublicId: row.image_public_id,
   imageAlt: row.image_alt,
 
   hoverAccent: row.hover_accent,
@@ -48,6 +55,7 @@ const mapTeamMemberFormValues = (values: AdminTeamMemberFormValues) => ({
   description: values.description,
 
   image_url: values.imageUrl,
+  image_public_id: values.imagePublicId,
   image_alt: values.imageAlt,
 
   hover_accent: values.hoverAccent,
@@ -55,6 +63,36 @@ const mapTeamMemberFormValues = (values: AdminTeamMemberFormValues) => ({
   status: values.status,
   sort_order: values.sortOrder,
 });
+
+const getStoredImagePublicId = (
+  imageUrl: string | null,
+  imagePublicId: string | null,
+) => imagePublicId || getCloudinaryImagePublicId(imageUrl);
+
+const cleanupTeamImage = async (
+  imageUrl: string | null,
+  imagePublicId: string | null,
+) => {
+  const resolvedPublicId = getStoredImagePublicId(imageUrl, imagePublicId);
+
+  if (!resolvedPublicId) return;
+
+  try {
+    await deleteAdminImageFromCloudinary(resolvedPublicId);
+  } catch (error) {
+    // Asset cleanup should not make an otherwise successful CMS mutation fail.
+    console.error("Could not clean up Cloudinary team image:", error);
+  }
+};
+
+const cleanupTeamFolder = async (memberId: string) => {
+  try {
+    await cleanupAdminCloudinaryFolder(`devbysam/team/${memberId}`);
+  } catch (error) {
+    // Folder cleanup is best-effort. Asset deletion remains the critical action.
+    console.error("Could not clean up empty Cloudinary team folders:", error);
+  }
+};
 
 export const getAdminTeamMembers = async (): Promise<AdminTeamMember[]> => {
   const client = requireSupabase();
@@ -74,12 +112,16 @@ export const getAdminTeamMembers = async (): Promise<AdminTeamMember[]> => {
 
 export const createAdminTeamMember = async (
   values: AdminTeamMemberFormValues,
+  memberId?: string,
 ): Promise<AdminTeamMember> => {
   const client = requireSupabase();
 
   const { data, error } = await client
     .from("team_members")
-    .insert(mapTeamMemberFormValues(values))
+    .insert({
+      ...(memberId ? { id: memberId } : {}),
+      ...mapTeamMemberFormValues(values),
+    })
     .select("*")
     .single();
 
@@ -99,6 +141,16 @@ export const updateAdminTeamMember = async ({
 }): Promise<AdminTeamMember> => {
   const client = requireSupabase();
 
+  const { data: previousMember, error: previousMemberError } = await client
+    .from("team_members")
+    .select("image_url, image_public_id")
+    .eq("id", memberId)
+    .single();
+
+  if (previousMemberError) {
+    throw previousMemberError;
+  }
+
   const { data, error } = await client
     .from("team_members")
     .update(mapTeamMemberFormValues(values))
@@ -110,11 +162,35 @@ export const updateAdminTeamMember = async ({
     throw error;
   }
 
+  const previousImagePublicId = getStoredImagePublicId(
+    previousMember.image_url,
+    previousMember.image_public_id,
+  );
+
+  if (previousImagePublicId && previousImagePublicId !== values.imagePublicId) {
+    await cleanupTeamImage(
+      previousMember.image_url,
+      previousImagePublicId,
+    );
+  }
+
+  await cleanupTeamFolder(memberId);
+
   return mapTeamMemberRow(data as TeamMemberRow);
 };
 
 export const deleteAdminTeamMember = async (memberId: string) => {
   const client = requireSupabase();
+
+  const { data: member, error: memberError } = await client
+    .from("team_members")
+    .select("image_url, image_public_id")
+    .eq("id", memberId)
+    .single();
+
+  if (memberError) {
+    throw memberError;
+  }
 
   const { error } = await client
     .from("team_members")
@@ -124,4 +200,7 @@ export const deleteAdminTeamMember = async (memberId: string) => {
   if (error) {
     throw error;
   }
+
+  await cleanupTeamImage(member.image_url, member.image_public_id);
+  await cleanupTeamFolder(memberId);
 };
