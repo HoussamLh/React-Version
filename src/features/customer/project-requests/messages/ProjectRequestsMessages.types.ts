@@ -1,3 +1,5 @@
+import type { ProjectMessageMedia } from "../../../../shared/types/projectMessageMedia.types";
+
 export type ProjectMessageSenderType = "customer" | "admin";
 
 export type CustomerProjectMessage = {
@@ -8,4 +10,5 @@ export type CustomerProjectMessage = {
   message: string;
   createdAt: string;
   readAt: string | null;
+  media: ProjectMessageMedia[];
 };
