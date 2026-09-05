@@ -13,15 +13,20 @@ type ProjectMessagesPanelProps = { projectRequestId: string };
 
 export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({ 
   projectRequestId }) => {
-  const { 
-    messages, 
-    message, 
-    setMessage, 
-    isLoading, 
-    isSending, 
-    error, 
-    messagesEndRef, 
-    handleSend 
+  const {
+    messages,
+    message,
+    setMessage,
+    isLoading,
+    isSending,
+    error,
+    setError,
+    messagesEndRef,
+    handleSend,
+    images,
+    files,
+    setImages,
+    setFiles,
   } = useProjectMessages(projectRequestId);
 
   return (
@@ -29,23 +34,25 @@ export const ProjectMessagesPanel: React.FC<ProjectMessagesPanelProps> = ({
       <h2 style={styles.title}>Project Messages</h2>
       <div style={styles.messages}>
         {isLoading && <p style={styles.muted}>Loading messages...</p>}
-        {!isLoading && messages.length === 0 && <p style={styles.muted}>
-          No messages yet.</p>
-          }
-        {messages.map((item) => 
-        <ProjectMessageItem 
-        key={item.id} 
-        message={item} 
-        />
+        {!isLoading && messages.length === 0 && (
+          <p style={styles.muted}>No messages yet.</p>
         )}
+        {messages.map((item) => (
+          <ProjectMessageItem key={item.id} message={item} />
+        ))}
         <div ref={messagesEndRef} />
       </div>
       {error && <p style={styles.error}>{error}</p>}
-      <ProjectMessageComposer 
-      value={message} 
-      isSending={isSending} 
-      onChange={setMessage} 
-      onSubmit={handleSend} 
+      <ProjectMessageComposer
+        value={message}
+        images={images}
+        files={files}
+        isSending={isSending}
+        onChange={setMessage}
+        onImagesChange={setImages}
+        onFilesChange={setFiles}
+        onError={setError}
+        onSubmit={handleSend}
       />
     </section>
   );

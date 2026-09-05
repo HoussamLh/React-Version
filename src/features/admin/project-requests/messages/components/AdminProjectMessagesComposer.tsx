@@ -19,7 +19,7 @@ type Props = {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 };
 
-export const ProjectMessageComposer: React.FC<Props> = ({
+export const AdminProjectMessagesComposer: React.FC<Props> = ({
   value,
   images,
   files,
@@ -34,7 +34,7 @@ export const ProjectMessageComposer: React.FC<Props> = ({
     <textarea
       style={styles.input}
       value={value}
-      placeholder="Write a message..."
+      placeholder="Reply to customer..."
       onChange={(event) => onChange(event.target.value)}
       disabled={isSending}
     />
@@ -50,10 +50,13 @@ export const ProjectMessageComposer: React.FC<Props> = ({
 
     <button
       type="submit"
-      style={{ ...styles.button, ...(isSending ? styles.disabled : {}) }}
+      style={{
+        ...styles.button,
+        ...(isSending ? styles.disabled : {}),
+      }}
       disabled={isSending}
     >
-      {isSending ? "Sending..." : "Send"}
+      {isSending ? "Sending..." : "Send Reply"}
     </button>
   </form>
 );
@@ -84,5 +87,8 @@ const styles = {
     fontWeight: typography.fontWeight.black,
     cursor: "pointer",
   },
-  disabled: { opacity: 0.6, cursor: "not-allowed" },
+  disabled: {
+    opacity: 0.6,
+    cursor: "not-allowed",
+  },
 };

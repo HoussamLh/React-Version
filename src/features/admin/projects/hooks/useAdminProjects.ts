@@ -147,7 +147,7 @@ export const useAdminProjects = () => {
         setIsCreatingProject(false);
       }
     },
-    [loadProjects],
+    [createProjectId, loadProjects],
   );
 
   const handleUpdateProject = useCallback(
