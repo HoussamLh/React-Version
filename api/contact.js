@@ -1,14 +1,5 @@
-import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
-
-const escapeHtml = (value = "") => {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-};
+import { sendContactEmail } from "./services/contactEmail.service.js";
 
 const createSupabaseAdminClient = () => {
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -28,6 +19,29 @@ const createSupabaseAdminClient = () => {
   });
 };
 
+const getContactFormData = (body) => ({
+  name: String(body?.name || "").trim(),
+  email: String(body?.email || "").trim(),
+  phone: String(body?.phone || "").trim(),
+  service: String(body?.service || "").trim(),
+  message: String(body?.message || "").trim(),
+});
+
+const validateContactFormData = ({ name, email, phone, service, message }) => {
+  return Boolean(name && email && phone && service && message);
+};
+
+const validateEnvironment = () => {
+  const requiredEnvVars = [
+    "RESEND_API_KEY",
+    "RECEIVER_EMAIL",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ];
+
+  return requiredEnvVars.filter((key) => !process.env[key]);
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -39,33 +53,26 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    const name = String(body?.name || "").trim();
-    const email = String(body?.email || "").trim();
-    const phone = String(body?.phone || "").trim();
-    const service = String(body?.service || "").trim();
-    const message = String(body?.message || "").trim();
+    const contactData = getContactFormData(body);
 
-    if (!name || !email || !phone || !service || !message) {
+    if (!validateContactFormData(contactData)) {
       return res.status(400).json({
         success: false,
         message: "Please fill in all required fields.",
       });
     }
 
-    const requiredEnvVars = [
-      "EMAIL_USER",
-      "EMAIL_PASS",
-      "RECEIVER_EMAIL",
-      "SUPABASE_URL",
-      "SUPABASE_SERVICE_ROLE_KEY",
-    ];
-
-    const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
+    const missingEnvVars = validateEnvironment();
 
     if (missingEnvVars.length > 0) {
+      console.error(
+        "Missing environment variables:",
+        missingEnvVars.join(", "),
+      );
+
       return res.status(500).json({
         success: false,
-        message: `Service is missing: ${missingEnvVars.join(", ")}`,
+        message: "Email service is not configured correctly.",
       });
     }
 
@@ -74,11 +81,7 @@ export default async function handler(req, res) {
     const { error: submissionError } = await supabaseAdmin
       .from("contact_submissions")
       .insert({
-        name,
-        email,
-        phone,
-        service,
-        message,
+        ...contactData,
         status: "new",
         source: "contact_page",
       });
@@ -86,80 +89,22 @@ export default async function handler(req, res) {
     if (submissionError) {
       console.error("Contact submission save error:", submissionError);
 
-return res.status(500).json({
-  success: false,
-  message: "Failed to send message.",
-  error: error instanceof Error ? error.message : String(error),
-});
-
+      return res.status(500).json({
+        success: false,
+        message: "Failed to save your message.",
+      });
     }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const { error: emailError } = await sendContactEmail(contactData);
 
-    const safeName = escapeHtml(name);
-    const safeEmail = escapeHtml(email);
-    const safePhone = escapeHtml(phone);
-    const safeService = escapeHtml(service);
-    const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
+    if (emailError) {
+      console.error("Resend email error:", emailError);
 
-    await transporter.sendMail({
-      from: `"DevBySam Contact Form" <${process.env.EMAIL_USER}>`,
-      to: process.env.RECEIVER_EMAIL,
-      replyTo: email,
-      subject: `New ${service} enquiry from ${name}`,
-      text: `
-New DevBySam contact form submission
-
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
-Service: ${service}
-
-Message:
-${message}
-      `,
-      html: `
-        <div style="font-family: Arial, sans-serif; background: #0d0f12; color: #ffffff; padding: 24px;">
-          <div style="max-width: 640px; margin: 0 auto; background: #181a1e; border: 1px solid #262930; border-radius: 16px; padding: 24px;">
-            <h2 style="margin: 0 0 16px; color: #93dc5c;">
-              New DevBySam enquiry
-            </h2>
-
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-              <tr>
-                <td style="padding: 8px 0; color: #8a8f98;">Name</td>
-                <td style="padding: 8px 0; color: #ffffff;">${safeName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #8a8f98;">Email</td>
-                <td style="padding: 8px 0; color: #ffffff;">${safeEmail}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #8a8f98;">Phone</td>
-                <td style="padding: 8px 0; color: #ffffff;">${safePhone}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #8a8f98;">Service</td>
-                <td style="padding: 8px 0; color: #ffffff;">${safeService}</td>
-              </tr>
-            </table>
-
-            <div style="border-top: 1px solid #262930; padding-top: 16px;">
-              <p style="margin: 0 0 8px; color: #8a8f98;">Message</p>
-              <p style="margin: 0; line-height: 1.6; color: #ffffff;">
-                ${safeMessage}
-              </p>
-            </div>
-          </div>
-        </div>
-      `,
-    });
+      return res.status(500).json({
+        success: false,
+        message: "Your message was saved, but the email could not be sent.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -170,7 +115,7 @@ ${message}
 
     return res.status(500).json({
       success: false,
-      message: "Failed to send message.",
+      message: "Failed to process your message.",
     });
   }
 }
