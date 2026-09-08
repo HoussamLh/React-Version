@@ -3,11 +3,13 @@ import { MessageSquareCode, X } from "lucide-react";
 import { colors } from "../../../design-system";
 
 type LiveChatFloatingButtonProps = {
+  disabled?: boolean;
   isOpen: boolean;
   onClick: () => void;
 };
 
 export const LiveChatFloatingButton: React.FC<LiveChatFloatingButtonProps> = ({
+  disabled = false,
   isOpen,
   onClick,
 }) => {
@@ -16,6 +18,7 @@ export const LiveChatFloatingButton: React.FC<LiveChatFloatingButtonProps> = ({
       type="button"
       aria-label={isOpen ? "Close live chat" : "Open live chat"}
       className={!isOpen ? "ds-float-subtle" : undefined}
+      disabled={disabled}
       style={styles.bubble}
       onClick={onClick}
     >
