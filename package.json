@@ -35,5 +35,47 @@
     "typescript-eslint": "^8.59.2",
     "vercel": "^59.11.7",
     "vite": "^8.0.12"
+  },
+  "overrides": {
+    "@mapbox/node-pre-gyp": {
+      "tar": "7.5.22"
+    },
+    "@vercel/fun": {
+      "@tootallnate/once": "2.0.1",
+      "path-to-regexp": "8.4.0",
+      "tar": "7.5.22"
+    },
+    "@vercel/node": {
+      "path-to-regexp": "6.3.0"
+    },
+    "@vercel/python-analysis": {
+      "js-yaml": "4.3.1",
+      "minimatch": "10.2.3",
+      "smol-toml": "1.6.1"
+    },
+    "@vercel/remix-builder": {
+      "path-to-regexp": "6.3.0"
+    },
+    "@vercel/rust": {
+      "smol-toml": "1.6.1"
+    },
+    "@vercel/static-config": {
+      "ajv": "8.18.0"
+    },
+    "@vercel/backends": {
+      "path-to-regexp": "8.4.0"
+    },
+    "@vercel/express": {
+      "path-to-regexp": "8.4.0"
+    },
+    "@vercel/hono": {
+      "path-to-regexp": "8.4.0"
+    },
+    "vercel": {
+      "smol-toml": "1.6.1"
+    }
+  },
+  "allowScripts": {
+    "esbuild@0.27.0": true
   }
 }
