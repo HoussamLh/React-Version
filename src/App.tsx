@@ -1,51 +1,118 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter,
   Navigate,
   Route,
   Routes,
-  useLocation,
 } from "react-router-dom";
 import { RootLayout } from "./layouts/rootLayout";
 import { Home } from "./routes/Home";
-import { About } from "./routes/About";
-import { Services } from "./routes/Services";
-import { Projects } from "./routes/Projects";
-import { Pricing } from "./routes/Pricing";
-import { Contact } from "./routes/Contact";
-import {
-  CustomerDashboardPage,
-  CustomerSignInPage,
-  CustomerSignUpPage,
-  ProtectedCustomerRoute,
-  ProjectRequestsDetailsPage,
-} from "./features/customer";
-import { LiveChatBubble } from "./features/live-chat";
 
-import {
-  AdminChatPage,
-  AdminDashboard,
-  AdminLayout,
-  AdminLogin,
-  AdminPricingPage,
-  AdminProjectRequestsPage,
-  AdminProjectsPage,
-  AdminServicesPage,
-  AdminTeamPage,
-  ContactSubmissionsPage,
-  ProtectedAdminRoute,
-} from "./features/admin";
+const About = lazy(() =>
+  import("./routes/About").then(({ About }) => ({ default: About })),
+);
+const Services = lazy(() =>
+  import("./routes/Services").then(({ Services }) => ({ default: Services })),
+);
+const Projects = lazy(() =>
+  import("./routes/Projects").then(({ Projects }) => ({ default: Projects })),
+);
+const Pricing = lazy(() =>
+  import("./routes/Pricing").then(({ Pricing }) => ({ default: Pricing })),
+);
+const Contact = lazy(() =>
+  import("./routes/Contact").then(({ Contact }) => ({ default: Contact })),
+);
 
-const LiveChatVisibility = () => {
-  const location = useLocation();
+const CustomerSignInPage = lazy(() =>
+  import("./features/customer/auth/CustomerSignInPage").then(
+    ({ CustomerSignInPage }) => ({ default: CustomerSignInPage }),
+  ),
+);
+const CustomerSignUpPage = lazy(() =>
+  import("./features/customer/auth/CustomerSignUpPage").then(
+    ({ CustomerSignUpPage }) => ({ default: CustomerSignUpPage }),
+  ),
+);
+const ProtectedCustomerRoute = lazy(() =>
+  import("./features/customer/auth/ProtectedCustomerRoute").then(
+    ({ ProtectedCustomerRoute }) => ({ default: ProtectedCustomerRoute }),
+  ),
+);
+const CustomerDashboardPage = lazy(() =>
+  import("./features/customer/dashboard/CustomerDashboardPage").then(
+    ({ CustomerDashboardPage }) => ({ default: CustomerDashboardPage }),
+  ),
+);
+const ProjectRequestsDetailsPage = lazy(() =>
+  import(
+    "./features/customer/project-requests/components/ProjectRequestsDetailsPage"
+  ).then(({ ProjectRequestsDetailsPage }) => ({
+    default: ProjectRequestsDetailsPage,
+  })),
+);
 
-  const isAdminRoute = location.pathname.startsWith("/admin");
+const AdminLogin = lazy(() =>
+  import("./features/admin/auth/AdminLogin").then(({ AdminLogin }) => ({
+    default: AdminLogin,
+  })),
+);
+const ProtectedAdminRoute = lazy(() =>
+  import("./features/admin/auth/ProtectedAdminRoute").then(
+    ({ ProtectedAdminRoute }) => ({ default: ProtectedAdminRoute }),
+  ),
+);
+const AdminLayout = lazy(() =>
+  import("./features/admin/layout/AdminLayout").then(({ AdminLayout }) => ({
+    default: AdminLayout,
+  })),
+);
+const AdminDashboard = lazy(() =>
+  import("./features/admin/dashboard/AdminDashboard").then(
+    ({ AdminDashboard }) => ({ default: AdminDashboard }),
+  ),
+);
+const AdminProjectsPage = lazy(() =>
+  import("./features/admin/projects/components/AdminProjectsPage").then(
+    ({ AdminProjectsPage }) => ({ default: AdminProjectsPage }),
+  ),
+);
+const AdminProjectRequestsPage = lazy(() =>
+  import("./features/admin/project-requests/AdminProjectRequestsPage").then(
+    ({ AdminProjectRequestsPage }) => ({ default: AdminProjectRequestsPage }),
+  ),
+);
+const AdminServicesPage = lazy(() =>
+  import("./features/admin/services/AdminServicesPage").then(
+    ({ AdminServicesPage }) => ({ default: AdminServicesPage }),
+  ),
+);
+const AdminPricingPage = lazy(() =>
+  import("./features/admin/pricing/AdminPricingPage").then(
+    ({ AdminPricingPage }) => ({ default: AdminPricingPage }),
+  ),
+);
+const AdminTeamPage = lazy(() =>
+  import("./features/admin/team/AdminTeamPage").then(({ AdminTeamPage }) => ({
+    default: AdminTeamPage,
+  })),
+);
+const AdminChatPage = lazy(() =>
+  import("./features/admin/chat/components/AdminChatPage").then(
+    ({ AdminChatPage }) => ({ default: AdminChatPage }),
+  ),
+);
+const ContactSubmissionsPage = lazy(() =>
+  import("./features/admin/contacts/ContactSubmissionsPage").then(
+    ({ ContactSubmissionsPage }) => ({ default: ContactSubmissionsPage }),
+  ),
+);
 
-  if (isAdminRoute) {
-    return null;
-  }
-
-  return <LiveChatBubble />;
-};
+const RouteLoadingFallback = () => (
+  <div aria-live="polite" style={styles.routeLoading}>
+    Loading page...
+  </div>
+);
 
 function App() {
   return (
@@ -64,7 +131,9 @@ function App() {
           path="/about"
           element={
             <RootLayout>
-              <About />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <About />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -72,7 +141,9 @@ function App() {
           path="/services"
           element={
             <RootLayout>
-              <Services />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <Services />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -80,7 +151,9 @@ function App() {
           path="/projects"
           element={
             <RootLayout>
-              <Projects />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <Projects />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -88,7 +161,9 @@ function App() {
           path="/pricing"
           element={
             <RootLayout>
-              <Pricing />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <Pricing />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -96,7 +171,9 @@ function App() {
           path="/contact"
           element={
             <RootLayout>
-              <Contact />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <Contact />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -104,7 +181,9 @@ function App() {
           path="/get-started"
           element={
             <RootLayout>
-              <CustomerSignUpPage />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <CustomerSignUpPage />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -112,7 +191,9 @@ function App() {
           path="/sign-in"
           element={
             <RootLayout>
-              <CustomerSignInPage />
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <CustomerSignInPage />
+              </Suspense>
             </RootLayout>
           }
         />
@@ -124,53 +205,128 @@ function App() {
         <Route
           path="/customer/dashboard"
           element={
-            <ProtectedCustomerRoute>
-              <RootLayout>
-                <CustomerDashboardPage />
-              </RootLayout>
-            </ProtectedCustomerRoute>
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <ProtectedCustomerRoute>
+                <RootLayout>
+                  <CustomerDashboardPage />
+                </RootLayout>
+              </ProtectedCustomerRoute>
+            </Suspense>
           }
         />
 
         <Route
           path="/customer/projects/:id"
           element={
-            <ProtectedCustomerRoute>
-              <RootLayout>
-                <ProjectRequestsDetailsPage />
-              </RootLayout>
-            </ProtectedCustomerRoute>
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <ProtectedCustomerRoute>
+                <RootLayout>
+                  <ProjectRequestsDetailsPage />
+                </RootLayout>
+              </ProtectedCustomerRoute>
+            </Suspense>
           }
         />
 
         {/* Admin routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/login"
+          element={
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <AdminLogin />
+            </Suspense>
+          }
+        />
         <Route
           path="/admin"
           element={
-            <ProtectedAdminRoute>
-              <AdminLayout />
-            </ProtectedAdminRoute>
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <ProtectedAdminRoute>
+                <AdminLayout />
+              </ProtectedAdminRoute>
+            </Suspense>
           }
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="projects" element={<AdminProjectsPage />} />
+          <Route
+            path="dashboard"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminDashboard />
+              </Suspense>
+            }
+          />
+          <Route
+            path="projects"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminProjectsPage />
+              </Suspense>
+            }
+          />
           <Route
             path="project-requests"
-            element={<AdminProjectRequestsPage />}
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminProjectRequestsPage />
+              </Suspense>
+            }
           />
-          <Route path="services" element={<AdminServicesPage />} />
-          <Route path="pricing" element={<AdminPricingPage />} />
-          <Route path="team" element={<AdminTeamPage />} />
-          <Route path="chat" element={<AdminChatPage />} />
-          <Route path="contacts" element={<ContactSubmissionsPage />} />
+          <Route
+            path="services"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminServicesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="pricing"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminPricingPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="team"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminTeamPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="chat"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <AdminChatPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="contacts"
+            element={
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <ContactSubmissionsPage />
+              </Suspense>
+            }
+          />
         </Route>
       </Routes>
 
-      <LiveChatVisibility />
     </BrowserRouter>
   );
 }
 
 export default App;
+
+const styles = {
+  routeLoading: {
+    minHeight: "50vh",
+    display: "flex" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    color: "var(--text-muted)",
+  },
+};
