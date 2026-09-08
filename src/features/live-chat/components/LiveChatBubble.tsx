@@ -20,8 +20,14 @@ import { LiveChatHomeView } from "./LiveChatHomeView";
 import { LiveChatMessagesView } from "./LiveChatMessagesView";
 
 
-export const LiveChatBubble: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+type LiveChatBubbleProps = {
+  initiallyOpen?: boolean;
+};
+
+export const LiveChatBubble: React.FC<LiveChatBubbleProps> = ({
+  initiallyOpen = false,
+}) => {
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [view, setView] = useState<ChatView>("home");
   const [message, setMessage] = useState("");
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
